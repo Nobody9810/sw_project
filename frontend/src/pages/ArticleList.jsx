@@ -106,133 +106,85 @@ function ArticleList({ type }) {
 
   if (loading) {
     return (
-        <div className="container mt-4" style={{ 
-        minHeight: 'calc(100vh - 500px)', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        flex: '1 0 auto',
-        width: '100%'
-      }}>
-        <div className="py-5 text-center text-muted article-list-loading">加载中...</div>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 min-h-[calc(100vh-500px)] flex items-center justify-center">
+        <div className="py-12 text-center text-gray-500 dark:text-gray-400">加载中...</div>
       </div>
     )
   }
 
   return (
-    <div className="container mt-4">
-      <div className="row g-4">
-        <div className="col-lg-9">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-9">
           {/* 列表布局 */}
-          <div className="article-list-container">
+          <div className="space-y-4">
             {articles.length === 0 && (
-              <div className="text-center w-100 py-5 text-muted article-list-empty">暂无数据</div>
+              <div className="text-center w-full py-12 text-gray-500 dark:text-gray-400">暂无数据</div>
             )}
             {articles.map(article => (
               <div 
                 key={article.id} 
-                className="article-list-item mb-3"
-                style={{
-                  backgroundColor: isDark ? '#242424' : '#fff',
-                  borderRadius: '12px',
-                  boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.08)',
-                  transition: 'all 0.3s ease',
-                  overflow: 'hidden',
-                  border: `1px solid ${isDark ? '#333' : '#f0f0f0'}`
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = isDark ? '0 4px 16px rgba(0,0,0,0.5)' : '0 4px 16px rgba(0,0,0,0.12)'
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.08)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
               >
-                <div className="row g-0">
-                  <div className="col-md-3">
-                    <Link to={`/${type}/${article.id}`}>
-                      <img 
-                        src={article.图片 || '/static/images/default-placeholder.png'} 
-                        alt={article.标题}
-                        loading="lazy"
-                        className="article-list-image"
-                        style={{ 
-                          width: '100%', 
-                          height: '140px', 
-                          objectFit: 'cover'
-                        }}
-                      />
+                <div className="flex flex-col md:flex-row">
+                  <div className="md:w-1/3 flex-shrink-0">
+                    <Link to={`/${type}/${article.id}`} className="block">
+                      <div className="w-full h-40 md:h-40 overflow-hidden bg-gray-100 dark:bg-gray-700">
+                        <img 
+                          src={article.图片 || '/static/images/default-placeholder.png'} 
+                          alt={article.标题}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </Link>
                   </div>
-                  <div className="col-md-9">
-                    <div className="article-list-content p-3">
-                      <h6 className="article-list-title mb-2" style={{ 
-                        fontSize: '1.1rem',
-                        fontWeight: '600'
-                      }}>
-                        <Link 
-                          to={`/${type}/${article.id}`} 
-                          className="article-list-title-link"
-                          style={{ 
-                            textDecoration: 'none', 
-                            color: isDark ? '#e0e0e0' : '#333',
-                            transition: 'color 0.2s'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.target.style.color = '#1e88e5'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.color = isDark ? '#e0e0e0' : '#333'
-                          }}
-                        >
-                          {article.标题}
-                        </Link>
-                      </h6>
-                      {article.内容 && (
-                        <p className="article-list-summary text-muted mb-2" style={{
-                          fontSize: '0.875rem',
-                          lineHeight: '1.5',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          color: isDark ? '#bbb' : undefined
-                        }}>
-                          {stripHtml(article.内容)}
-                        </p>
+                  <div className="md:w-2/3 flex-1 p-4">
+                    <h6 className="text-lg font-semibold mb-2">
+                      <Link 
+                        to={`/${type}/${article.id}`} 
+                        className="text-gray-900 dark:text-gray-100 hover:text-green-600 dark:hover:text-green-400 transition-colors no-underline"
+                      >
+                        {article.标题}
+                      </Link>
+                    </h6>
+                    {article.内容 && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 leading-relaxed">
+                        {stripHtml(article.内容)}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
+                      {article.作者 && (
+                        <span className="flex items-center gap-1">
+                          <i className="bi bi-person"></i> 
+                          <span>{article.作者}</span>
+                        </span>
                       )}
-                      <div className="article-list-meta" style={{ 
-                        fontSize: '0.85rem', 
-                        color: isDark ? '#888' : '#999',
-                        marginTop: '8px'
-                      }}>
-                        {article.作者 && (
-                          <span className="me-3">
-                            <i className="bi bi-person"></i> {article.作者}
-                          </span>
-                        )}
-                        {article.更新时间 && (
-                          <span>
-                            <i className="bi bi-calendar"></i> {new Date(article.更新时间).toLocaleDateString('zh-CN')}
-                          </span>
-                        )}
-                      </div>
+                      {article.更新时间 && (
+                        <span className="flex items-center gap-1">
+                          <i className="bi bi-calendar"></i> 
+                          <span>{new Date(article.更新时间).toLocaleDateString('zh-CN')}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+          
           {totalPages > 1 && (
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              onPageChange={setPage}
-            />
+            <div className="mt-8">
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
+            </div>
           )}
         </div>
-        <div className="col-lg-3">
+        
+        <div className="lg:col-span-3">
           <MainSidebar />
         </div>
       </div>

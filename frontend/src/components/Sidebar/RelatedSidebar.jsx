@@ -41,22 +41,36 @@ function RelatedSidebar({ type, currentId, sectionName }) {
   }
 
   return (
-    <aside className="sx-sidebar">
-      <div className="sx-widget">
-        <div className="sx-widget-header">
-          <div className="sx-widget-icon">
+    <aside style={{ position: 'relative' }}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm mb-4 overflow-hidden" style={{ position: 'relative' }}>
+        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+          <div className="text-green-600 dark:text-green-400">
             <i className="bi bi-bookmarks" aria-hidden="true" />
           </div>
-          <h3 className="sx-widget-title">相关{sectionName || type}</h3>
+          <h3 className="text-lg font-medium m-0 text-gray-800 dark:text-gray-200">
+            相关{sectionName || type}
+          </h3>
         </div>
-        <div className="sx-widget-content">
-          {items.map(item => (
-            <div className="sx-related-item" key={item.id}>
-              <Link to={`/${type}/${item.id}`} className="sx-related-link">
-                <h4 className="sx-related-title">{item.标题}</h4>
+        <div className="p-3">
+          {items.map((item, index) => (
+            <div
+              key={item.id}
+              className={`py-2 ${
+                index !== items.length - 1
+                  ? 'border-b border-gray-200 dark:border-gray-700'
+                  : ''
+              }`}
+            >
+              <Link
+                to={`/${type}/${item.id}`}
+                className="block text-gray-800 dark:text-gray-200 no-underline transition-all duration-300 hover:text-green-600 dark:hover:text-green-400 hover:translate-x-1"
+              >
+                <h4 className="text-sm font-medium mb-1 leading-snug m-0">
+                  {item.标题}
+                </h4>
                 {item.更新时间 && (
-                  <div className="sx-related-meta">
-                    <i className="bi bi-calendar3 me-1" aria-hidden="true" />
+                  <div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                    <i className="bi bi-calendar3" aria-hidden="true" />
                     {new Date(item.更新时间).toLocaleDateString('zh-CN')}
                   </div>
                 )}

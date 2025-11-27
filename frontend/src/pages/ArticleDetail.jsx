@@ -137,9 +137,13 @@ function ArticleDetail({ type }) {
     if (!article) {
       return []
     }
+    // 优先使用内容简介，如果存在内容简介则不显示内容字段，避免重复
+    const hasContentIntro = article['内容简介']
+    
     const sections = [
       { key: '内容简介', title: '内容简介', icon: 'bi-book' },
-      { key: '内容', title: '内容简介', icon: 'bi-journal-text' },
+      // 只有在没有内容简介时才显示内容字段
+      ...(hasContentIntro ? [] : [{ key: '内容', title: '内容', icon: 'bi-journal-text' }]),
       { key: '作者简介', title: '作者简介', icon: 'bi-person-badge' },
       { key: '目录', title: '目录', icon: 'bi-list-ul' },
       { key: '前言', title: '前言', icon: 'bi-chat-quote' },
@@ -154,77 +158,69 @@ function ArticleDetail({ type }) {
 
   if (loading) {
     return (
-      <div className="container sx-container" style={{ 
-        minHeight: 'calc(100vh - 500px)', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        flex: '1 0 auto',
-        width: '100%'
-      }}>
-        <div className="py-5 text-center text-muted">加载中...</div>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-500px)] flex items-center justify-center">
+        <div className="py-12 text-center text-gray-500 dark:text-gray-400">加载中...</div>
       </div>
     )
   }
 
   if (!article) {
     return (
-      <div className="container sx-container" style={{ 
-        minHeight: 'calc(100vh - 500px)', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        flex: '1 0 auto',
-        width: '100%'
-      }}>
-        <div className="py-5 text-center text-danger">文章不存在或已下架</div>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-500px)] flex items-center justify-center">
+        <div className="py-12 text-center text-red-500 dark:text-red-400">文章不存在或已下架</div>
       </div>
     )
   }
 
   return (
-    <div className="container sx-container">
-      <div className="row">
-        <div className="col-lg-8">
-          <article className="sx-article">
-            <h1 className="sx-title">{article.标题}</h1>
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8">
+          <article className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+              {article.标题}
+            </h1>
 
-            <div className="sx-meta">
+            <div className="flex flex-wrap items-center gap-4 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
               {metaItems.length > 0 && (
                 <>
                   {metaItems.map(item => (
-                    <div className="sx-meta-item" key={item.label}>
+                    <div key={item.label} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                       <i className={`bi ${item.icon}`} aria-hidden="true" />
                       <span>{item.label}</span>
                     </div>
                   ))}
                 </>
               )}
-              <ShareButtons 
-                title={article.标题}
-                description={article.内容简介 || (article.内容 ? article.内容.substring(0, 100).replace(/<[^>]*>/g, '') : '')}
-              />
+              <div className="ml-auto">
+                <ShareButtons 
+                  title={article.标题}
+                  description={article.内容简介 || (article.内容 ? article.内容.substring(0, 100).replace(/<[^>]*>/g, '') : '')}
+                />
+              </div>
             </div>
 
             {/* 书讯信息卡片 */}
             {type === "书讯" && (article.图片 || bookInfo.length > 0) && (
-              <div className="sx-book-info-card">
-                <div className="sx-book-info-content">
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 mb-6">
+                <div className="flex flex-col md:flex-row md:items-stretch gap-8">
                   {article.图片 && (
-
-                      <img 
-                      src={article.图片 || '/static/images/default-placeholder.png'} 
-                      alt={article.标题}
-                      className="feature-img"
-                      loading="lazy"
-                      style={{ width: '30%', height: 'auto', display: 'block' }} />
-
+                    <div className="flex-shrink-0 flex justify-center md:justify-start md:self-stretch">
+                      <div className="flex items-center md:h-full">
+                        <img 
+                          src={article.图片 || '/static/images/default-placeholder.png'} 
+                          alt={article.标题}
+                          className="w-32 sm:w-40 md:w-48 max-w-[200px] rounded-lg object-contain shadow-md md:h-full"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
                   )}
-                  <div className="sx-book-details">
+                  <div className="flex-1 space-y-4 flex flex-col justify-center">
                     {bookInfo.map((info, index) => (
-                      <div className="sx-book-detail-item" key={index}>
-                        <span className="sx-book-detail-label">{info.label}：</span>
-                        <span className="sx-book-detail-value">{info.value}</span>
+                      <div key={index} className="flex gap-3 text-base">
+                        <span className="font-medium text-gray-700 dark:text-gray-300">{info.label}：</span>
+                        <span className="text-gray-600 dark:text-gray-400">{info.value}</span>
                       </div>
                     ))}
                   </div>
@@ -233,45 +229,41 @@ function ArticleDetail({ type }) {
             )}
 
             {richSections.map(section => (
-              <div className="sx-section" key={section.key}>
-                <div className="sx-section-header">
-                  <div className="d-flex align-items-center">
-                    <div className="sx-section-icon">
-                      <i className={`bi ${section.icon}`} aria-hidden="true" />
-                    </div>
-                    <h3 className="sx-section-title">{section.title}</h3>
+              <div key={section.key} className="mb-8">
+                <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+                  <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <i className={`bi ${section.icon} text-green-600 dark:text-green-400 text-lg`} aria-hidden="true" />
                   </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{section.title}</h3>
                 </div>
                 <div
-                  className="sx-section-content text-justify"
+                  className="prose prose-gray dark:prose-invert max-w-none text-justify [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-4 [&_img]:mx-auto [&_img]:block"
                   dangerouslySetInnerHTML={{ __html: section.value }}
                 />
               </div>
             ))}
 
             {!richSections.length && article.内容 && (
-              <div className="sx-section">
-                <div className="sx-section-content text-justify" dangerouslySetInnerHTML={{ __html: article.内容 }} />
+              <div className="prose prose-gray dark:prose-invert max-w-none text-justify [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-4 [&_img]:mx-auto [&_img]:block">
+                <div dangerouslySetInnerHTML={{ __html: article.内容 }} />
               </div>
             )}
 
             {article.文档 && (
-              <div className="sx-section">
-                <div className="sx-section-header">
-                  <div className="d-flex align-items-center">
-                    <div className="sx-section-icon">
-                      <i className="bi bi-file-earmark-pdf" aria-hidden="true" />
-                    </div>
-                    <h3 className="sx-section-title">在线阅读</h3>
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+                  <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <i className="bi bi-file-earmark-pdf text-green-600 dark:text-green-400 text-lg" aria-hidden="true" />
                   </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">在线阅读</h3>
                 </div>
-                <div className="sx-section-content">
+                <div className="mt-4">
                   <DFlipViewer fileUrl={article.文档} />
                 </div>
               </div>
             )}
 
-            <div className="sx-comments">
+            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
               <LikeDislike
                 appLabel={article.app_label || 'home'}
                 modelName={article.model_name || type}
@@ -293,7 +285,7 @@ function ArticleDetail({ type }) {
           />
         </div>
 
-        <div className="col-lg-4">
+        <div className="lg:col-span-4">
           <RelatedSidebar type={type} currentId={id} sectionName={type} />
         </div>
       </div>
