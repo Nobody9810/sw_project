@@ -1,0 +1,258 @@
+/* 书库轮播组件样式 */
+.book-carousel-container {
+  position: relative;
+  width: 100%;
+  padding: 0;
+  margin: 1rem 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.book-carousel-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.book-carousel-track {
+  display: flex;
+  width: 100%;
+  will-change: transform;
+}
+
+.book-carousel-slide {
+  min-width: 100%;
+  flex-shrink: 0;
+}
+
+.book-carousel-items {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+/* 书籍卡片样式 */
+.book-carousel-item {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  max-height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #fff;
+}
+
+.book-carousel-item:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.book-carousel-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.book-carousel-cover {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.book-carousel-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.book-carousel-item:hover .book-carousel-cover img {
+  transform: scale(1.05);
+}
+
+/* 悬停信息覆盖层 */
+.book-carousel-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 50%, transparent 100%);
+  padding: 1rem 0.75rem 0.75rem;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.book-carousel-item:hover .book-carousel-overlay {
+  transform: translateY(0);
+}
+
+.book-carousel-info {
+  color: white;
+}
+
+.book-carousel-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.book-carousel-author {
+  font-size: 0.85rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 导航按钮 */
+.book-carousel-nav {
+  display: none;
+}
+
+
+/* 指示器 */
+.book-carousel-indicators {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 0.5rem;
+}
+
+.book-carousel-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.book-carousel-indicator:hover {
+  background: rgba(253, 126, 20, 0.5);
+  transform: scale(1.2);
+}
+
+.book-carousel-indicator.active {
+  width: 24px;
+  height: 10px;
+  border-radius: 5px;
+  background: #fd7e14;
+  box-shadow: 0 2px 8px rgba(253, 126, 20, 0.4);
+}
+
+/* 空状态 */
+.book-carousel-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #999;
+}
+
+/* 响应式设计 */
+@media (max-width: 1400px) {
+  .book-carousel-items {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .book-carousel-items {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .book-carousel-item {
+    max-height: 180px;
+  }
+}
+
+@media (max-width: 992px) {
+  .book-carousel-items {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+  }
+  
+  .book-carousel-item {
+    max-height: 160px;
+  }
+}
+
+@media (max-width: 768px) {
+  .book-carousel-items {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .book-carousel-item {
+    max-height: 140px;
+  }
+  
+  .book-carousel-title {
+    font-size: 0.85rem;
+  }
+  
+  .book-carousel-author {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .book-carousel-items {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+  
+  .book-carousel-item {
+    max-height: 120px;
+  }
+}
+
+/* 深色模式适配 */
+[data-bs-theme="dark"] .book-carousel-item {
+  background: #2a2a2a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .book-carousel-item:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+[data-bs-theme="dark"] .book-carousel-cover {
+  background: #1a1a1a;
+}
+
+[data-bs-theme="dark"] .book-carousel-nav {
+  background: rgba(42, 42, 42, 0.95);
+  border-color: #fd7e14;
+}
+
+[data-bs-theme="dark"] .book-carousel-indicator {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-bs-theme="dark"] .book-carousel-indicator:hover {
+  background: rgba(253, 126, 20, 0.5);
+}
+

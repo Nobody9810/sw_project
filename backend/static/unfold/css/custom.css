@@ -1,0 +1,64 @@
+/* 修复unfold admin界面中input框没有边框的问题 */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="search"],
+textarea,
+select {
+    border: 1px solid rgb(229, 231, 235) !important; /* border-base-200 */
+    border-width: 1px !important;
+}
+
+/* 深色模式下的边框 */
+.dark input[type="text"],
+.dark input[type="password"],
+.dark input[type="email"],
+.dark input[type="url"],
+.dark input[type="number"],
+.dark input[type="tel"],
+.dark input[type="date"],
+.dark input[type="datetime-local"],
+.dark input[type="time"],
+.dark input[type="search"],
+.dark textarea,
+.dark select {
+    border-color: rgb(55, 65, 81) !important; /* border-base-700 */
+}
+
+/* 聚焦状态 */
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+input[type="time"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+    border-color: rgb(37, 99, 235) !important; /* primary-600 */
+    outline: 2px solid rgb(37, 99, 235) !important;
+    outline-offset: -2px !important;
+}
+
+/* 确保所有input元素都有边框 */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="hidden"]),
+textarea,
+select {
+    border: 1px solid rgb(229, 231, 235) !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="hidden"]),
+.dark textarea,
+.dark select {
+    border-color: rgb(55, 65, 81) !important;
+}
+

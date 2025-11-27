@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Noto Sans SC', 'Microsoft YaHei', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #212529;
+  background-color: #f8f9fa;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* 防止布局闪烁 */
+#root > div {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* 使用minHeight，允许超过视口高度 */
+}
+
+a {
+  color: inherit;
+}
+
+/* 防止图片加载时的布局偏移 */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 防止路由切换时的页面抖动 */
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* 确保footer始终稳定 */
+#footer {
+  will-change: auto !important;
+  transform: translateZ(0) !important; /* 启用硬件加速 */
+  backface-visibility: hidden !important; /* 防止重绘 */
+  -webkit-font-smoothing: subpixel-antialiased !important;
+  transition: none !important; /* 移除所有transition */
+  animation: none !important; /* 移除所有animation */
+  contain: layout style paint !important; /* 隔离布局，防止外部影响 */
+}

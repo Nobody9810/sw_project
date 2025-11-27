@@ -1,0 +1,207 @@
+/* 导航栏基础样式 */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding-top: 0px;
+}
+
+/* Logo在导航栏中的样式 */
+.navbar-logo {
+  display: none;
+}
+
+.navbar-logo img {
+  height: 40px;
+  width: auto;
+}
+
+
+
+/* 确保在桌面端导航栏展开 */
+@media (min-width: 992px) {
+  .navbar-expand-lg .navbar-collapse {
+    display: flex !important;
+    flex-basis: auto;
+  }
+  
+  .navbar-expand-lg .navbar-collapse.collapse {
+    display: flex !important;
+  }
+  
+  .navbar-expand-lg .navbar-toggler {
+    display: none;
+  }
+}
+
+.navbar-nav {
+  gap: 10px;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  color: #333 !important;
+  font-size: 15px;
+  padding: 6px 12px !important;
+  transition: all 0.2s ease;
+  position: relative;
+  border-radius: 4px;
+  text-decoration: none !important;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background-color: #1e88e5;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #1e88e5 !important;
+  background-color: rgba(30, 136, 229, 0.08) !important;
+}
+
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+.nav-link.current {
+  color: #1e88e5 !important;
+  font-weight: 600 !important;
+  background-color: rgba(30, 136, 229, 0.1) !important;
+}
+
+.nav-link.current::after {
+  transform: scaleX(1);
+}
+
+/* 响应式调整 */
+@media (max-width: 991.98px) {
+  /* 在移动端显示导航栏中的Logo */
+  .navbar-logo {
+    display: block;
+    margin: 0 auto;
+    padding: 8px 0;
+    text-align: center;
+  }
+
+  .navbar-logo img {
+    height: 50px;
+    width: auto;
+  }
+
+  /* 隐藏顶部搜索栏和大Logo */
+  .top-search-bar,
+  .logo-container {
+    display: none;
+  }
+
+  /* 导航栏容器布局 */
+  .navbar > .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 15px;
+  }
+
+  /* 确保 Logo 和 Toggler 按钮在同一行 */
+  .navbar > .container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* 汉堡菜单按钮样式 */
+  .navbar-toggler {
+    display: block !important;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 4px 8px;
+    margin: 0;
+    order: 2;
+  }
+
+  .navbar-toggler-icon {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    vertical-align: middle;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+  }
+
+  /* Logo 在移动端的样式 */
+  .navbar-logo {
+    order: 1;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* 导航菜单样式 */
+  .navbar-collapse {
+    order: 3;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  /* 确保移动端 collapse 行为正常 */
+  /* 注意：这里不使用 !important，让内联样式优先级更高 */
+  .navbar-collapse.collapse:not(.show) {
+    display: none;
+  }
+
+  .navbar-collapse.collapse.show {
+    display: block;
+  }
+
+  /* 确保移动端展开时内容可见 */
+  .navbar-collapse.show {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* 确保导航内容在移动端可见 */
+  .navbar-collapse[style*="display: block"] {
+    display: block !important;
+  }
+
+  .navbar-nav {
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .nav-link {
+    padding: 8px 12px;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* 调整导航栏布局 */
+  .navbar-custom {
+    padding: 0;
+  }
+
+  /* 调整折叠菜单的布局 */
+  #navbarNav {
+    justify-content: center;
+    text-align: center;
+  }
+} 

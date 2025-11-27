@@ -1,0 +1,171 @@
+# =========================================
+# Python / Django
+# =========================================
+# 字节码文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.venv
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+local_settings.py
+/media
+/staticfiles
+*.csv
+
+# Python 打包
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+*.whl
+
+# =========================================
+# Node.js / React / Vite
+# =========================================
+# 依赖
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 构建输出
+dist/
+dist-ssr/
+*.local
+build/
+.vite/
+
+# 编辑器目录和文件
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# =========================================
+# 环境变量和配置文件
+# =========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# =========================================
+# 媒体文件和用户上传内容
+# =========================================
+backend/media/
+backend/staticfiles/
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.svg
+*.mp4
+*.mp3
+*.avi
+*.mov
+
+# =========================================
+# IDE 和编辑器
+# =========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# =========================================
+# 操作系统文件
+# =========================================
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+*.Zone.Identifier
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# =========================================
+# 日志和临时文件
+# =========================================
+*.log
+*.tmp
+*.temp
+*.cache
+.cache/
+*.pid
+*.seed
+*.pid.lock
+
+# =========================================
+# 测试覆盖率
+# =========================================
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.pytest_cache/
+.hypothesis/
+
+# =========================================
+# 其他
+# =========================================
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.swo
+*.swp
+.vscode-test/
+*.code-workspace
+frontend/node_modules/
+frontend/dist/
+backend/media/
+backend/staticfiles/
