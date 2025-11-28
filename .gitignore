@@ -6,6 +6,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.sql
+*.md
 
 # 虚拟环境
 venv/
