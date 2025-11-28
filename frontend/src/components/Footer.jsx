@@ -1,69 +1,84 @@
-import React, { memo, useEffect } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowUpCircle } from 'lucide-react'
 
 const Footer = memo(function Footer() {
-  // 调试代码：监控footer位置变化（生产环境可移除）
+  const [showBackToTop, setShowBackToTop] = useState(false)
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.pageYOffset > 100) {
+        setShowBackToTop(true)
+      } else {
+        setShowBackToTop(false)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }
 
   return (
-    <footer 
-      className="bg-secondary text-center text-lg-start text-white mt-3" 
-      id="footer" 
-      style={{ 
-        flexShrink: 0, 
-        flexGrow: 0,
-        position: 'relative',
-        width: '100%',
-        display: 'block',
-        visibility: 'visible',
-        opacity: 1,
-        marginTop: '40px',
-        marginBottom: 0,
-        minHeight: '200px',
-        boxSizing: 'border-box',
-        willChange: 'auto',
-        transform: 'translateZ(0)',
-        backfaceVisibility: 'hidden'
-      }}
-    >
-      <div className="container p-4 pb-0">
-        <div className="row justify-content-center">
-          <div className="col-md-8 text-center">
-            <img 
-              src="/static/images/logo_white.png" 
-              className="footer-logo" 
-              alt="" 
-              loading="eager"
-              style={{ display: 'block', width: 'auto', height: 'auto' }}
-            />
-            <p className="display-12">
-              漢語穆斯林交流園地，資訊、知識、思想共用。<br/>
-              它是一粒種子，欲生一朵絢麗的希望之花。<br/>
-              它是一流，要穿過渾濁的世道。<br/>
-              它是一棵胡楊，挺立在大時代的壁戈荒漠，給身處死亡之穀的守望者一抹生的色彩。
-            </p>
-            <div className="footer-slogan">
-              <span>年輕</span>
-              <span>夢想</span>
-              <span>擧意</span>
+    <>
+      <footer 
+        id="footer"
+        className="bg-gradient-to-r from-slate-700 to-orange-600 text-white mt-10 relative w-full flex-shrink-0 flex-grow-0 min-h-[200px] py-8 px-4"
+        style={{ 
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden'
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+          <div className="flex justify-center">
+            <div className="w-full max-w-3xl text-center">
+              <img 
+                src="/static/images/logo_white.png" 
+                className="max-w-[100px] h-auto mx-auto mb-4 opacity-90 hover:opacity-100 transition-opacity block" 
+                alt="Logo" 
+                loading="eager"
+              />
+              <p className="text-[13px] leading-[1.8] text-white/80 mx-auto mb-4 max-w-[600px] px-4">
+                漢語穆斯林交流園地，資訊、知識、思想共用。<br/>
+                它是一粒種子，欲生一朵絢麗的希望之花。<br/>
+                它是一流，要穿過渾濁的世道。<br/>
+                它是一棵胡楊，挺立在大時代的壁戈荒漠，給身處死亡之穀的守望者一抹生的色彩。
+              </p>
+              <div className="text-2xl font-semibold text-white mb-5 tracking-wider">
+                <span className="mx-3">年輕</span>
+                <span className="text-white/60 mx-3">·</span>
+                <span className="mx-3">夢想</span>
+                <span className="text-white/60 mx-3">·</span>
+                <span className="mx-3">擧意</span>
+              </div>
+              <p className="text-xs text-white/60 mt-5">
+                Copyright 书味 &copy; 2024 | 
+                <Link to="/关于我们" className="text-white hover:text-white/80 transition-colors ml-1">关于我们</Link> | 
+                <Link to="/版权声明" className="text-white hover:text-white/80 transition-colors ml-1">版权声明</Link>
+              </p>
             </div>
-            <p className="small">
-              Copyright 书味 &copy; 2024 | 
-              <Link to="/关于我们" className="text-white">关于我们</Link> |
-              <Link to="/版权声明" className="text-white">版权声明</Link>
-            </p>
           </div>
         </div>
-        
-        <a id="back-to-top">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
-            className="bi bi-arrow-up-circle-fill" viewBox="0 0 16 16"
-            style={{width: '32px', height: '32px', color: 'blue'}}>
-            <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z" />
-          </svg>
-        </a>
-      </div>
-    </footer>
+      </footer>
+
+      {/* 返回顶部按钮 */}
+      <button
+        id="back-to-top"
+        onClick={scrollToTop}
+        className={`fixed bottom-8 right-8 z-[1000] cursor-pointer transition-all duration-300 bg-white rounded-full p-2 shadow-lg hover:shadow-xl hover:-translate-y-1 ${
+          showBackToTop ? 'block' : 'hidden'
+        }`}
+        aria-label="返回顶部"
+      >
+        <ArrowUpCircle className="w-8 h-8 text-blue-600" />
+      </button>
+    </>
   )
 })
 

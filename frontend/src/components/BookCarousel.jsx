@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import './BookCarousel.css'
+import PDFThumbnail from './PDFThumbnail'
 
 const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -66,42 +66,84 @@ const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
 
   if (books.length === 0) {
     return (
-      <div className="book-carousel-empty">
-        <p className="text-muted">暂无图书</p>
+      <div className="text-center py-12 px-4">
+        <p className="text-gray-500 dark:text-gray-400">暂无图书</p>
       </div>
     )
   }
 
   return (
-    <div className="book-carousel-container" ref={carouselRef}>
-      <div className="book-carousel-wrapper">
+    <div className="relative w-full p-0 my-4 max-w-full box-border" ref={carouselRef}>
+      <div className="relative w-full overflow-hidden rounded-xl">
         <div 
-          className="book-carousel-track"
+          className="flex w-full will-change-transform"
           style={{
             transform: `translateX(-${currentIndex * 100}%)`,
             transition: isTransitioning ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none'
           }}
         >
           {slides.map((slide, slideIndex) => (
-            <div key={slideIndex} className="book-carousel-slide">
-              <div className="book-carousel-items">
+            <div key={slideIndex} className="min-w-full flex-shrink-0" style={{ width: '100%' }}>
+              <div className="grid gap-2 py-2 w-full
+                              grid-cols-5
+                              max-sm:grid-cols-3">
                 {slide.map(book => (
-                  <div key={book.id} className="book-carousel-item">
-                    <Link to={`/书库/${book.id}`} className="book-carousel-link">
-                      <div className="book-carousel-cover">
-                        <img
-                          src={book.图片 || '/static/images/default-placeholder.png'}
-                          alt={book.标题}
-                          loading="lazy"
-                          onError={(e) => {
-                            e.target.src = '/static/images/default-placeholder.png'
-                          }}
-                        />
-                        <div className="book-carousel-overlay">
-                          <div className="book-carousel-info">
-                            <h4 className="book-carousel-title">{book.标题}</h4>
+                  <div 
+                    key={book.id} 
+                    className="group relative w-full min-w-0 aspect-[2/3] max-h-[240px] 
+                               max-sm:max-h-[180px]
+                               rounded-lg overflow-hidden 
+                               shadow-[0_2px_8px_rgba(0,0,0,0.1)] 
+                               dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)]
+                               transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+                               bg-white dark:bg-[#2a2a2a]
+                               hover:-translate-y-1 hover:scale-[1.01] hover:z-10
+                               hover:shadow-[0_4px_16px_rgba(0,0,0,0.15)]
+                               dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+                  >
+                    <Link 
+                      to={`/书库/${book.id}`} 
+                      className="block w-full h-full no-underline text-inherit"
+                    >
+                      <div className="relative w-full h-full overflow-hidden bg-gray-100 dark:bg-[#1a1a1a]">
+                        {book.文档 ? (
+                          <div className="w-full h-full relative">
+                            <PDFThumbnail 
+                              pdfUrl={book.文档} 
+                              alt={book.标题}
+                              onError={(err) => {
+                                console.error(`PDF缩略图加载失败 (${book.标题}):`, err, 'URL:', book.文档)
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <img
+                            src={book.图片 || '/static/images/default-placeholder.png'}
+                            alt={book.标题}
+                            loading="lazy"
+                            className="w-full h-full object-contain transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-105"
+                            onError={(e) => {
+                              e.target.src = '/static/images/default-placeholder.png'
+                            }}
+                          />
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 
+                                        bg-gradient-to-t from-black/90 via-black/70 to-transparent 
+                                        px-3 pt-4 pb-3 
+                                        translate-y-full 
+                                        transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+                                        pointer-events-none
+                                        group-hover:translate-y-0">
+                          <div className="text-white">
+                            <h4 className="text-[0.95rem] sm:text-[0.85rem] font-semibold mb-2 leading-tight 
+                                          line-clamp-2 overflow-hidden text-ellipsis">
+                              {book.标题}
+                            </h4>
                             {book.作者 && (
-                              <p className="book-carousel-author">{book.作者}</p>
+                              <p className="text-[0.85rem] sm:text-[0.75rem] m-0 text-white/90 italic 
+                                          overflow-hidden text-ellipsis whitespace-nowrap">
+                                {book.作者}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -115,16 +157,17 @@ const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
         </div>
       </div>
 
-      {/* 导航按钮 */}
-
-
       {/* 指示器 */}
       {totalSlides > 1 && (
-        <div className="book-carousel-indicators">
+        <div className="flex justify-center items-center gap-2 p-2">
           {slides.map((_, index) => (
             <button
               key={index}
-              className={`book-carousel-indicator ${index === currentIndex ? 'active' : ''}`}
+              className={`h-2.5 rounded-full border-none cursor-pointer transition-all duration-300 ease-in-out p-0
+                         ${index === currentIndex 
+                           ? 'w-6 h-2.5 rounded-[5px] bg-[#fd7e14] shadow-[0_2px_8px_rgba(253,126,20,0.4)]' 
+                           : 'w-2.5 bg-black/20 dark:bg-white/20 hover:bg-[#fd7e14]/50 hover:scale-110'
+                         }`}
               onClick={() => goToSlide(index)}
               aria-label={`跳转到第 ${index + 1} 页`}
             />

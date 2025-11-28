@@ -137,24 +137,42 @@ const sections = [
 
 function Copyright() {
   return (
-    <div className="terms-container">
-      <div className="terms-header">
-        <h1>用户协议与隐私政策</h1>
-        <p className="terms-date">最后更新日期：2024年3月</p>
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      {/* Header */}
+      <div className="text-center mb-12 md:mb-16 pb-8 border-b border-gray-200 dark:border-gray-700">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          用户协议与隐私政策
+        </h1>
+        <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">
+          最后更新日期：2024年3月
+        </p>
       </div>
 
-      <div className="terms-content">
-        {sections.map(section => (
-          <div className="terms-section" key={section.title}>
-            <h2>{section.title}</h2>
-            <div className="terms-item">
-              {section.paragraphs.map(paragraph => (
-                <p key={paragraph}>{paragraph}</p>
+      {/* Content */}
+      <div className="space-y-8 md:space-y-12">
+        {sections.map((section, index) => (
+          <div 
+            key={section.title}
+            className="bg-white dark:bg-gray-800 rounded-lg p-6 md:p-8 shadow-sm border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-md"
+          >
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6 pb-3 border-b-2 border-orange-500">
+              {section.title}
+            </h2>
+            <div className="space-y-4">
+              {section.paragraphs.map((paragraph, pIndex) => (
+                <p 
+                  key={`${index}-${pIndex}`}
+                  className="text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300"
+                >
+                  {paragraph}
+                </p>
               ))}
               {section.list && (
-                <ul>
-                  {section.list.map(item => (
-                    <li key={item}>{item}</li>
+                <ul className="mt-4 space-y-2 list-disc list-inside text-base md:text-lg text-gray-700 dark:text-gray-300 pl-4">
+                  {section.list.map((item, lIndex) => (
+                    <li key={`${index}-list-${lIndex}`} className="leading-relaxed">
+                      {item}
+                    </li>
                   ))}
                 </ul>
               )}
@@ -163,12 +181,14 @@ function Copyright() {
         ))}
       </div>
 
-      <div className="terms-footer">
-        <p>如果您对本协议有任何疑问，请联系我们的客服团队。</p>
+      {/* Footer */}
+      <div className="mt-12 md:mt-16 pt-8 border-t border-gray-200 dark:border-gray-700 text-center">
+        <p className="text-base md:text-lg text-gray-600 dark:text-gray-400">
+          如果您对本协议有任何疑问，请联系我们的客服团队。
+        </p>
       </div>
     </div>
   )
 }
 
 export default Copyright
-

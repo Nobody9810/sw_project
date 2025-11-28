@@ -1,17 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { User, Calendar } from 'lucide-react'
 import apiClient from '../utils/apiClient'
+import { formatDateToChinese } from '../utils/dateFormatter'
 import MainSidebar from '../components/Sidebar/MainSidebar'
 import Pagination from '../components/Pagination'
+import { useTheme } from '../hooks/useTheme'
 
 function ArticleList({ type }) {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState({ count: 0 })
-  const [isDark, setIsDark] = useState(() => {
-    return document.body.classList.contains('dark-theme')
-  })
+  const { isDark } = useTheme()
   const pageSize = 12
 
   // 去除 HTML 标签并提取纯文本
@@ -31,35 +32,6 @@ function ArticleList({ type }) {
   useEffect(() => {
     setPage(1)
   }, [type])
-
-  // 监听主题变化
-  useEffect(() => {
-    const checkTheme = () => {
-      setIsDark(document.body.classList.contains('dark-theme'))
-    }
-    
-    // 初始检查
-    checkTheme()
-    
-    // 监听主题变化事件
-    const handleThemeChange = () => {
-      checkTheme()
-    }
-    
-    document.addEventListener('themeChange', handleThemeChange)
-    
-    // 使用MutationObserver监听body类变化
-    const observer = new MutationObserver(checkTheme)
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['class']
-    })
-    
-    return () => {
-      document.removeEventListener('themeChange', handleThemeChange)
-      observer.disconnect()
-    }
-  }, [])
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -113,68 +85,77 @@ function ArticleList({ type }) {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         <div className="lg:col-span-9">
           {/* 列表布局 */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {articles.length === 0 && (
-              <div className="text-center w-full py-12 text-gray-500 dark:text-gray-400">暂无数据</div>
+              <div className="text-center w-full py-16 text-gray-500 dark:text-gray-400 text-lg">
+                暂无数据
+              </div>
             )}
             {articles.map(article => (
-              <div 
+              <article 
                 key={article.id} 
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                className="group bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 md:h-36"
               >
-                <div className="flex flex-col md:flex-row">
-                  <div className="md:w-1/3 flex-shrink-0">
-                    <Link to={`/${type}/${article.id}`} className="block">
-                      <div className="w-full h-40 md:h-40 overflow-hidden bg-gray-100 dark:bg-gray-700">
-                        <img 
-                          src={article.图片 || '/static/images/default-placeholder.png'} 
-                          alt={article.标题}
-                          loading="lazy"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                <div className="flex flex-col md:flex-row md:h-full">
+                  <div className="w-full md:w-1/4 flex-shrink-0 relative overflow-hidden bg-gray-100 dark:bg-gray-700 h-32 md:h-full">
+                    <Link to={`/${type}/${article.id}`} className="absolute inset-0">
+                      <img 
+                        src={article.图片 || '/static/images/default-placeholder.png'} 
+                        alt={article.标题}
+                        loading="lazy"
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </Link>
                   </div>
-                  <div className="md:w-2/3 flex-1 p-4">
-                    <h6 className="text-lg font-semibold mb-2">
+                  <div className="w-full md:w-3/4 flex-1 p-3 flex flex-col md:h-full overflow-hidden">
+                    <h2 className="text-lg font-semibold mb-1.5 line-clamp-1">
                       <Link 
                         to={`/${type}/${article.id}`} 
                         className="text-gray-900 dark:text-gray-100 hover:text-green-600 dark:hover:text-green-400 transition-colors no-underline"
                       >
                         {article.标题}
                       </Link>
-                    </h6>
+                    </h2>
                     {article.内容 && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 leading-relaxed">
+                      <p 
+                        className="text-sm text-gray-600 dark:text-gray-400 mb-2 flex-1 overflow-hidden"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          lineHeight: '1.4',
+                          maxHeight: '2.8em',
+                        }}
+                      >
                         {stripHtml(article.内容)}
                       </p>
                     )}
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400 md:mt-auto pt-1.5 border-t border-gray-200 dark:border-gray-700">
                       {article.作者 && (
                         <span className="flex items-center gap-1">
-                          <i className="bi bi-person"></i> 
+                          <User className="w-3 h-3 text-gray-400" /> 
                           <span>{article.作者}</span>
                         </span>
                       )}
                       {article.更新时间 && (
                         <span className="flex items-center gap-1">
-                          <i className="bi bi-calendar"></i> 
-                          <span>{new Date(article.更新时间).toLocaleDateString('zh-CN')}</span>
+                          <Calendar className="w-3 h-3 text-gray-400" /> 
+                          <span>{formatDateToChinese(article.更新时间)}</span>
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
           
           {totalPages > 1 && (
-            <div className="mt-8">
+            <div className="mt-10">
               <Pagination
                 page={page}
                 totalPages={totalPages}

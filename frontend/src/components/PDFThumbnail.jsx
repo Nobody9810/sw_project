@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { FileText } from 'lucide-react'
 
 /**
  * PDF缩略图组件
@@ -198,7 +199,7 @@ function PDFThumbnail({ pdfUrl, alt = 'PDF预览', onError }) {
         fontSize: '0.9rem'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <i className="bi bi-file-earmark-pdf" style={{ fontSize: '2rem', marginBottom: '8px' }}></i>
+          <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
           <div>PDF加载失败</div>
         </div>
       </div>
@@ -220,8 +221,8 @@ function PDFThumbnail({ pdfUrl, alt = 'PDF预览', onError }) {
           backgroundColor: '#f5f5f5',
           zIndex: 1
         }}>
-          <div className="spinner-border text-primary spinner-border-sm" role="status">
-            <span className="visually-hidden">加载中...</span>
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" role="status">
+            <span className="sr-only">加载中...</span>
           </div>
         </div>
       )}

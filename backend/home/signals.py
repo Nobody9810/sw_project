@@ -313,9 +313,7 @@ def delete_guji_files(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=书库)
 def delete_shuku_files(sender, instance, **kwargs):
-    """删除书库的图片、PDF文档文件和CKEditor内容中的图片"""
-    if instance.图片:
-        delete_file(instance.图片)
+    """删除书库的PDF文档文件和CKEditor内容中的图片"""
     if instance.文档:
         delete_file(instance.文档)
     # 删除CKEditor内容中的图片
@@ -417,7 +415,6 @@ def compress_guji_files(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=书库)
 def compress_shuku_files(sender, instance, **kwargs):
-    """压缩书库的图片和PDF文档文件"""
-    compress_file_field(instance, '图片')
+    """压缩书库的PDF文档文件"""
     compress_file_field(instance, '文档')
 

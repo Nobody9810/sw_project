@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
+import { Calendar, User, Building, Eye, TrendingUp, Book, UserCircle, List, MessageSquare, FileText } from 'lucide-react'
 import apiClient, { interactionsApiClient } from '../utils/apiClient'
+import { formatDateToChinese } from '../utils/dateFormatter'
 import RelatedSidebar from '../components/Sidebar/RelatedSidebar'
 import LikeDislike from '../components/LikeDislike'
 import CommentSection from '../components/CommentSection'
@@ -16,11 +18,7 @@ function ArticleDetail({ type }) {
     if (!value) {
       return null
     }
-    const parsed = new Date(value)
-    if (Number.isNaN(parsed.getTime())) {
-      return null
-    }
-    return parsed.toLocaleDateString('zh-CN')
+    return formatDateToChinese(value)
   }
 
   useEffect(() => {
@@ -96,23 +94,23 @@ function ArticleDetail({ type }) {
     }
     return [
       {
-        icon: 'bi-calendar3',
+        icon: Calendar,
         label: formatDate(article.更新时间),
       },
       {
-        icon: 'bi-person',
+        icon: User,
         label: article.作者 || null,
       },
       {
-        icon: 'bi-building',
+        icon: Building,
         label: article.出处 || null,
       },
       {
-        icon: 'bi-eye',
+        icon: Eye,
         label: article.总浏览量 != null ? `总浏览: ${article.总浏览量}` : null,
       },
       {
-        icon: 'bi-eye-fill',
+        icon: TrendingUp,
         label: article.今日浏览量 != null ? `今日: ${article.今日浏览量}` : null,
       },
     ].filter(item => item.label)
@@ -141,12 +139,10 @@ function ArticleDetail({ type }) {
     const hasContentIntro = article['内容简介']
     
     const sections = [
-      { key: '内容简介', title: '内容简介', icon: 'bi-book' },
-      // 只有在没有内容简介时才显示内容字段
-      ...(hasContentIntro ? [] : [{ key: '内容', title: '内容', icon: 'bi-journal-text' }]),
-      { key: '作者简介', title: '作者简介', icon: 'bi-person-badge' },
-      { key: '目录', title: '目录', icon: 'bi-list-ul' },
-      { key: '前言', title: '前言', icon: 'bi-chat-quote' },
+      { key: '内容简介', title: '内容简介', icon: Book },
+      { key: '作者简介', title: '作者简介', icon: UserCircle },
+      { key: '目录', title: '目录', icon: List },
+      { key: '前言', title: '前言', icon: MessageSquare },
     ]
     return sections
       .map(section => ({
@@ -173,24 +169,27 @@ function ArticleDetail({ type }) {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         <div className="lg:col-span-8">
-          <article className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+          <article className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 md:p-8 mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
               {article.标题}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-4 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex flex-wrap items-center gap-4 mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
               {metaItems.length > 0 && (
-                <>
-                  {metaItems.map(item => (
-                    <div key={item.label} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <i className={`bi ${item.icon}`} aria-hidden="true" />
-                      <span>{item.label}</span>
-                    </div>
-                  ))}
-                </>
+                <div className="flex flex-wrap items-center gap-4">
+                  {metaItems.map(item => {
+                    const IconComponent = item.icon
+                    return (
+                      <div key={item.label} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <IconComponent className="w-4 h-4 text-gray-400" aria-hidden="true" />
+                        <span>{item.label}</span>
+                      </div>
+                    )
+                  })}
+                </div>
               )}
               <div className="ml-auto">
                 <ShareButtons 
@@ -202,24 +201,24 @@ function ArticleDetail({ type }) {
 
             {/* 书讯信息卡片 */}
             {type === "书讯" && (article.图片 || bookInfo.length > 0) && (
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 mb-6">
-                <div className="flex flex-col md:flex-row md:items-stretch gap-8">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 rounded-xl p-6 md:p-8 mb-8 border border-gray-200 dark:border-gray-700">
+                <div className="flex flex-col md:flex-row md:items-stretch gap-6 md:gap-8">
                   {article.图片 && (
-                    <div className="flex-shrink-0 flex justify-center md:justify-start md:self-stretch">
-                      <div className="flex items-center md:h-full">
+                    <div className="flex-shrink-0 flex justify-center md:justify-start">
+                      <div className="flex items-center">
                         <img 
                           src={article.图片 || '/static/images/default-placeholder.png'} 
                           alt={article.标题}
-                          className="w-32 sm:w-40 md:w-48 max-w-[200px] rounded-lg object-contain shadow-md md:h-full"
+                          className="w-40 sm:w-48 md:w-56 max-w-[240px] rounded-lg object-contain shadow-lg"
                           loading="lazy"
                         />
                       </div>
                     </div>
                   )}
-                  <div className="flex-1 space-y-4 flex flex-col justify-center">
+                  <div className="flex-1 space-y-3 flex flex-col justify-center">
                     {bookInfo.map((info, index) => (
-                      <div key={index} className="flex gap-3 text-base">
-                        <span className="font-medium text-gray-700 dark:text-gray-300">{info.label}：</span>
+                      <div key={index} className="flex gap-3 text-base md:text-lg">
+                        <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">{info.label}：</span>
                         <span className="text-gray-600 dark:text-gray-400">{info.value}</span>
                       </div>
                     ))}
@@ -228,42 +227,45 @@ function ArticleDetail({ type }) {
               </div>
             )}
 
-            {richSections.map(section => (
-              <div key={section.key} className="mb-8">
-                <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-                  <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <i className={`bi ${section.icon} text-green-600 dark:text-green-400 text-lg`} aria-hidden="true" />
+            {richSections.map(section => {
+              const IconComponent = section.icon
+              return (
+                <div key={section.key} className="mb-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 flex items-center justify-center shadow-sm">
+                      <IconComponent className="w-6 h-6 text-green-600 dark:text-green-400" aria-hidden="true" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{section.title}</h3>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{section.title}</h3>
-                </div>
                 <div
-                  className="prose prose-gray dark:prose-invert max-w-none text-justify [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-4 [&_img]:mx-auto [&_img]:block"
+                  className="prose prose-lg prose-gray dark:prose-invert max-w-none text-justify leading-relaxed [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-6 [&_img]:mx-auto [&_img]:block [&_img]:shadow-md [&_p]:mb-4 [&_p]:text-gray-700 [&_p]:dark:text-gray-300"
                   dangerouslySetInnerHTML={{ __html: section.value }}
                 />
-              </div>
-            ))}
+                </div>
+              )
+            })}
 
             {!richSections.length && article.内容 && (
-              <div className="prose prose-gray dark:prose-invert max-w-none text-justify [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-4 [&_img]:mx-auto [&_img]:block">
+              <div className="prose prose-lg prose-gray dark:prose-invert max-w-none text-justify leading-relaxed [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-6 [&_img]:mx-auto [&_img]:block [&_img]:shadow-md [&_p]:mb-4 [&_p]:text-gray-700 [&_p]:dark:text-gray-300">
                 <div dangerouslySetInnerHTML={{ __html: article.内容 }} />
               </div>
             )}
 
             {article.文档 && (
-              <div className="mb-8">
-                <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-                  <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <i className="bi bi-file-earmark-pdf text-green-600 dark:text-green-400 text-lg" aria-hidden="true" />
+              <div className="mb-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 flex items-center justify-center shadow-sm">
+                    <FileText className="w-6 h-6 text-green-600 dark:text-green-400" aria-hidden="true" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">在线阅读</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">在线阅读</h3>
                 </div>
-                <div className="mt-4">
+                <div className="mt-6 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                   <DFlipViewer fileUrl={article.文档} />
                 </div>
               </div>
             )}
 
-            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-10 pt-8 border-t border-gray-200 dark:border-gray-700">
               <LikeDislike
                 appLabel={article.app_label || 'home'}
                 modelName={article.model_name || type}

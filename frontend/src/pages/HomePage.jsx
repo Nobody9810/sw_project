@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient from '../utils/apiClient'
+import { formatDateToChinese } from '../utils/dateFormatter'
 import BookCarousel from '../components/BookCarousel'
 
 const SECTIONS = [
@@ -132,7 +133,7 @@ function HomePage() {
                             try {
                               if (typeof topBook.出版年 === 'string') {
                                 const date = new Date(topBook.出版年)
-                                return isNaN(date.getTime()) ? topBook.出版年 : date.toLocaleDateString('zh-CN')
+                                return isNaN(date.getTime()) ? topBook.出版年 : formatDateToChinese(topBook.出版年)
                               }
                               return String(topBook.出版年)
                             } catch (e) {
@@ -180,7 +181,7 @@ function HomePage() {
         <div className="w-full lg:w-[40%]">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full flex flex-col">
             <div className="flex justify-between items-center mb-0 pb-2 -mx-4 px-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-xl font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-green-600">书讯</h3>
+              <h3 className="text-xl font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-[1em] before:w-1 before:bg-green-600 before:rounded-full">书讯</h3>
               <Link to="/书讯" className="text-green-600 dark:text-green-400 hover:underline text-sm">
                 更多 ›
               </Link>
@@ -210,7 +211,7 @@ function HomePage() {
       <div className="mb-8">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex justify-between items-center mb-0 pb-2 -mx-4 px-4 border-b" style={{ borderColor: '#fd7e14' }}>
-            <h3 className="text-xl font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-green-600">书库</h3>
+            <h3 className="text-xl font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-[1em] before:w-1 before:bg-green-600 before:rounded-full">书库</h3>
             <Link to="/书库" className="text-green-600 dark:text-green-400 hover:underline text-sm">
               更多 ›
             </Link>
@@ -242,7 +243,7 @@ function HomePage() {
           {/* 问答 */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex justify-between items-center mb-0 pb-2 -mx-4 px-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-xl font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-green-600">近期问答</h3>
+              <h3 className="text-xl font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-[1em] before:w-1 before:bg-green-600 before:rounded-full">近期问答</h3>
               <div className="flex items-center gap-3">
                 <Link to="/问答" className="text-green-600 dark:text-green-400 hover:underline text-sm">
                   提问
@@ -323,7 +324,7 @@ function CategoryBlock({ data = [], title, link, authorField, hideFirst = false,
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3 flex flex-col h-full">
         <div className="flex justify-between items-center mb-0 pb-2 -mx-3 px-3 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-green-600">{title}</h3>
+          <h3 className="text-lg font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-[1em] before:w-1 before:bg-green-600 before:rounded-full">{title}</h3>
           <Link to={link} className="text-green-600 dark:text-green-400 hover:underline text-sm">
             更多 ›
           </Link>
@@ -340,7 +341,7 @@ function CategoryBlock({ data = [], title, link, authorField, hideFirst = false,
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3 flex flex-col h-full">
       <div className="flex justify-between items-center mb-0 pb-2 -mx-3 px-3 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-bold">{title}</h3>
+        <h3 className="text-lg font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-[1em] before:w-1 before:bg-green-600 before:rounded-full">{title}</h3>
         <Link to={link} className="text-green-600 dark:text-green-400 hover:underline text-sm">
           更多 ›
         </Link>

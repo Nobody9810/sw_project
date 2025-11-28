@@ -203,6 +203,20 @@ def comment_list_api(request, app_label, model_name, object_id):
             else:
                 root_comments.append(comment_data)
         
+        # 对根评论按提交时间从最新到最旧排序
+        root_comments.sort(key=lambda x: x['submit_date'], reverse=True)
+        
+        # 对每个评论的回复也按提交时间从最新到最旧排序
+        def sort_replies(comment_data):
+            if comment_data['replies']:
+                comment_data['replies'].sort(key=lambda x: x['submit_date'], reverse=True)
+                # 递归排序所有层级的回复
+                for reply in comment_data['replies']:
+                    sort_replies(reply)
+        
+        for root_comment in root_comments:
+            sort_replies(root_comment)
+        
         return root_comments
     
     comment_tree = build_comment_tree(comments)

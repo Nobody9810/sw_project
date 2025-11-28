@@ -5,7 +5,6 @@ import HomePage from './pages/HomePage'
 import ArticleList from './pages/ArticleList'
 import ArticleDetail from './pages/ArticleDetail'
 import BookList from './pages/BookList'
-import BookDetail from './pages/BookDetail'
 import AboutUs from './pages/AboutUs'
 import Copyright from './pages/Copyright'
 import SearchResults from './pages/SearchResults'
@@ -44,7 +43,7 @@ function App() {
           <Route path="/通讯/:id" element={<ArticleDetail type="通讯" />} />
           <Route path="/论文/:id" element={<ArticleDetail type="论文" />} />
           <Route path="/古籍/:id" element={<ArticleDetail type="古籍" />} />
-          <Route path="/书库/:id" element={<BookDetail />} />
+          <Route path="/书库/:id" element={<ArticleDetail type="书库" />} />
           
           <Route path="/关于我们" element={<AboutUs />} />
           <Route path="/版权声明" element={<Copyright />} />

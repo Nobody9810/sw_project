@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { FileText, AlertTriangle } from 'lucide-react'
 
 function DFlipViewer({ fileUrl }) {
   const containerRef = useRef(null)
@@ -31,23 +32,48 @@ function DFlipViewer({ fileUrl }) {
   }, [fileUrl])
 
   useEffect(() => {
+    // 确保 PDF.js worker 路径已设置
+    if (typeof window !== 'undefined' && window.pdfjsLib) {
+      if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/dflip/js/libs/pdf.worker.min.js'
+      }
+    }
+
     // 等待库加载的函数
     const waitForLibraries = (callback, maxAttempts = 50) => {
       let attempts = 0
       const checkLibraries = () => {
         attempts++
-        if (typeof window !== 'undefined' && 
-            window.jQuery && 
-            window.DFLIP && 
-            typeof window.jQuery.fn.flipBook !== 'undefined') {
+        
+        // 确保 PDF.js worker 路径已设置（每次检查时都设置）
+        if (typeof window !== 'undefined' && window.pdfjsLib) {
+          if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/dflip/js/libs/pdf.worker.min.js'
+            console.log('DFlipViewer: 已设置 PDF.js worker 路径')
+          }
+        }
+        
+        const hasJQuery = typeof window !== 'undefined' && window.jQuery
+        const hasDFLIP = typeof window !== 'undefined' && window.DFLIP
+        const hasFlipBook = hasJQuery && typeof window.jQuery.fn.flipBook !== 'undefined'
+        const hasPdfjsLib = typeof window !== 'undefined' && window.pdfjsLib
+        
+        if (hasJQuery && hasDFLIP && hasFlipBook) {
+          console.log('DFlipViewer: 所有库已加载', {
+            jQuery: hasJQuery,
+            DFLIP: hasDFLIP,
+            flipBook: hasFlipBook,
+            pdfjsLib: hasPdfjsLib
+          })
           callback()
         } else if (attempts < maxAttempts) {
           setTimeout(checkLibraries, 100)
         } else {
           console.error('DFlipViewer: dflip 或 jQuery 未加载', {
-            jQuery: !!window.jQuery,
-            DFLIP: !!window.DFLIP,
-            flipBookPlugin: typeof window.jQuery?.fn?.flipBook
+            jQuery: hasJQuery,
+            DFLIP: hasDFLIP,
+            flipBookPlugin: hasFlipBook,
+            pdfjsLib: hasPdfjsLib
           })
           setError('PDF 查看器库未加载，请刷新页面重试')
           setLoading(false)
@@ -56,7 +82,14 @@ function DFlipViewer({ fileUrl }) {
       checkLibraries()
     }
 
-    if (!pdfUrl || !containerRef.current) {
+    if (!pdfUrl) {
+      console.warn('DFlipViewer: pdfUrl 为空，无法加载PDF')
+      setLoading(false)
+      return
+    }
+
+    if (!containerRef.current) {
+      console.warn('DFlipViewer: 容器元素未准备好')
       setLoading(false)
       return
     }
@@ -100,6 +133,8 @@ function DFlipViewer({ fileUrl }) {
           return
         }
 
+        console.log('DFlipViewer: 开始初始化 flipBook，PDF URL:', pdfUrl)
+        
         const flipbookInstance = $container.flipBook(pdfUrl, {
           webgl: true,
           webglShadow: true,
@@ -119,6 +154,15 @@ function DFlipViewer({ fileUrl }) {
           controlsPosition: window.DFLIP.CONTROLSPOSITION.BOTTOM,
           onReady: () => {
             console.log('DFlipViewer: PDF 加载完成')
+            setLoading(false)
+            if (timeoutId) {
+              clearTimeout(timeoutId)
+              timeoutId = null
+            }
+          },
+          onError: (error) => {
+            console.error('DFlipViewer: PDF 加载错误', error)
+            setError('PDF 文件加载失败，请检查文件是否存在')
             setLoading(false)
             if (timeoutId) {
               clearTimeout(timeoutId)
@@ -163,8 +207,8 @@ function DFlipViewer({ fileUrl }) {
 
   if (!pdfUrl) {
     return (
-      <div className="text-center text-muted py-5">
-        <i className="bi bi-file-earmark-pdf fs-1 d-block mb-2"></i>
+      <div className="text-center text-gray-500 dark:text-gray-400 py-5">
+        <FileText className="w-16 h-16 mx-auto mb-2 text-gray-400" />
         <p>未提供PDF文件</p>
       </div>
     )
@@ -172,9 +216,21 @@ function DFlipViewer({ fileUrl }) {
 
   if (error) {
     return (
-      <div className="alert alert-danger" role="alert">
-        <i className="bi bi-exclamation-triangle me-2"></i>
-        {error}
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg" role="alert">
+        <div className="flex items-center gap-2 mb-2">
+          <AlertTriangle className="w-5 h-5" />
+          <strong>PDF 加载失败：</strong>{error}
+        </div>
+        <div className="mt-2">
+          <small className="text-red-700 dark:text-red-300">
+            如果问题持续存在，请尝试：
+            <ul className="mb-0 mt-1 list-disc list-inside">
+              <li>刷新页面</li>
+              <li>检查网络连接</li>
+              <li>确认PDF文件是否存在</li>
+            </ul>
+          </small>
+        </div>
       </div>
     )
   }
@@ -183,10 +239,10 @@ function DFlipViewer({ fileUrl }) {
     <div className="dflip-viewer-container" style={{ width: '100%', minHeight: '600px' }}>
       {loading && (
         <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">加载中...</span>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" role="status">
+            <span className="sr-only">加载中...</span>
           </div>
-          <p className="mt-2 text-muted">正在加载PDF...</p>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">正在加载PDF...</p>
         </div>
       )}
       <div ref={containerRef} style={{ width: '100%' }}></div>

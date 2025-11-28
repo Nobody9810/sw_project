@@ -18,7 +18,7 @@ class 总类(models.Model):
         null=True, 
         blank=True, 
         default="暂无内容简介",
-
+        config_name='default'
     )
     更新时间 = models.DateTimeField(
         auto_now=True,
@@ -98,19 +98,22 @@ class 书讯(总类):
         null=True,
         blank=True,
         default="暂无作者简介",
-        verbose_name="作者简介"
+        verbose_name="作者简介",
+        config_name='default'
     )
     目录 = CKEditor5Field(
         null=True,
         blank=True,
         default="暂无",
-        verbose_name="目录"
+        verbose_name="目录",
+        config_name='default'
     )
     前言 = CKEditor5Field(
         null=True,
         blank=True,
         default="暂无",
-        verbose_name="前言"
+        verbose_name="前言",
+        config_name='default'
     )
     ISBN = models.CharField(
         max_length=30,
@@ -320,13 +323,15 @@ class 书库(总类):
         null=True,
         blank=True,
         default="暂无",
-        verbose_name="作者简介"
+        verbose_name="作者简介",
+        config_name='default'
     )
     内容简介 = CKEditor5Field(
         null=True,
         blank=True,
         default="暂无",
-        verbose_name="内容简介"
+        verbose_name="内容简介",
+        config_name='default'
     )
     出版日期 = models.DateField(
         null=True,
@@ -370,3 +375,44 @@ class Contact(models.Model):
 
     def __str__(self):
         return self.邮箱
+
+
+class Feedback(models.Model):
+    """用户反馈/建议模型"""
+    姓名 = models.CharField(
+        max_length=100,
+        null=False,
+        blank=False,
+        verbose_name="姓名"
+    )
+    邮箱 = models.EmailField(
+        null=False,
+        blank=False,
+        verbose_name="邮箱"
+    )
+    建议内容 = models.TextField(
+        null=False,
+        blank=False,
+        verbose_name="建议内容"
+    )
+    提交时间 = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="提交时间"
+    )
+    已处理 = models.BooleanField(
+        default=False,
+        verbose_name="已处理"
+    )
+    处理备注 = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="处理备注"
+    )
+
+    class Meta:
+        verbose_name = "用户反馈"
+        verbose_name_plural = "用户反馈"
+        ordering = ['-提交时间']
+
+    def __str__(self):
+        return f"{self.姓名} - {self.提交时间.strftime('%Y-%m-%d %H:%M')}"

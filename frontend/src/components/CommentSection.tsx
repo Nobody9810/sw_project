@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Card, Avatar, Form, Button, Input, message, Spin, Empty, Space, Typography, Divider, Alert } from 'antd'
 import { SendOutlined, UserOutlined, ClockCircleOutlined, MessageOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import { commentApiClient } from '../utils/apiClient'
+import { useTheme } from '../hooks/useTheme'
 
 const { TextArea } = Input
 const { Text, Title } = Typography
@@ -32,9 +33,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ appLabel, modelName, ob
   const [replyingTo, setReplyingTo] = useState<{ id: number; name: string } | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
   const [showReviewAlert, setShowReviewAlert] = useState(false)
-  const [isDark, setIsDark] = useState(() => {
-    return document.body.classList.contains('dark-theme')
-  })
+  const { isDark } = useTheme()
 
   useEffect(() => {
     fetchComments()
@@ -46,35 +45,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ appLabel, modelName, ob
     const savedEmail = localStorage.getItem('comment_email')
     if (savedName) setName(savedName)
     if (savedEmail) setEmail(savedEmail)
-  }, [])
-
-  // 监听主题变化
-  useEffect(() => {
-    const checkTheme = () => {
-      setIsDark(document.body.classList.contains('dark-theme'))
-    }
-    
-    // 初始检查
-    checkTheme()
-    
-    // 监听主题变化事件
-    const handleThemeChange = () => {
-      checkTheme()
-    }
-    
-    document.addEventListener('themeChange', handleThemeChange)
-    
-    // 使用MutationObserver监听body类变化
-    const observer = new MutationObserver(checkTheme)
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['class']
-    })
-    
-    return () => {
-      document.removeEventListener('themeChange', handleThemeChange)
-      observer.disconnect()
-    }
   }, [])
 
   const fetchComments = async () => {
@@ -155,11 +125,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ appLabel, modelName, ob
     const days = Math.floor(hours / 24)
 
     if (days > 7) {
-      return date.toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      return `${year}年${month}月${day}日`
     } else if (days > 0) {
       return `${days}天前`
     } else if (hours > 0) {
@@ -373,6 +342,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({ appLabel, modelName, ob
                 loading={submitting}
                 onClick={handleSubmit}
                 icon={<SendOutlined />}
+                style={{
+                  backgroundColor: '#28a745',
+                  borderColor: '#28a745',
+                }}
+                onMouseEnter={(e) => {
+                  if (!submitting) {
+                    e.currentTarget.style.backgroundColor = '#218838'
+                    e.currentTarget.style.borderColor = '#218838'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!submitting) {
+                    e.currentTarget.style.backgroundColor = '#28a745'
+                    e.currentTarget.style.borderColor = '#28a745'
+                  }
+                }}
               >
                 发表评论
               </Button>

@@ -17,7 +17,7 @@ from comment.forms import CommentForm
 from comment.views import get_comments_for_object
 from .models import (
     通讯, 书讯, 书评, 观点, 文艺, 译林, 文史, 
-    论文, 古籍, 书库, 书评_分类
+    论文, 古籍, 书库, 书评_分类, Feedback
 )
 from interactions.models import UserReaction, ViewCount
 from .forms import ContactForm
@@ -737,5 +737,60 @@ def about_us(request):
 
 def copyright(request):
     return render(request, 'components/others/T-P.html')
+
+
+@csrf_exempt
+def api_feedback(request):
+    """用户反馈 API"""
+    if request.method != 'POST':
+        return JsonResponse({'error': '仅支持 POST 请求'}, status=405)
+    
+    try:
+        import json
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+        
+        name = data.get('name', '').strip()
+        email = data.get('email', '').strip()
+        message = data.get('message', '').strip()
+        
+        # 验证必填字段
+        if not name:
+            return JsonResponse({'error': '姓名不能为空'}, status=400)
+        if not email:
+            return JsonResponse({'error': '邮箱不能为空'}, status=400)
+        if not message:
+            return JsonResponse({'error': '建议内容不能为空'}, status=400)
+        
+        # 验证邮箱格式
+        from django.core.validators import validate_email
+        from django.core.exceptions import ValidationError
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({'error': '邮箱格式不正确'}, status=400)
+        
+        # 创建反馈记录
+        feedback = Feedback.objects.create(
+            姓名=name,
+            邮箱=email,
+            建议内容=message
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': '反馈提交成功，感谢您的建议！',
+            'id': feedback.id
+        }, status=201)
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'JSON 格式错误'}, status=400)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f'反馈提交失败: {str(e)}')
+        return JsonResponse({'error': '服务器错误，请稍后重试'}, status=500)
 
 # ... 其他视图函数保持不变 ...

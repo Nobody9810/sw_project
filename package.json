@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@ckeditor/ckeditor5-core": "^43.3.1",
-    "ckeditor5-line-height-plugin": "^0.1.6"
-  }
-}

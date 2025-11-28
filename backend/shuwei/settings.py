@@ -209,9 +209,7 @@ CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"
 
 # 自定义配置
 CKEDITOR_5_CUSTOM_CSS = None
-CKEDITOR_5_JS = [
-    "{% static 'django_ckeditor_5/src/custom-plugins.js' %}",
-]
+CKEDITOR_5_JS = []
 
 # 详细编辑器配置
 CKEDITOR_5_CONFIGS = {
@@ -293,7 +291,7 @@ CKEDITOR_5_CONFIGS = {
         },
         'pageBreak': True,  # 支持分页符
         'sourceEditing': True,  # 支持源代码编辑
-        'language': 'zh-cn',  # 设置为简体中文
+        # 'language': 'zh-cn',  # 暂时移除语言设置，避免语言文件404错误
         'ui': 'default', 
         'tabSpaces':2,
     }
@@ -422,17 +420,41 @@ LOGGING = {
     'handlers': logging_handlers,
     'root': {
         'handlers': default_handlers,
-        'level': 'INFO' if IS_PRODUCTION else 'DEBUG',
+        'level': 'INFO' if IS_PRODUCTION else 'INFO',  # 开发环境也使用 INFO，减少日志输出
     },
     'loggers': {
         'django': {
             'handlers': default_handlers,
-            'level': 'INFO' if IS_PRODUCTION else 'DEBUG',
+            'level': 'INFO' if IS_PRODUCTION else 'INFO',  # 开发环境也使用 INFO
             'propagate': False,
         },
         'django.request': {
             'handlers': default_handlers,
             'level': 'ERROR',
+            'propagate': False,
+        },
+        # 减少开发环境下的 SQL 查询日志输出
+        'django.db.backends': {
+            'handlers': default_handlers,
+            'level': 'WARNING',  # 只显示警告和错误，不显示所有 SQL 查询
+            'propagate': False,
+        },
+        # 减少模板相关的日志输出
+        'django.template': {
+            'handlers': default_handlers,
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        # 减少静态文件相关的日志输出
+        'django.contrib.staticfiles': {
+            'handlers': default_handlers,
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        # 减少开发服务器相关的日志输出
+        'django.server': {
+            'handlers': default_handlers,
+            'level': 'INFO',  # 保留基本的请求信息
             'propagate': False,
         },
     },
@@ -551,10 +573,16 @@ UNFOLD = {
                         "icon": "help",
                         "link": "/admin/qa/question/",
                     },
+                ],
+            },
+            {
+                "title": "用户反馈",
+                "separator": True,
+                "items": [
                     {
-                        "title": "回答",
-                        "icon": "question_answer",
-                        "link": "/admin/qa/answer/",
+                        "title": "用户反馈",
+                        "icon": "feedback",
+                        "link": "/admin/home/feedback/",
                     },
                 ],
             },

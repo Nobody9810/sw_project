@@ -1,52 +1,23 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { User } from 'lucide-react'
 import apiClient from '../utils/apiClient'
 import MainSidebar from '../components/Sidebar/MainSidebar'
 import Pagination from '../components/Pagination'
 import PDFThumbnail from '../components/PDFThumbnail'
+import { useTheme } from '../hooks/useTheme'
 
 function BookList({ type }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState({ count: 0 })
-  const [isDark, setIsDark] = useState(() => {
-    return document.body.classList.contains('dark-theme')
-  })
+  const { isDark } = useTheme()
   const pageSize = 16
 
   useEffect(() => {
     setPage(1)
   }, [type])
-
-  // 监听主题变化
-  useEffect(() => {
-    const checkTheme = () => {
-      setIsDark(document.body.classList.contains('dark-theme'))
-    }
-    
-    // 初始检查
-    checkTheme()
-    
-    // 监听主题变化事件
-    const handleThemeChange = () => {
-      checkTheme()
-    }
-    
-    document.addEventListener('themeChange', handleThemeChange)
-    
-    // 使用MutationObserver监听body类变化
-    const observer = new MutationObserver(checkTheme)
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['class']
-    })
-    
-    return () => {
-      document.removeEventListener('themeChange', handleThemeChange)
-      observer.disconnect()
-    }
-  }, [])
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -125,25 +96,27 @@ function BookList({ type }) {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         <div className="lg:col-span-9">
           {/* 网格风格的图书列表 */}
           <div>
             {items.length === 0 && (
-              <div className="text-center w-full py-12 text-gray-500 dark:text-gray-400">暂无数据</div>
+              <div className="text-center w-full py-16 text-gray-500 dark:text-gray-400 text-lg">
+                暂无数据
+              </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {items.map(item => (
                 <div 
                   key={item.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 cursor-pointer h-full flex flex-col"
+                  className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer h-full flex flex-col"
                 >
                   {/* 封面图 */}
-                  <Link to={`/${type}/${item.id}`} className="block">
-                    <div className="relative h-72 overflow-hidden border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700">
-                      {/* 古籍和论文优先使用PDF首页作为封面 */}
-                      {(type === '古籍' || type === '论文') && item.文档 ? (
+                  <Link to={`/${type}/${item.id}`} className="block relative overflow-hidden bg-gray-100 dark:bg-gray-700">
+                    <div className="relative h-56 overflow-hidden border-b border-gray-200 dark:border-gray-700">
+                      {/* 古籍、论文和书库优先使用PDF首页作为封面 */}
+                      {(type === '古籍' || type === '论文' || type === '书库') && item.文档 ? (
                         <div className="absolute inset-0 w-full h-full">
                           <PDFThumbnail 
                             pdfUrl={item.文档} 
@@ -158,16 +131,16 @@ function BookList({ type }) {
                           src={item.图片 || '/static/images/default-placeholder.png'} 
                           alt={item.标题}
                           loading="lazy"
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       )}
                     </div>
                   </Link>
 
                   {/* 卡片信息 */}
-                  <div className="p-3.5 flex-1 flex flex-col">
+                  <div className="p-3 flex-1 flex flex-col">
                     {/* 标题 */}
-                    <h6 className="text-sm font-medium leading-snug mb-2 h-14 line-clamp-2">
+                    <h6 className="text-sm font-semibold leading-tight mb-1.5 line-clamp-1">
                       <Link 
                         to={`/${type}/${item.id}`} 
                         className="text-gray-900 dark:text-gray-100 hover:text-green-600 dark:hover:text-green-400 transition-colors no-underline"
@@ -178,14 +151,15 @@ function BookList({ type }) {
 
                     {/* 作者 */}
                     {item.作者 && (
-                      <div className="text-xs text-gray-600 dark:text-gray-400 mb-1.5 truncate">
-                        {item.作者}
+                      <div className="text-xs text-gray-600 dark:text-gray-400 truncate flex items-center gap-1">
+                        <User className="w-3 h-3 text-gray-400" />
+                        <span>{item.作者}</span>
                       </div>
                     )}
 
                     {/* 评分 */}
                     {item.评分 && (
-                      <div className="text-xs mt-1.5 text-amber-500 tracking-wider">
+                      <div className="text-xs mt-auto pt-1.5 text-amber-500 tracking-wider">
                         {'★'.repeat(Math.round(item.评分 / 2))}{'☆'.repeat(5 - Math.round(item.评分 / 2))}
                       </div>
                     )}
@@ -197,7 +171,7 @@ function BookList({ type }) {
 
           {/* 分页 */}
           {totalPages > 1 && (
-            <div className="mt-8">
+            <div className="mt-10">
               <Pagination
                 page={page}
                 totalPages={totalPages}

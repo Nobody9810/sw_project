@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Bookmark, Calendar } from 'lucide-react'
 import apiClient from '../../utils/apiClient'
+import { formatDateToChinese } from '../../utils/dateFormatter'
 
 function RelatedSidebar({ type, currentId, sectionName }) {
   const [items, setItems] = useState([])
@@ -45,7 +47,7 @@ function RelatedSidebar({ type, currentId, sectionName }) {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm mb-4 overflow-hidden" style={{ position: 'relative' }}>
         <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
           <div className="text-green-600 dark:text-green-400">
-            <i className="bi bi-bookmarks" aria-hidden="true" />
+            <Bookmark className="w-5 h-5" aria-hidden="true" />
           </div>
           <h3 className="text-lg font-medium m-0 text-gray-800 dark:text-gray-200">
             相关{sectionName || type}
@@ -70,8 +72,8 @@ function RelatedSidebar({ type, currentId, sectionName }) {
                 </h4>
                 {item.更新时间 && (
                   <div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                    <i className="bi bi-calendar3" aria-hidden="true" />
-                    {new Date(item.更新时间).toLocaleDateString('zh-CN')}
+                    <Calendar className="w-3 h-3" aria-hidden="true" />
+                    {formatDateToChinese(item.更新时间)}
                   </div>
                 )}
               </Link>

@@ -11,7 +11,7 @@
 {% block content %}
     <div class="flex flex-col gap-6">
         <!-- 数据统计卡片 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- 评论统计 -->
             <div class="bg-white dark:bg-base-800 rounded-lg shadow p-6 border border-base-200 dark:border-base-700">
                 <div class="flex items-center justify-between">
@@ -26,23 +26,6 @@
                 <div class="mt-4 flex items-center text-sm">
                     <span class="text-base-500 dark:text-base-400">待审核: {{ stats.comments.pending }}</span>
                     <span class="ml-4 text-base-500 dark:text-base-400">今日: {{ stats.comments.today }}</span>
-                </div>
-            </div>
-
-            <!-- 问答统计 -->
-            <div class="bg-white dark:bg-base-800 rounded-lg shadow p-6 border border-base-200 dark:border-base-700">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-base-600 dark:text-base-400">问答总数</p>
-                        <p class="text-2xl font-bold text-base-900 dark:text-base-100">{{ stats.qa.total_questions }}</p>
-                    </div>
-                    <div class="p-3 bg-primary-100 dark:bg-primary-900 rounded-lg">
-                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">help</span>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center text-sm">
-                    <span class="text-base-500 dark:text-base-400">已发布: {{ stats.qa.published_questions }}</span>
-                    <span class="ml-4 text-base-500 dark:text-base-400">待审核: {{ stats.qa.draft_questions }}</span>
                 </div>
             </div>
 
@@ -79,8 +62,44 @@
             </div>
         </div>
 
-        <!-- 最新评论和问答 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 第二行统计卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- 建议统计 -->
+            <div class="bg-white dark:bg-base-800 rounded-lg shadow p-6 border border-base-200 dark:border-base-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-base-600 dark:text-base-400">建议总数</p>
+                        <p class="text-2xl font-bold text-base-900 dark:text-base-100">{{ stats.feedbacks.total }}</p>
+                    </div>
+                    <div class="p-3 bg-primary-100 dark:bg-primary-900 rounded-lg">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">feedback</span>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="text-base-500 dark:text-base-400">待处理: {{ stats.feedbacks.pending }}</span>
+                    <span class="ml-4 text-base-500 dark:text-base-400">今日: {{ stats.feedbacks.today }}</span>
+                </div>
+            </div>
+
+            <!-- 互动统计 -->
+            <div class="bg-white dark:bg-base-800 rounded-lg shadow p-6 border border-base-200 dark:border-base-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-base-600 dark:text-base-400">总点赞数</p>
+                        <p class="text-2xl font-bold text-base-900 dark:text-base-100">{{ stats.interactions.total_likes }}</p>
+                    </div>
+                    <div class="p-3 bg-primary-100 dark:bg-primary-900 rounded-lg">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">thumb_up</span>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="text-base-500 dark:text-base-400">点踩数: {{ stats.interactions.total_dislikes }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最新评论、问答和建议 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- 最新评论 -->
             <div class="bg-white dark:bg-base-800 rounded-lg shadow border border-base-200 dark:border-base-700">
                 <div class="p-4 border-b border-base-200 dark:border-base-700">
@@ -169,6 +188,54 @@
                         </div>
                     {% else %}
                         <p class="text-sm text-base-500 dark:text-base-400">暂无问题</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 最新建议 -->
+            <div class="bg-white dark:bg-base-800 rounded-lg shadow border border-base-200 dark:border-base-700">
+                <div class="p-4 border-b border-base-200 dark:border-base-700">
+                    <h3 class="text-lg font-semibold text-base-900 dark:text-base-100 flex items-center">
+                        <span class="material-symbols-outlined mr-2">feedback</span>
+                        最新建议
+                    </h3>
+                </div>
+                <div class="p-4">
+                    {% if latest_feedbacks %}
+                        <div class="space-y-4">
+                            {% for feedback in latest_feedbacks %}
+                                <div class="border-b border-base-100 dark:border-base-700 pb-4 last:border-0 last:pb-0">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-base-900 dark:text-base-100">
+                                                {{ feedback.姓名 }}
+                                            </p>
+                                            <p class="text-sm text-base-600 dark:text-base-400 mt-1">
+                                                {{ feedback.建议内容|truncatewords:15 }}
+                                            </p>
+                                            <div class="flex items-center mt-2 text-xs text-base-500 dark:text-base-400">
+                                                <span>{{ feedback.提交时间|date:"Y-m-d H:i" }}</span>
+                                                {% if not feedback.已处理 %}
+                                                    <span class="ml-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded">待处理</span>
+                                                {% else %}
+                                                    <span class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded">已处理</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <a href="/admin/home/feedback/{{ feedback.id }}/change/" class="ml-4 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                                            <span class="material-symbols-outlined text-sm">edit</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-4">
+                            <a href="/admin/home/feedback/" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                                查看所有建议 → 
+                            </a>
+                        </div>
+                    {% else %}
+                        <p class="text-sm text-base-500 dark:text-base-400">暂无建议</p>
                     {% endif %}
                 </div>
             </div>

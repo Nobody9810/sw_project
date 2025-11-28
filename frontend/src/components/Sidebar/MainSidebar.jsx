@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient from '../../utils/apiClient'
+import { formatDateToChinese } from '../../utils/dateFormatter'
 
 const SIDEBAR_SECTIONS = [
   {
@@ -103,7 +104,7 @@ function MainSidebar() {
                       </span>
                       {item.更新时间 && (
                         <span className="text-gray-500 dark:text-gray-500 text-xs">
-                          {new Date(item.更新时间).toLocaleDateString('zh-CN')}
+                          {formatDateToChinese(item.更新时间)}
                         </span>
                       )}
                     </div>

@@ -10,6 +10,20 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      // 代理后端的静态文件（unfold 管理界面需要）
+      // 注意：这些路径需要放在前面，以确保优先级
+      '/static/django_ckeditor_5': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/static/unfold': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/static/admin': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
@@ -26,12 +40,11 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
-      // 注意：移除了 /static 代理，因为静态文件现在在 public/static/ 目录中
-      // 如果需要从后端获取某些静态文件，可以使用更具体的路径，例如：
-      // '/static/admin': {
-      //   target: 'http://localhost:8000',
-      //   changeOrigin: true,
-      // }
+      '/admin': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      // 注意：前端的静态文件在 public/static/ 目录中，不需要代理
     }
   },
   build: {

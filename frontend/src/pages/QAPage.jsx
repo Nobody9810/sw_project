@@ -1,6 +1,7 @@
 // src/pages/QAPage.jsx  —— 左侧提问侧边栏，右侧问答列表
 import React, { useState, useEffect } from 'react';
 import apiClient from '../utils/apiClient';
+import { formatDateToChinese } from '../utils/dateFormatter';
 import { MessageSquare, Menu, X } from 'lucide-react';
 
 const QASkeleton = () => (
@@ -174,7 +175,7 @@ export default function QAPage() {
                           提问
                         </span>
                       </div>
-                      <time>{new Date(q.created_at).toLocaleDateString('zh-CN')}</time>
+                      <time>{formatDateToChinese(q.created_at)}</time>
                     </div>
                     <h3 className="text-sm md:text-base font-medium text-gray-900 dark:text-gray-100 leading-snug">
                       {q.content}
@@ -199,7 +200,7 @@ export default function QAPage() {
                               </span>
                             </div>
                             <span className="text-gray-500 dark:text-gray-400">
-                              {new Date(a.created_at).toLocaleDateString('zh-CN')}
+                              {formatDateToChinese(a.created_at)}
                             </span>
                           </div>
                           <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">

@@ -8,8 +8,13 @@ class CommentAdmin(ModelAdmin):
     list_display = ('user_name', 'user_email', 'comment_preview', 'content_object', 'is_public', 'is_removed', 'submit_date')
     list_filter = ('is_public', 'is_removed', 'submit_date')
     search_fields = ('user_name', 'user_email', 'comment')
-    readonly_fields = ('submit_date', 'updated_at', 'content_type', 'object_id', 'content_object')
+    readonly_fields = ('user_name', 'user_email', 'comment', 'submit_date', 'updated_at', 'content_type', 'object_id', 'content_object', 'parent', 'level', 'thread_id', 'order')
     list_editable = ('is_public', 'is_removed')
+    ordering = ['-submit_date']  # 按提交时间从最新到最旧排序
+    
+    def has_add_permission(self, request):
+        """禁止在admin中添加新的评论"""
+        return False
     
     fieldsets = (
         ('评论信息', {

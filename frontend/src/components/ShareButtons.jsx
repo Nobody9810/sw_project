@@ -3,6 +3,7 @@ import {
   WhatsappIcon,
   TwitterIcon,
 } from 'react-share'
+import { Send, Camera } from 'lucide-react'
 import './ShareButtons.css'
 
 function ShareButtons({ url, title, description }) {
@@ -95,7 +96,7 @@ function ShareButtons({ url, title, description }) {
           title="分享到微信"
           aria-label="分享到微信"
         >
-          <i className="bi bi-send-fill" aria-hidden="true" />
+          <Send className="w-3.5 h-3.5" aria-hidden="true" />
         </button>
 
         {/* WhatsApp 分享 - 直接打开应用 */}
@@ -128,7 +129,7 @@ function ShareButtons({ url, title, description }) {
           title="分享到 Instagram"
           aria-label="分享到 Instagram"
         >
-          <i className="bi bi-camera-fill" aria-hidden="true" />
+          <Camera className="w-3.5 h-3.5" aria-hidden="true" />
         </button>
       </div>
     </div>
