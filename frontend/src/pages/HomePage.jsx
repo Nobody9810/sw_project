@@ -32,39 +32,68 @@ function HomePage() {
 
     const fetchData = async () => {
       try {
-        const types = ['书讯', '书评', '观点', '译林', '文艺', '文史', '通讯', '书库']
-        const promises = types.map(type =>
+        // 第一批：优先加载关键内容（书讯、书库）- 用户最先看到的内容
+        const priorityTypes = ['书讯', '书库']
+        const priorityPromises = priorityTypes.map(type =>
           apiClient.get(`/${type}/`, { params: { page_size: type === '书库' ? 10 : 10 } }).catch(err => {
             console.error(`Error fetching ${type}:`, err)
             return { data: { results: [] } }
           })
         )
-        
-        // 获取最新问答
-        const qaPromise = apiClient.get('/qa/questions/', { params: { limit: 3 } }).catch(err => {
-          console.error('Error fetching QA:', err)
-          return { data: { results: [] } }
-        })
 
-        const results = await Promise.all([...promises, qaPromise])
+        const priorityResults = await Promise.all(priorityPromises)
 
         if (!isMounted) return
 
+        // 先设置优先数据，让用户看到关键内容
         const newData = {}
-        types.forEach((type, idx) => {
-          const responseData = results[idx].data
+        priorityTypes.forEach((type, idx) => {
+          const responseData = priorityResults[idx].data
           newData[type] = responseData?.results || responseData || []
-
         })
-        
-        // 处理问答数据
-        const qaData = results[results.length - 1].data
-        newData['qa'] = qaData?.results || qaData || []
-
         setData(newData)
+        setLoading(false) // 关键内容加载完成，可以显示页面了
+
+        // 第二批：延迟加载其他内容（在后台加载）
+        // 使用setTimeout确保第一批渲染完成后再加载
+        setTimeout(async () => {
+          if (!isMounted) return
+          
+          const secondaryTypes = ['书评', '观点', '译林', '文艺', '文史', '通讯']
+          const secondaryPromises = secondaryTypes.map(type =>
+            apiClient.get(`/${type}/`, { params: { page_size: 10 } }).catch(err => {
+              console.error(`Error fetching ${type}:`, err)
+              return { data: { results: [] } }
+            })
+          )
+          
+          // 获取最新问答
+          const qaPromise = apiClient.get('/qa/questions/', { params: { limit: 3 } }).catch(err => {
+            console.error('Error fetching QA:', err)
+            return { data: { results: [] } }
+          })
+
+          const secondaryResults = await Promise.all([...secondaryPromises, qaPromise])
+
+          if (!isMounted) return
+
+          // 使用函数式更新确保数据正确合并
+          setData(prevData => {
+            const updatedData = { ...prevData }
+            secondaryTypes.forEach((type, idx) => {
+              const responseData = secondaryResults[idx].data
+              updatedData[type] = responseData?.results || responseData || []
+            })
+            
+            // 处理问答数据
+            const qaData = secondaryResults[secondaryResults.length - 1].data
+            updatedData['qa'] = qaData?.results || qaData || []
+            
+            return updatedData
+          })
+        }, 100) // 延迟100ms，确保第一批数据已渲染
       } catch (error) {
         console.error('Error fetching data:', error)
-      } finally {
         if (isMounted) {
           setLoading(false)
         }
@@ -106,6 +135,10 @@ function HomePage() {
                   alt={topBook.标题}
                   className="w-full sm:w-[40%] h-auto object-cover rounded"
                   loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    e.target.src = '/assets/images/default-placeholder.png'
+                  }}
                 />
                 <div className="flex-1">
                   <div className="text-sm bg-green-600 text-white mb-2 font-semibold px-2 py-1 rounded inline-block">新书推荐</div>

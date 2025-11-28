@@ -107,17 +107,6 @@ function Navbar() {
     
     return false
   }
-  
-  // 调试：在开发环境下输出路径信息
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('当前路径:', location.pathname)
-      navItems.forEach(item => {
-        const active = isActive(item.path)
-        console.log(`${item.label} (${item.path}): ${active ? '激活' : '未激活'}`)
-      })
-    }
-  }, [location.pathname, navItems])
 
   return (
     <>

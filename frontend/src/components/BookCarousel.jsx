@@ -111,6 +111,7 @@ const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
                             <PDFThumbnail 
                               pdfUrl={book.文档} 
                               alt={book.标题}
+                              lazy={true}
                               onError={(err) => {
                                 console.error(`PDF缩略图加载失败 (${book.标题}):`, err, 'URL:', book.文档)
                               }}

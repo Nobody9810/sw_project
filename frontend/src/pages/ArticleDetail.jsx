@@ -28,10 +28,6 @@ function ArticleDetail({ type }) {
       try {
         const response = await apiClient.get(`/${type}/${id}/`)
         setArticle(response.data)
-        // 调试：检查PDF文档URL
-        if (response.data.文档) {
-          console.log('PDF文档URL:', response.data.文档)
-        }
       } catch (error) {
         console.error('获取文章详情失败:', error)
         setArticle(null)

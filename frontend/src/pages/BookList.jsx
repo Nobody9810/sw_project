@@ -22,23 +22,14 @@ function BookList({ type }) {
   useEffect(() => {
     const fetchItems = async () => {
       setLoading(true)
+      // 不阻塞，让页面先渲染
+      await new Promise(resolve => setTimeout(resolve, 0))
       try {
-        console.log('Fetching items for type:', type)
         const response = await apiClient.get(`/${type}/`, {
           params: { page, page_size: pageSize },
         })
-        console.log('API Response:', response.data)
         const data = response.data || {}
         const list = data.results ?? (Array.isArray(data) ? data : [])
-        // 调试：检查古籍和论文的文档字段
-        if (type === '古籍' || type === '论文') {
-          console.log(`${type}列表数据:`, list.map(item => ({
-            id: item.id,
-            标题: item.标题,
-            文档: item.文档,
-            图片: item.图片
-          })))
-        }
         const countValue = typeof data.count === 'number'
           ? data.count
           : Array.isArray(data)

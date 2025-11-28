@@ -5,37 +5,6 @@ import Footer from './Footer'
 import TopSearchBar from './TopSearchBar'
 
 const Layout = memo(function Layout({ children }) {
-  // 调试代码：确保布局稳定（生产环境可移除）
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      const checkLayout = () => {
-        const layout = document.querySelector('#root > div')
-        const main = document.querySelector('main')
-        const footer = document.getElementById('footer')
-        
-        if (layout && main && footer) {
-          const layoutHeight = layout.offsetHeight
-          const mainHeight = main.offsetHeight
-          const footerHeight = footer.offsetHeight
-          const windowHeight = window.innerHeight
-          
-          console.log('=== Layout Debug ===')
-          console.log('Window height:', windowHeight)
-          console.log('Layout height:', layoutHeight)
-          console.log('Main height:', mainHeight)
-          console.log('Footer height:', footerHeight)
-          console.log('Total:', mainHeight + footerHeight)
-          console.log('Main min-height:', window.getComputedStyle(main).minHeight)
-        }
-      }
-      
-      // 在多个时机检查
-      setTimeout(checkLayout, 0)
-      setTimeout(checkLayout, 100)
-      setTimeout(checkLayout, 500)
-      setTimeout(checkLayout, 1000)
-    }
-  }, [children])
 
   return (
     <div 

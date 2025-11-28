@@ -85,9 +85,38 @@ function ShareButtons({ url, title, description }) {
   }
 
   return (
-    <div className="share-buttons-container">
-      <span className="share-divider">|</span>
-      <div className="share-buttons">
+    <div 
+      className="share-buttons-container"
+      style={{
+        margin: 0,
+        padding: 0,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '15px',
+        marginLeft: 'auto',
+        flexShrink: 0
+      }}
+    >
+      <span 
+        className="share-divider"
+        style={{
+          color: '#ddd',
+          fontSize: '14px',
+          fontWeight: 300,
+          userSelect: 'none'
+        }}
+      >
+        |
+      </span>
+      <div 
+        className="share-buttons"
+        style={{
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          flexWrap: 'wrap'
+        }}
+      >
         {/* 微信分享 */}
         <button
           type="button"
@@ -95,8 +124,25 @@ function ShareButtons({ url, title, description }) {
           onClick={handleWeChatShare}
           title="分享到微信"
           aria-label="分享到微信"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '32px',
+            height: '32px',
+            padding: 0,
+            border: '1px solid #07C160',
+            borderRadius: '50%',
+            background: 'transparent',
+            color: '#07C160',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            textDecoration: 'none',
+            fontFamily: 'inherit',
+            lineHeight: 1
+          }}
         >
-          <Send className="w-3.5 h-3.5" aria-hidden="true" />
+          <Send className="w-3.5 h-3.5" aria-hidden="true" style={{ width: '14px', height: '14px', flexShrink: 0 }} />
         </button>
 
         {/* WhatsApp 分享 - 直接打开应用 */}
@@ -106,8 +152,25 @@ function ShareButtons({ url, title, description }) {
           onClick={handleWhatsAppShare}
           title="分享到 WhatsApp"
           aria-label="分享到 WhatsApp"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '32px',
+            height: '32px',
+            padding: 0,
+            border: '1px solid #25D366',
+            borderRadius: '50%',
+            background: 'transparent',
+            color: '#25D366',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            textDecoration: 'none',
+            fontFamily: 'inherit',
+            lineHeight: 1
+          }}
         >
-          <WhatsappIcon size={14} round={false} />
+          <WhatsappIcon size={14} round={false} style={{ width: '14px', height: '14px', flexShrink: 0 }} />
         </button>
 
         {/* Twitter 分享 - 直接打开应用 */}
@@ -117,8 +180,25 @@ function ShareButtons({ url, title, description }) {
           onClick={handleTwitterShare}
           title="分享到 Twitter"
           aria-label="分享到 Twitter"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '32px',
+            height: '32px',
+            padding: 0,
+            border: '1px solid #1DA1F2',
+            borderRadius: '50%',
+            background: 'transparent',
+            color: '#1DA1F2',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            textDecoration: 'none',
+            fontFamily: 'inherit',
+            lineHeight: 1
+          }}
         >
-          <TwitterIcon size={14} round={false} />
+          <TwitterIcon size={14} round={false} style={{ width: '14px', height: '14px', flexShrink: 0 }} />
         </button>
 
         {/* Instagram 分享 */}
@@ -128,8 +208,25 @@ function ShareButtons({ url, title, description }) {
           onClick={handleInstagramShare}
           title="分享到 Instagram"
           aria-label="分享到 Instagram"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '32px',
+            height: '32px',
+            padding: 0,
+            border: '1px solid #E4405F',
+            borderRadius: '50%',
+            background: 'transparent',
+            color: '#E4405F',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            textDecoration: 'none',
+            fontFamily: 'inherit',
+            lineHeight: 1
+          }}
         >
-          <Camera className="w-3.5 h-3.5" aria-hidden="true" />
+          <Camera className="w-3.5 h-3.5" aria-hidden="true" style={{ width: '14px', height: '14px', flexShrink: 0 }} />
         </button>
       </div>
     </div>

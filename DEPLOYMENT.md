@@ -687,14 +687,139 @@ sudo tail -f /var/log/supervisor/sw_project.log
 - 检查端口 8000 是否被占用
 - 检查 Nginx 配置中的 `proxy_pass` 地址是否正确
 
-**问题 2: 403 Forbidden**
-- 检查文件权限：`sudo chown -R www-data:www-data /var/www/sw_project`
-- 检查目录权限：`sudo chmod -R 755 /var/www/sw_project`
+**问题 2: 403 Forbidden（权限问题）**
+
+这是最常见的权限问题，通常是因为文件或目录的所有者是 `root`，而 Nginx 以 `www-data` 用户运行。
+
+**快速修复：**
+```bash
+# 修复整个项目的权限（推荐）
+sudo chown -R www-data:www-data /var/www/sw_project
+sudo find /var/www/sw_project -type d -exec chmod 755 {} \;
+sudo find /var/www/sw_project -type f -exec chmod 644 {} \;
+
+# 或者只修复静态文件和媒体文件
+sudo chown -R www-data:www-data /var/www/sw_project/backend/staticfiles/
+sudo chown -R www-data:www-data /var/www/sw_project/backend/media/
+```
+
+**使用自动修复脚本：**
+```bash
+cd /var/www/sw_project
+chmod +x scripts/fix_static_permissions.sh
+./scripts/fix_static_permissions.sh
+```
+
+**验证修复：**
+```bash
+# 检查所有者
+ls -ld /var/www/sw_project/backend/staticfiles/
+ls -ld /var/www/sw_project/backend/media/
+
+# 应该显示 www-data:www-data，而不是 root:root
+```
 
 **问题 3: 静态文件 404**
 - 确认已运行 `python manage.py collectstatic`
 - 检查 `STATIC_ROOT` 路径是否正确
 - 检查 Nginx 配置中的 `alias` 路径
+
+**问题 3.1: Unfold Admin 样式不工作**
+这是生产环境中常见的问题，通常由以下原因导致：
+
+1. **静态文件未收集**
+   ```bash
+   # 进入backend目录
+   cd /var/www/sw_project/backend
+   source ../venv/bin/activate
+   
+   # 收集静态文件
+   python manage.py collectstatic --noinput
+   ```
+
+2. **验证unfold CSS文件是否存在**
+   ```bash
+   # 检查自定义CSS是否被收集
+   ls -la /var/www/sw_project/backend/staticfiles/unfold/css/custom.css
+   
+   # 如果文件不存在，检查源文件
+   ls -la /var/www/sw_project/backend/static/unfold/css/custom.css
+   ```
+
+3. **检查Nginx配置**
+   确保Nginx配置中的 `/static/` location 指向正确的目录：
+   ```nginx
+   location /static/ {
+       alias /var/www/sw_project/backend/staticfiles/;
+       expires 1y;
+       add_header Cache-Control "public, immutable";
+   }
+   ```
+   然后重载Nginx：
+   ```bash
+   sudo nginx -t
+   sudo systemctl reload nginx
+   ```
+
+4. **检查文件权限（重要！）**
+   
+   这是最常见的问题！如果 `staticfiles` 或 `media` 目录的所有者是 `root`，而 Nginx 以 `www-data` 用户运行，会导致 403 Forbidden 错误。
+   
+   **检查当前权限：**
+   ```bash
+   # 检查静态文件目录的所有者
+   ls -ld /var/www/sw_project/backend/staticfiles/
+   ls -ld /var/www/sw_project/backend/media/
+   
+   # 检查具体文件的所有者
+   ls -la /var/www/sw_project/backend/staticfiles/unfold/css/custom.css
+   ```
+   
+   **修复权限（推荐方法）：**
+   ```bash
+   # 方法1：修复整个目录的权限
+   sudo chown -R www-data:www-data /var/www/sw_project/backend/staticfiles/
+   sudo chown -R www-data:www-data /var/www/sw_project/backend/media/
+   
+   # 设置目录权限为 755（rwxr-xr-x）
+   sudo find /var/www/sw_project/backend/staticfiles -type d -exec chmod 755 {} \;
+   sudo find /var/www/sw_project/backend/media -type d -exec chmod 755 {} \;
+   
+   # 设置文件权限为 644（rw-r--r--）
+   sudo find /var/www/sw_project/backend/staticfiles -type f -exec chmod 644 {} \;
+   sudo find /var/www/sw_project/backend/media -type f -exec chmod 644 {} \;
+   ```
+   
+   **或者使用自动修复脚本：**
+   ```bash
+   cd /var/www/sw_project
+   chmod +x scripts/fix_static_permissions.sh
+   ./scripts/fix_static_permissions.sh
+   ```
+   
+   **验证权限修复：**
+   ```bash
+   # 检查所有者是否已改为 www-data
+   ls -ld /var/www/sw_project/backend/staticfiles/
+   # 应该显示：drwxr-xr-x ... www-data www-data ...
+   
+   # 测试文件是否可读（以 www-data 用户身份）
+   sudo -u www-data test -r /var/www/sw_project/backend/staticfiles/unfold/css/custom.css && echo "可读" || echo "不可读"
+   ```
+
+5. **使用诊断脚本**
+   项目提供了自动诊断脚本：
+   ```bash
+   cd /var/www/sw_project
+   chmod +x scripts/fix_unfold_styles.sh
+   ./scripts/fix_unfold_styles.sh
+   ```
+
+6. **浏览器端检查**
+   - 打开浏览器开发者工具（F12）
+   - 查看 Network 标签，确认 `/static/unfold/css/custom.css` 是否成功加载（状态码应为200）
+   - 如果返回404，说明静态文件路径配置有问题
+   - 如果返回403，说明文件权限有问题
 
 **问题 4: CSRF 错误**
 - 检查 `CSRF_TRUSTED_ORIGINS` 是否包含您的域名

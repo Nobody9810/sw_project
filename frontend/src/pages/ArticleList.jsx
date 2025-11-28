@@ -36,16 +36,15 @@ function ArticleList({ type }) {
   useEffect(() => {
     const fetchArticles = async () => {
       setLoading(true)
+      // 不阻塞，让页面先渲染
+      await new Promise(resolve => setTimeout(resolve, 0))
       try {
         // 使用普通列表 API
-        console.log('Fetching articles for type:', type, 'URL:', `/${type}/`)
         const response = await apiClient.get(`/${type}/`, {
           params: { page, page_size: pageSize },
         })
-        console.log('API Response:', response.data)
         const data = response.data || {}
         const list = data.results ?? (Array.isArray(data) ? data : [])
-        console.log('Parsed list:', list, 'Count:', list.length)
         const countValue = typeof data.count === 'number'
           ? data.count
           : Array.isArray(data)

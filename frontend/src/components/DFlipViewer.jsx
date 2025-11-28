@@ -13,21 +13,15 @@ function DFlipViewer({ fileUrl }) {
       console.warn('DFlipViewer: fileUrl 为空')
       return null
     }
-    console.log('DFlipViewer: 原始 fileUrl:', fileUrl)
     if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
-      console.log('DFlipViewer: 使用完整URL:', fileUrl)
       return fileUrl
     }
     if (fileUrl.startsWith('/media/')) {
-      console.log('DFlipViewer: 使用 /media/ 路径:', fileUrl)
       return fileUrl
     }
     if (!fileUrl.startsWith('/')) {
-      const url = `/media/${fileUrl}`
-      console.log('DFlipViewer: 添加 /media/ 前缀:', url)
-      return url
+      return `/media/${fileUrl}`
     }
-    console.log('DFlipViewer: 直接返回路径:', fileUrl)
     return fileUrl
   }, [fileUrl])
 
@@ -49,7 +43,6 @@ function DFlipViewer({ fileUrl }) {
         if (typeof window !== 'undefined' && window.pdfjsLib) {
           if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
             window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/assets/dflip/js/libs/pdf.worker.min.js'
-            console.log('DFlipViewer: 已设置 PDF.js worker 路径')
           }
         }
         
@@ -59,12 +52,6 @@ function DFlipViewer({ fileUrl }) {
         const hasPdfjsLib = typeof window !== 'undefined' && window.pdfjsLib
         
         if (hasJQuery && hasDFLIP && hasFlipBook) {
-          console.log('DFlipViewer: 所有库已加载', {
-            jQuery: hasJQuery,
-            DFLIP: hasDFLIP,
-            flipBook: hasFlipBook,
-            pdfjsLib: hasPdfjsLib
-          })
           callback()
         } else if (attempts < maxAttempts) {
           setTimeout(checkLibraries, 100)
@@ -133,7 +120,6 @@ function DFlipViewer({ fileUrl }) {
           return
         }
 
-        console.log('DFlipViewer: 开始初始化 flipBook，PDF URL:', pdfUrl)
         
         const flipbookInstance = $container.flipBook(pdfUrl, {
           webgl: true,
@@ -153,7 +139,6 @@ function DFlipViewer({ fileUrl }) {
           autoPlay: false,
           controlsPosition: window.DFLIP.CONTROLSPOSITION.BOTTOM,
           onReady: () => {
-            console.log('DFlipViewer: PDF 加载完成')
             setLoading(false)
             if (timeoutId) {
               clearTimeout(timeoutId)

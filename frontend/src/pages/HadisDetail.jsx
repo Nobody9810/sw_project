@@ -134,10 +134,6 @@ function HadithDetailPage() {
       if (arabRes.error) throw new Error(arabRes.error);
       if (zhRes.error) throw new Error(zhRes.error);
       
-      // 调试信息
-      console.log('阿拉伯文数据:', arabRes);
-      console.log('中文翻译数据:', zhRes);
-      
       // 确保数据格式正确
       if (!arabRes.verses || !Array.isArray(arabRes.verses)) {
         console.error('阿拉伯文数据格式错误:', arabRes);

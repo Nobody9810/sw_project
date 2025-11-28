@@ -54,7 +54,49 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    assetsDir: 'assets'
-  }
+    assetsDir: 'assets',
+    // 生产环境优化配置
+    // 使用 esbuild 进行压缩（更快，无需额外安装，压缩率稍低但足够好）
+    minify: 'esbuild',
+    // 代码分割优化
+    rollupOptions: {
+      output: {
+        // 手动代码分割，优化加载性能
+        manualChunks: {
+          // 将 React 相关库单独打包
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // 将 UI 库单独打包
+          'ui-vendor': ['antd', '@ant-design/icons', 'lucide-react'],
+          // 将其他第三方库打包
+          'utils-vendor': ['axios', 'react-share'],
+        },
+        // 优化 chunk 文件名
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: (assetInfo) => {
+          if (!assetInfo.name) {
+            return `assets/[name]-[hash][extname]`
+          }
+          const info = assetInfo.name.split('.')
+          const ext = info[info.length - 1]
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+            return `assets/images/[name]-[hash][extname]`
+          }
+          if (/woff2?|eot|ttf|otf/i.test(ext)) {
+            return `assets/fonts/[name]-[hash][extname]`
+          }
+          return `assets/[ext]/[name]-[hash][extname]`
+        },
+      },
+    },
+    // 启用 CSS 代码分割
+    cssCodeSplit: true,
+    // 生成 source map（生产环境可以关闭以提高安全性）
+    sourcemap: false,
+    // 提高构建性能
+    chunkSizeWarningLimit: 1000, // 调整 chunk 大小警告阈值
+    // 启用压缩
+    reportCompressedSize: true,
+  },
 })
 
