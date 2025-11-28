@@ -153,9 +153,37 @@ def delete_ckeditor_file(file_url):
                 print(f"[删除] 删除CKEditor文件失败: {path}, 错误: {e}")
                 return False
         else:
-            # 文件不存在，尝试查找类似的文件名（处理编码问题）
-            # 如果路径中包含编码字符，尝试不同的解码方式
+            # 文件不存在，尝试查找类似的文件名
             alt_paths = [path]
+            
+            # 处理带处理后缀的文件名（如：xxx.jpg.1500x1000_q95_crop-smart_upscale.jpg）
+            # 尝试提取原始文件名
+            if '.' in os.path.basename(path):
+                # 如果文件名包含多个点，可能是处理后的文件名
+                # 尝试提取原始文件名（去掉处理后缀）
+                base_name = os.path.basename(path)
+                dir_name = os.path.dirname(path)
+                
+                # 匹配模式：xxx.jpg.尺寸_质量_其他.jpg -> xxx.jpg
+                # 或者：xxx.jpg.其他后缀 -> xxx.jpg
+                import re
+                # 尝试匹配：文件名.扩展名.处理参数.扩展名
+                pattern = r'^(.+?\.(jpg|jpeg|png|gif|bmp|webp|pdf))\.\d+x\d+.*?\.\2$'
+                match = re.match(pattern, base_name, re.IGNORECASE)
+                if match:
+                    original_name = match.group(1)
+                    original_path = os.path.join(dir_name, original_name) if dir_name else original_name
+                    alt_paths.append(original_path)
+                    print(f"[删除] 检测到处理后文件名，尝试原始文件名: {original_path}")
+                
+                # 也尝试只去掉最后一个点和后面的内容（更通用的方法）
+                parts = base_name.rsplit('.', 2)
+                if len(parts) >= 3:
+                    # 如果有至少3个部分，尝试去掉最后一部分
+                    simplified_name = '.'.join(parts[:-1])
+                    simplified_path = os.path.join(dir_name, simplified_name) if dir_name else simplified_name
+                    if simplified_path not in alt_paths:
+                        alt_paths.append(simplified_path)
             
             # 如果路径包含编码字符，尝试其他可能的路径
             if '%' in file_url or ' ' in path:
@@ -165,13 +193,14 @@ def delete_ckeditor_file(file_url):
                     original_path = original_path[1:]
                 if original_path.startswith('media/'):
                     original_path = original_path[6:]
-                alt_paths.append(original_path)
+                if original_path not in alt_paths:
+                    alt_paths.append(original_path)
                 
                 # 尝试URL编码的路径
                 try:
                     import urllib.parse
                     encoded_path = urllib.parse.quote(path, safe='/')
-                    if encoded_path != path:
+                    if encoded_path != path and encoded_path not in alt_paths:
                         alt_paths.append(encoded_path)
                 except:
                     pass
@@ -188,9 +217,10 @@ def delete_ckeditor_file(file_url):
                     except Exception as e:
                         print(f"[删除] 删除CKEditor文件失败（备用路径）: {alt_path}, 错误: {e}")
             
-            # 所有路径都找不到文件
-            print(f"[删除] CKEditor文件不存在: {path} (已尝试多个路径)")
-            return False
+            # 所有路径都找不到文件，可能是文件已经被删除或不存在
+            # 这种情况下不报错，只记录日志（因为可能是正常的，比如文件已经被手动删除）
+            print(f"[删除] CKEditor文件不存在（可能已删除）: {path} (已尝试多个路径)")
+            return False  # 返回 False 但不抛出异常
             
     except Exception as e:
         print(f"[删除] 处理CKEditor文件URL失败: {file_url}, 错误: {e}")
@@ -322,39 +352,22 @@ def delete_shuku_files(sender, instance, **kwargs):
 
 def compress_file_field(instance, field_name):
     """
-    压缩文件字段（备用方案，主要压缩由存储类处理）
+    压缩文件字段（备用方案）
+    
+    注意：由于项目使用了 CompressedFileSystemStorage 作为默认存储类，
+    文件在保存时会自动通过存储类压缩。此函数主要用于处理特殊情况。
+    
+    为了避免双重压缩，此函数现在被禁用。所有压缩由存储类统一处理。
+    如果需要重新启用，请确保不会与存储类重复压缩。
     
     参数:
         instance: 模型实例
         field_name: 字段名称
     """
-    try:
-        field = getattr(instance, field_name, None)
-        if not field:
-            return
-        
-        # 检查是否有新上传的文件
-        if hasattr(field, 'file') and field.file:
-            file = field.file
-            # 检查是否是上传的文件对象
-            if hasattr(file, 'name') and hasattr(file, 'read'):
-                ext = os.path.splitext(file.name)[1].lower()
-                image_exts = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
-                pdf_exts = ['.pdf']
-                
-                # 重置文件指针
-                file.seek(0)
-                
-                if ext in image_exts and should_compress_file(file, 'image'):
-                    compressed = compress_image(file)
-                    # 将压缩后的文件保存回字段
-                    field.save(file.name, compressed, save=False)
-                elif ext in pdf_exts and should_compress_file(file, 'pdf'):
-                    compressed = compress_pdf(file)
-                    field.save(file.name, compressed, save=False)
-    except Exception as e:
-        # 如果压缩失败，记录错误但不中断保存流程
-        print(f"压缩文件字段 {field_name} 失败: {str(e)}")
+    # 由于使用了 CompressedFileSystemStorage，压缩由存储类统一处理
+    # 这里不再进行压缩，避免双重压缩
+    # 如果需要处理特殊情况，可以在这里添加逻辑
+    pass
 
 
 # 为所有模型添加pre_save信号处理器来压缩文件

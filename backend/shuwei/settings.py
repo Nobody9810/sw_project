@@ -151,7 +151,14 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # 添加这一行
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # 收集静态文件的目录
+
+# 静态文件查找器配置（确保能找到所有应用的静态文件）
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
 # 媒体文件配置
 MEDIA_URL = '/media/'
 MEDIA_ROOT =  BASE_DIR / 'media'
@@ -185,7 +192,7 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.mysql'),
-        'NAME': os.getenv('DB_NAME', 'shuwei'),
+        'NAME': os.getenv('DB_NAME', 'shuwei_latest'),
         'USER': os.getenv('DB_USER', 'root'),
         'PASSWORD': os.getenv('DB_PASSWORD', '112233'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
@@ -203,7 +210,7 @@ DATABASES = {
 # 基础配置
 CKEDITOR_5_FILE_STORAGE = "home.storage.CompressedFileSystemStorage"
 CKEDITOR_5_ALLOW_ALL_FILE_TYPES = True
-CKEDITOR_5_UPLOAD_FILE_TYPES = ['jpeg', 'pdf', 'png']
+CKEDITOR_5_UPLOAD_FILE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'bmp', 'pdf']
 CKEDITOR_5_UPLOADS = "uploads/"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"
 
@@ -254,6 +261,14 @@ CKEDITOR_5_CONFIGS = {
             'styles': [
                 'alignLeft', 'alignCenter', 'alignRight', 'full', 'side'
             ]
+        },
+        # 配置 SimpleUploadAdapter 的上传 URL
+        'simpleUpload': {
+            # 使用相对路径，由 Vite 代理到后端
+            # 开发环境：Vite 会代理到 http://localhost:8000/ckeditor5/image_upload/
+            # 生产环境：直接使用相对路径
+            'uploadUrl': '/ckeditor5/image_upload/',
+            'withCredentials': True,  # 发送 cookies（用于 CSRF token）
         },
         'table': {
             'contentToolbar': [
@@ -374,7 +389,8 @@ DEFAULT_META_IMAGE = 'images/default-placeholder.png'
 # =========================================
 # 确保日志目录存在（如果需要文件日志）
 log_dir = BASE_DIR / 'logs'
-use_file_logging = IS_PRODUCTION
+# 开发环境也可以启用文件日志，方便调试
+use_file_logging = IS_PRODUCTION or os.getenv('ENABLE_FILE_LOGGING', 'False').lower() == 'true'
 if use_file_logging:
     try:
         log_dir.mkdir(exist_ok=True)

@@ -37,6 +37,8 @@ urlpatterns = [
     # path('api/dislike/<str:app_label>/<str:model_name>/<int:item_id>/', views.dislike_item, name='dislike_item'),
     path('api/search/', views.api_search_all, name='api_search'),
     path('api/feedback/', views.api_feedback, name='api_feedback'),
+    path('api/book-review-categories/', views.api_book_review_categories, name='api_book_review_categories'),
+    path('api/book-reviews/category/<int:category_id>/', views.api_book_reviews_by_category, name='api_book_reviews_by_category'),
     path('api/<str:content_type>/<int:item_id>/', views.api_detail_view, name='api_detail'),
     # API 列表端点
     path('api/<str:content_type>/', views.api_list_view, name='api_list'),

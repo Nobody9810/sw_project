@@ -33,5 +33,9 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    # 开发环境下，Django 的 runserver 会自动处理静态文件
+    # 但为了确保 CKEditor5 等第三方应用的静态文件可以访问，需要手动配置
+    # 注意：STATIC_ROOT 是收集静态文件的目录，在开发环境下也应该存在
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+    urlpatterns += staticfiles_urlpatterns()
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

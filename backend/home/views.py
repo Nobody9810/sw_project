@@ -598,6 +598,9 @@ def _serialize_item(item):
             data[field.name] = value.id if value else None
             # 同时添加一个带_id后缀的字段（用于兼容）
             data[f'{field.name}_id'] = value.id if value else None
+            # 对于书评的分类字段，同时返回分类名称
+            if field.name == '分类' and item._meta.model_name == '书评' and value:
+                data['分类名称'] = value.名称
         else:
             data[field.name] = value
     data['app_label'] = item._meta.app_label
@@ -793,4 +796,95 @@ def api_feedback(request):
         logger.error(f'反馈提交失败: {str(e)}')
         return JsonResponse({'error': '服务器错误，请稍后重试'}, status=500)
 
-# ... 其他视图函数保持不变 ...
+
+@csrf_exempt
+def api_book_review_categories(request):
+    """获取书评分类列表 API"""
+    if request.method != 'GET':
+        return JsonResponse({'error': '仅支持 GET 请求'}, status=405)
+    
+    try:
+        categories = 书评_分类.objects.all().order_by('名称')
+        categories_data = [
+            {
+                'id': category.id,
+                '名称': category.名称,
+            }
+            for category in categories
+        ]
+        
+        return JsonResponse({
+            'success': True,
+            'categories': categories_data,
+            'count': len(categories_data)
+        })
+    except Exception as e:
+        return JsonResponse({'error': f'服务器错误: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+def api_book_reviews_by_category(request, category_id):
+    """获取某个分类下的所有书评 API"""
+    if request.method != 'GET':
+        return JsonResponse({'error': '仅支持 GET 请求'}, status=405)
+    
+    try:
+        category = get_object_or_404(书评_分类, pk=category_id)
+        
+        # 获取分页参数
+        page = int(request.GET.get('page', 1))
+        page_size = int(request.GET.get('page_size', 12))
+        
+        # 获取该分类下的所有已发布书评
+        queryset = 书评.objects.filter(分类=category, 发布状态=True).order_by('-更新时间')
+        
+        # 计算分页
+        total_count = queryset.count()
+        start = (page - 1) * page_size
+        end = start + page_size
+        items = queryset[start:end]
+        
+        # 序列化数据
+        results = []
+        for item in items:
+            author_value = getattr(item, '作者', '') or ''
+            content_value = ''
+            if hasattr(item, '内容'):
+                raw_content = getattr(item, '内容', None)
+                if raw_content is not None:
+                    content_value = str(raw_content)
+                    if content_value == '暂无内容简介':
+                        content_value = ''
+            
+            item_data = {
+                'id': item.id,
+                '标题': item.标题,
+                '作者': author_value,
+                '内容': content_value,
+                '更新时间': item.更新时间.isoformat() if hasattr(item, '更新时间') and item.更新时间 else '',
+                '图片': item.图片.url if hasattr(item, '图片') and item.图片 else None,
+                '出处': getattr(item, '出处', None) or '',
+                '书籍出版日期': item.书籍出版日期.isoformat() if hasattr(item, '书籍出版日期') and item.书籍出版日期 else None,
+                '分类名称': category.名称,
+            }
+            results.append(item_data)
+        
+        return JsonResponse({
+            'success': True,
+            'category': {
+                'id': category.id,
+                '名称': category.名称,
+            },
+            'results': results,
+            'count': total_count,
+            'page': page,
+            'page_size': page_size,
+            'total_pages': (total_count + page_size - 1) // page_size if total_count > 0 else 0,
+        })
+    except 书评_分类.DoesNotExist:
+        return JsonResponse({'error': '分类不存在'}, status=404)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f'获取分类书评失败: {str(e)}')
+        return JsonResponse({'error': f'服务器错误: {str(e)}'}, status=500)

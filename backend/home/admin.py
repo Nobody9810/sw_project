@@ -1,7 +1,7 @@
 from unfold.admin import ModelAdmin
 from django.contrib import admin
 
-from .models import 通讯, 书讯, 书评, 观点, 文艺, 译林, 文史, 论文, 古籍, 书库, Feedback
+from .models import 通讯, 书讯, 书评, 观点, 文艺, 译林, 文史, 论文, 古籍, 书库, Feedback, 书评_分类
 
 # 通用批量操作函数
 def reset_likes_dislikes_and_views(modeladmin, request, queryset):
@@ -22,9 +22,16 @@ class 书讯Admin(ModelAdmin):
     exclude = ('likes', 'dislikes', '总浏览量', '今日浏览量', '最后统计日期')
     actions = [reset_likes_dislikes_and_views]
 
+@admin.register(书评_分类)
+class 书评_分类Admin(ModelAdmin):
+    list_display = ('名称',)
+    search_fields = ('名称',)
+
 @admin.register(书评)
 class 书评Admin(ModelAdmin):
-    list_display = ('标题', 'likes', '总浏览量', '更新时间', '发布状态')
+    list_display = ('标题', '分类', 'likes', '总浏览量', '更新时间', '发布状态')
+    list_filter = ('分类', '发布状态', '更新时间')
+    search_fields = ('标题', '作者')
     exclude = ('likes', 'dislikes', '总浏览量', '今日浏览量', '最后统计日期')
     actions = [reset_likes_dislikes_and_views]
 

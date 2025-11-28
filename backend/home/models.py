@@ -4,6 +4,7 @@ from sorl.thumbnail import ImageField
 from django.urls import reverse
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from home.storage import CompressedFileSystemStorage
 
 # UserReaction 模型已迁移到 interactions app
 # 如需使用，请从 interactions.models 导入
@@ -295,7 +296,8 @@ class 论文(总类):
         upload_to='pdf/lunwen/', 
         default='null', 
         null=True,
-        verbose_name="PDF文档"
+        verbose_name="PDF文档",
+        storage=CompressedFileSystemStorage()  # 显式指定存储类
     )
     内容 = None
 
@@ -306,7 +308,8 @@ class 论文(总类):
 class 古籍(总类):
     文档 = models.FileField(
         upload_to='pdf/guji/',
-        verbose_name="PDF文档"
+        verbose_name="PDF文档",
+        storage=CompressedFileSystemStorage()  # 显式指定存储类
     )
     内容 = None
 
@@ -317,7 +320,8 @@ class 古籍(总类):
 class 书库(总类):
     文档 = models.FileField(
         upload_to='pdf/shuku/',
-        verbose_name="PDF文档"
+        verbose_name="PDF文档",
+        storage=CompressedFileSystemStorage()  # 显式指定存储类
     )
     作者简介 = CKEditor5Field(
         null=True,
