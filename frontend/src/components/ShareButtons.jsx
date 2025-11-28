@@ -8,9 +8,30 @@ import './ShareButtons.css'
 
 function ShareButtons({ url, title, description }) {
   // 获取当前页面的完整 URL
-  const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '')
+  // 在客户端环境下，直接使用 window.location.href 确保总是有值
+  const getShareUrl = () => {
+    if (typeof window === 'undefined') {
+      return url || ''
+    }
+    // 优先使用传入的 url，否则使用当前页面的完整 URL
+    const finalUrl = url || window.location.href
+    // 确保 URL 是完整的（包含协议和域名）
+    if (finalUrl && !finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+      // 如果是相对路径，转换为绝对路径
+      return window.location.origin + (finalUrl.startsWith('/') ? finalUrl : '/' + finalUrl)
+    }
+    return finalUrl || window.location.href
+  }
+  
+  const shareUrl = getShareUrl()
   const shareTitle = title || (typeof document !== 'undefined' ? document.title : '')
   const shareText = description ? `${shareTitle} - ${description}` : shareTitle
+  
+  // 如果确实没有 URL（仅在 SSR 时），不显示组件
+  // 在客户端，window.location.href 总是有值，所以组件会显示
+  if (!shareUrl && typeof window === 'undefined') {
+    return null
+  }
 
   // 微信分享处理函数（复制链接）
   const handleWeChatShare = () => {
@@ -63,10 +84,6 @@ function ShareButtons({ url, title, description }) {
     } else {
       alert('请手动复制链接：' + shareUrlToCopy)
     }
-  }
-
-  if (!shareUrl) {
-    return null
   }
 
   // WhatsApp 和 Twitter 直接打开应用的处理
