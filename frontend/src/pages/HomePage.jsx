@@ -104,7 +104,7 @@ function HomePage() {
                 <img
                   src={topBook.图片 || '/static/images/default-placeholder.png'}
                   alt={topBook.标题}
-                  className="w-full sm:w-[35%] h-auto object-cover rounded"
+                  className="w-full sm:w-[40%] h-auto object-cover rounded"
                   loading="lazy"
                 />
                 <div className="flex-1">

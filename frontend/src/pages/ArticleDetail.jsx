@@ -4,6 +4,7 @@ import { Calendar, User, Building, Eye, TrendingUp, Book, UserCircle, List, Mess
 import apiClient, { interactionsApiClient } from '../utils/apiClient'
 import { formatDateToChinese } from '../utils/dateFormatter'
 import RelatedSidebar from '../components/Sidebar/RelatedSidebar'
+import BookReviewCategorySidebar from '../components/Sidebar/BookReviewCategorySidebar'
 import LikeDislike from '../components/LikeDislike'
 import CommentSection from '../components/CommentSection'
 import ShareButtons from '../components/ShareButtons'
@@ -288,6 +289,8 @@ function ArticleDetail({ type }) {
         </div>
 
         <div className="lg:col-span-4">
+          {/* 书评分类 - 只在书评详情页显示 */}
+          {type === '书评' && <BookReviewCategorySidebar />}
           <RelatedSidebar type={type} currentId={id} sectionName={type} />
         </div>
       </div>

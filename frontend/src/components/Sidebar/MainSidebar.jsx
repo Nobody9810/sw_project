@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import apiClient from '../../utils/apiClient'
 import { formatDateToChinese } from '../../utils/dateFormatter'
+import BookReviewCategorySidebar from './BookReviewCategorySidebar'
 
 const SIDEBAR_SECTIONS = [
   {
@@ -27,6 +28,13 @@ const SIDEBAR_SECTIONS = [
 
 function MainSidebar() {
   const [sidebarData, setSidebarData] = useState({})
+  const location = useLocation()
+  
+  // 判断是否在书评相关页面（处理URL编码）
+  const decodedPath = decodeURIComponent(location.pathname)
+  const isBookReviewPage = decodedPath.startsWith('/书评') || decodedPath.includes('书评') || 
+                           location.pathname.includes('%E4%B9%A6%E8%AF%84') || // URL编码的"书评"
+                           location.pathname.startsWith('/%E4%B9%A6%E8%AF%84')
 
   useEffect(() => {
     let mounted = true
@@ -68,8 +76,12 @@ function MainSidebar() {
     }
   }, [])
 
+
   return (
     <div>
+      {/* 书评分类 - 只在书评页面显示 */}
+      {isBookReviewPage && <BookReviewCategorySidebar />}
+
       {SIDEBAR_SECTIONS.map(section => (
         <div
           key={section.title}

@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage'
 import ArticleList from './pages/ArticleList'
 import ArticleDetail from './pages/ArticleDetail'
 import BookList from './pages/BookList'
+import BookReviewCategoryList from './pages/BookReviewCategoryList'
 import AboutUs from './pages/AboutUs'
 import Copyright from './pages/Copyright'
 import SearchResults from './pages/SearchResults'
@@ -21,6 +22,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/书讯" element={<BookList type="书讯" />} />
+          <Route path="/书评/分类/:categoryId" element={<BookReviewCategoryList />} />
           <Route path="/书评" element={<ArticleList type="书评" />} />
           <Route path="/观点" element={<ArticleList type="观点" />} />
           <Route path="/译林" element={<ArticleList type="译林" />} />

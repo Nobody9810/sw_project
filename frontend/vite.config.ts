@@ -44,6 +44,11 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      // CKEditor5 上传接口代理
+      '/ckeditor5': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
       // 注意：前端的静态文件在 public/static/ 目录中，不需要代理
     }
   },
