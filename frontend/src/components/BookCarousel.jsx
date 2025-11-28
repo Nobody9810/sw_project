@@ -118,12 +118,12 @@ const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
                           </div>
                         ) : (
                           <img
-                            src={book.图片 || '/static/images/default-placeholder.png'}
+                            src={book.图片 || '/assets/images/default-placeholder.png'}
                             alt={book.标题}
                             loading="lazy"
                             className="w-full h-full object-contain transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-105"
                             onError={(e) => {
-                              e.target.src = '/static/images/default-placeholder.png'
+                              e.target.src = '/assets/images/default-placeholder.png'
                             }}
                           />
                         )}

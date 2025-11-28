@@ -208,7 +208,7 @@ function ArticleDetail({ type }) {
                     <div className="flex-shrink-0 flex justify-center md:justify-start">
                       <div className="flex items-center">
                         <img 
-                          src={article.图片 || '/static/images/default-placeholder.png'} 
+                          src={article.图片 || '/assets/images/default-placeholder.png'} 
                           alt={article.标题}
                           className="w-40 sm:w-48 md:w-56 max-w-[240px] rounded-lg object-contain shadow-lg"
                           loading="lazy"

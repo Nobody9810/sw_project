@@ -39,7 +39,7 @@ const Footer = memo(function Footer() {
           <div className="flex justify-center">
             <div className="w-full max-w-3xl text-center">
               <img 
-                src="/static/images/logo_white.png" 
+                src="/assets/images/logo_white.png" 
                 className="max-w-[100px] h-auto mx-auto mb-4 opacity-90 hover:opacity-100 transition-opacity block" 
                 alt="Logo" 
                 loading="eager"

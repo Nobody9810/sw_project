@@ -51,8 +51,8 @@ const Layout = memo(function Layout({ children }) {
       <TopSearchBar />
       <div className="logo-container">
         <Link to="/" className="main-logo">
-          <img src="/static/images/logo_black.png" alt="书味网" className="logo-light" />
-          <img src="/static/images/logo_white.png" alt="书味网" className="logo-dark" />
+          <img src="/assets/images/logo_black.png" alt="书味网" className="logo-light" />
+          <img src="/assets/images/logo_white.png" alt="书味网" className="logo-dark" />
         </Link>
       </div>
       <Navbar />

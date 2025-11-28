@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Avatar, Form, Button, Input, message, Spin, Empty, Space, Typography, Divider, Alert } from 'antd'
-import { SendOutlined, UserOutlined, ClockCircleOutlined, MessageOutlined, CheckCircleOutlined } from '@ant-design/icons'
+import { SendOutlined, ClockCircleOutlined, MessageOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import { commentApiClient } from '../utils/apiClient'
 import { useTheme } from '../hooks/useTheme'
 
@@ -31,7 +31,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ appLabel, modelName, ob
   const [email, setEmail] = useState('')
   const [comment, setComment] = useState('')
   const [replyingTo, setReplyingTo] = useState<{ id: number; name: string } | null>(null)
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [refreshKey] = useState(0)
   const [showReviewAlert, setShowReviewAlert] = useState(false)
   const { isDark } = useTheme()
 

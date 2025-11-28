@@ -114,7 +114,7 @@ function BookReviewCategoryList() {
                     <div className="w-full md:w-1/4 flex-shrink-0 relative overflow-hidden bg-gray-100 dark:bg-gray-700 h-32 md:h-full">
                       <Link to={`/书评/${article.id}`} className="absolute inset-0">
                         <img 
-                          src={article.图片 || '/static/images/default-placeholder.png'} 
+                          src={article.图片 || '/assets/images/default-placeholder.png'} 
                           alt={article.标题}
                           loading="lazy"
                           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

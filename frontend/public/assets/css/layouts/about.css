@@ -1,0 +1,253 @@
+/* 导入字体 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+
+.about-us-container {
+    max-width: 100%;
+    overflow: hidden;
+    font-family: 'Noto Serif SC', serif;
+}
+
+.about-banner {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/assets/images/about_us_1.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 450px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.about-banner::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(255,255,255,1), transparent);
+}
+
+.about-banner h1 {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: white;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.about-banner .subtitle {
+    font-size: 1.8rem;
+    opacity: 0.9;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: rgb(202, 201, 201);
+}
+
+.section-image1 img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.section-image1 img:hover {
+    transform: scale(1.02);
+}
+
+.about-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.mission-section,
+.story-section,
+.vision-section {
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+    margin-bottom: 6rem;
+    position: relative;
+    padding: 2rem;
+}
+
+.mission-section::before,
+.story-section::before,
+.vision-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    right: -100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.02);
+    z-index: -1;
+}
+
+.section-content {
+    flex: 1;
+    position: relative;
+}
+
+.section-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #2c3e50;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.section-content h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: #fd7e14;
+}
+
+.section-content p {
+    font-size: 1.2rem;
+    line-height: 2;
+    margin-bottom: 1.5rem;
+    color: #34495e;
+    text-align: justify;
+}
+
+.section-image {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.section-image img:hover {
+    transform: scale(1.05);
+}
+
+blockquote {
+    font-style: italic;
+    padding: 2rem 3rem;
+    border-left: 4px solid #fd7e14;
+    margin: 2rem 0;
+    background-color: rgba(253,126,20,0.05);
+    border-radius: 0 15px 15px 0;
+    position: relative;
+}
+
+blockquote::before {
+    content: '"';
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 4rem;
+    color: rgba(253,126,20,0.2);
+    font-family: serif;
+}
+
+blockquote footer {
+    margin-top: 1rem;
+    font-size: 1rem;
+    text-align: right;
+    color: #7f8c8d;
+}
+
+/* 深色模式适配 */
+[data-bs-theme="dark"] .section-content h2 {
+    color: #ecf0f1;
+}
+
+[data-bs-theme="dark"] .section-content p {
+    color: #bdc3c7;
+}
+
+[data-bs-theme="dark"] blockquote {
+    background-color: rgba(253,126,20,0.1);
+}
+
+[data-bs-theme="dark"] .mission-section::before,
+[data-bs-theme="dark"] .story-section::before,
+[data-bs-theme="dark"] .vision-section::before {
+    background-color: rgba(255,255,255,0.02);
+}
+
+/* 添加动画效果 */
+.section-content, .section-image {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .mission-section,
+    .story-section,
+    .vision-section {
+        flex-direction: column;
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .story-section {
+        flex-direction: column-reverse;
+    }
+
+    .about-banner {
+        height: 300px;
+    }
+
+    .about-banner h1 {
+        font-size: 2.5rem;
+    }
+
+    .section-content h2 {
+        font-size: 2rem;
+    }
+
+    .section-content p {
+        font-size: 1.1rem;
+    }
+
+    .section-image img {
+        height: 300px;
+    }
+
+    blockquote {
+        padding: 1.5rem 2rem;
+    }
+}
+
+/* 添加滚动显示动画 */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+}
+
+.scroll-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+} 

@@ -102,7 +102,7 @@ function HomePage() {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full flex flex-col">
               <div className="flex flex-col sm:flex-row gap-3 flex-1">
                 <img
-                  src={topBook.图片 || '/static/images/default-placeholder.png'}
+                  src={topBook.图片 || '/assets/images/default-placeholder.png'}
                   alt={topBook.标题}
                   className="w-full sm:w-[40%] h-auto object-cover rounded"
                   loading="lazy"

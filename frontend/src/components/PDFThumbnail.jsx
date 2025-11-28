@@ -22,7 +22,7 @@ function PDFThumbnail({ pdfUrl, alt = 'PDF预览', onError }) {
       if (window.pdfjsLib && typeof window.pdfjsLib.getDocument === 'function') {
         // 确保 worker 路径已设置（使用 dflip 的 worker）
         if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/dflip/js/libs/pdf.worker.min.js'
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/assets/dflip/js/libs/pdf.worker.min.js'
         }
         return true
       }
@@ -78,7 +78,7 @@ function PDFThumbnail({ pdfUrl, alt = 'PDF预览', onError }) {
     } else {
       // 如果没有脚本，主动加载 dflip 的 PDF.js
       const script = document.createElement('script')
-      script.src = '/static/dflip/js/libs/pdf.min.js'
+      script.src = '/assets/dflip/js/libs/pdf.min.js'
       script.async = true
       script.onload = () => {
         waitForPDFJS(20)

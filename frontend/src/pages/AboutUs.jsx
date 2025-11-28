@@ -42,7 +42,7 @@ function AboutUs() {
       <div 
         className="relative h-[450px] flex flex-col justify-center items-center text-white text-center mb-8"
         style={{
-          background: 'linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(/static/images/about_us_1.jpg)',
+          background: 'linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(/assets/images/about_us_1.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -77,7 +77,7 @@ function AboutUs() {
           
           <div className="flex-1 relative overflow-hidden">
             <img 
-              src="/static/images/contact_us.jpg" 
+              src="/assets/images/contact_us.jpg" 
               alt="我们的使命" 
               className="w-full h-[400px] object-cover rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105"
             />
@@ -93,7 +93,7 @@ function AboutUs() {
           
           <div className="flex-1 relative overflow-hidden">
             <img 
-              src="/static/images/about_us_3.jpg" 
+              src="/assets/images/about_us_3.jpg" 
               alt="我们的故事" 
               className="w-full h-[400px] object-cover rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105"
             />
@@ -146,7 +146,7 @@ function AboutUs() {
           
           <div className="flex-1 relative overflow-hidden">
             <img 
-              src="/static/images/about_us_2.png" 
+              src="/assets/images/about_us_2.png" 
               alt="我们的愿景" 
               className="w-full h-[400px] object-cover rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105"
             />

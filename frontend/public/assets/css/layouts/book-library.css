@@ -1,0 +1,168 @@
+/* 书库区域样式 */
+.book-library-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #fd7e14;
+}
+
+.book-library-section .section-header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+/* 轮播容器样式 */
+#bookCarousel {
+    padding: 0 2rem;
+}
+
+/* 书籍卡片样式 */
+.book-item {
+    position: relative;
+    margin: 0.3rem;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.book-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.book-cover {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.book-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+/* 悬停效果 */
+.book-hover-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 1rem;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.book-hover-info h4 {
+    color: white;
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.book-hover-info p {
+    color: #ddd;
+    font-size: 0.9rem;
+    margin: 0;
+    font-style: italic;
+}
+
+.book-item:hover {
+    transform: translateY(-5px);
+}
+
+.book-item:hover .book-cover img {
+    transform: scale(1.05);
+}
+
+.book-item:hover .book-hover-info {
+    transform: translateY(0);
+}
+
+/* 轮播控制按钮样式 */
+.carousel-control-prev,
+.carousel-control-next {
+    width: 40px;
+    height: 40px;
+    background: #fd7e14;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.8;
+}
+
+.carousel-control-prev {
+    left: -10px;
+}
+
+.carousel-control-next {
+    right: -10px;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    opacity: 1;
+}
+
+/* 深色模式适配 */
+[data-bs-theme="dark"] .book-library-section {
+    background: #242424;
+}
+
+[data-bs-theme="dark"] .book-item {
+    background: #2a2a2a;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .carousel-item .row {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        margin: 0 -0.5rem;
+    }
+
+    .carousel-item .col-md-2-4 {
+        flex: 0 0 auto;
+        width: 40%;
+        padding: 0 0.5rem;
+    }
+
+    .book-cover {
+        height: 150px;
+    }
+}
+
+/* 小屏幕设备优化 */
+@media (max-width: 576px) {
+    .carousel-item .col-md-3 {
+        width: 45%;  /* 稍微调整宽度以确保显示效果 */
+    }
+}
+
+/* 添加自定义的5列布局类 */
+.col-md-2-4 {
+    position: relative;
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+@media (min-width: 768px) {
+    .col-md-2-4 {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+}
+    

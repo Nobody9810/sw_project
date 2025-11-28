@@ -1,0 +1,333 @@
+/* 顶部搜索栏样式 - 不参与主题切换 */
+.top-search-bar {
+    width: 100%;
+    background: #333 !important;
+    padding: 5px 0;
+    border-bottom: 1px solid #eee !important;
+}
+
+.top-bar-container {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+}
+
+/* Logo容器样式 */
+.logo-container {
+    text-align: center;
+    padding: 15px 0;
+    background: #fff;
+}
+
+/* 搜索表单容器 */
+.search-form {
+    position: relative;
+    width: 220px;
+    max-width: 100%;
+}
+
+/* 搜索输入框 - 不参与主题切换 */
+.top-search-bar .form-control {
+    width: 100%;
+    height: 40px;
+    padding: 8px 45px 8px 15px;
+    border: none !important;
+    border-radius: 20px;
+    background: #ffffff !important;
+    color: #333 !important;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.top-search-bar .form-control:focus {
+    background: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.3);
+    outline: none;
+}
+
+.top-search-bar .form-control::placeholder {
+    color: #95a5a6 !important;
+    opacity: 0.8;
+}
+
+/* 搜索按钮 - 不参与主题切换 */
+.top-search-bar .search-btn {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #FF5722, #FF7043) !important;
+    color: #ffffff !important;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(255, 87, 34, 0.3);
+}
+
+.top-search-bar .search-btn:hover {
+    background: linear-gradient(145deg, #FF7043, #FF5722) !important;
+    transform: scale(1.05);
+    box-shadow: 0 3px 6px rgba(255, 87, 34, 0.4);
+}
+
+.top-search-bar .search-btn:active {
+    transform: scale(0.95);
+}
+
+.top-search-bar .search-btn i {
+    color: #ffffff !important;
+}
+
+/* 时间显示容器 - 不参与主题切换 */
+.top-search-bar .current-time {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    padding: 8px 15px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* 时间文本容器 */
+.time-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+/* 时间图标样式 - 不参与主题切换 */
+.top-search-bar .time-section i {
+    font-size: 16px;
+    width: 16px;
+    text-align: center;
+    color: #FF5722 !important;
+}
+
+/* 时间分隔线 */
+.time-divider {
+    width: 2px;
+    height: 20px;
+    background-color: #e67e22;
+    opacity: 0.3;
+}
+
+/* Logo 容器样式 */
+
+
+.main-logo {
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.main-logo img {
+    height: 100px;
+    width: auto;
+}
+
+/* 响应式调整 */
+@media (min-width: 576px) {
+    .top-bar-container {
+        max-width: 540px;
+    }
+}
+
+@media (min-width: 768px) {
+    .top-bar-container {
+        max-width: 720px;
+    }
+}
+
+@media (min-width: 992px) {
+    .top-bar-container {
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .top-bar-container {
+        max-width: 1140px;
+    }
+}
+
+/* 移动端响应式 */
+@media (max-width: 768px) {
+    .top-bar-container {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .current-time {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .search-form {
+        width: 100%;
+        max-width: 220px;
+    }
+}
+
+
+
+
+/* 功能图标样式 - 不参与主题切换 */
+.top-search-bar .function-icons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-left: 25px;
+    padding-left: 25px;
+    border-left: 1px solid rgba(255,255,255,0.2);
+}
+
+.top-search-bar .function-icon {
+    color: #fff !important;
+    font-size: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #661d07, #FF7043) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(255, 87, 34, 0.3);
+    border: none;
+}
+
+.top-search-bar .function-icon:hover {
+    background: linear-gradient(145deg, #FF7043, #FF5722) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 87, 34, 0.4);
+}
+
+.top-search-bar .function-icon i {
+    color: #fff !important;
+}
+
+/* 社交图标样式 - 不参与主题切换 */
+.top-search-bar .social-icons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-left: 25px;
+}
+
+.top-search-bar .social-icon {
+    color: #fff !important;
+    font-size: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #FF5722, #FF7043) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(255, 87, 34, 0.3);
+}
+
+.top-search-bar .social-icon:hover {
+    background: linear-gradient(145deg, #FF7043, #FF5722) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 87, 34, 0.4);
+}
+
+.top-search-bar .social-icon i {
+    color: #fff !important;
+}
+
+/* 调整右侧功能区布局 */
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* 微信二维码样式 - 不参与主题切换 */
+.top-search-bar .social-icon-wrapper {
+    position: relative;
+}
+
+.top-search-bar .qr-code {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff !important;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    display: none;
+    z-index: 1000;
+    width: 120px;
+    text-align: center;
+}
+
+.top-search-bar .qr-code::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: #fff !important;
+    box-shadow: -2px -2px 4px rgba(0,0,0,0.05);
+}
+
+.top-search-bar .qr-code img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.top-search-bar .qr-text {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #666 !important;
+}
+
+/* 悬停效果 */
+.social-icon-wrapper:hover .qr-code {
+    display: block;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -10px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* 邮箱提示样式 */
+.email-tooltip {
+    width: auto;
+    white-space: nowrap;
+    padding: 6px 12px;
+}
+
+.email-tooltip .qr-text {
+    margin: 0;
+    color: #333;
+    font-size: 13px;
+}

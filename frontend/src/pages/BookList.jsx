@@ -128,7 +128,7 @@ function BookList({ type }) {
                         </div>
                       ) : (
                         <img 
-                          src={item.图片 || '/static/images/default-placeholder.png'} 
+                          src={item.图片 || '/assets/images/default-placeholder.png'} 
                           alt={item.标题}
                           loading="lazy"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

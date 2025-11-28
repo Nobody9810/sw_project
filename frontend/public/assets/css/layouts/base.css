@@ -1,0 +1,324 @@
+/* 基础布局样式 */
+body {
+    min-height: 100vh;
+    background-color: #ffffff;
+}
+
+/* 深色主题覆盖 */
+body.dark-theme {
+    background-color: #1a1a1a !important;
+}
+
+.container {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.main-content {
+    padding: 2rem 0;
+    flex: 1 0 auto;
+    background-color: #ffffff;
+    color: #4a3c35;
+}
+
+/* 深色主题覆盖 */
+body.dark-theme .main-content {
+    background-color: #1a1a1a !important;
+    color: #e0e0e0 !important;
+}
+
+/* 内容区域的文本样式 */
+.main-content h1, 
+.main-content h2, 
+.main-content h3, 
+.main-content h4, 
+.main-content h5, 
+.main-content h6 {
+    color: #4a3c35;
+}
+
+body.dark-theme .main-content h1,
+body.dark-theme .main-content h2,
+body.dark-theme .main-content h3,
+body.dark-theme .main-content h4,
+body.dark-theme .main-content h5,
+body.dark-theme .main-content h6 {
+    color: #e0e0e0 !important;
+}
+
+.main-content p {
+    color: #4a3c35;
+}
+
+body.dark-theme .main-content p {
+    color: #bbb !important;
+}
+
+.main-content a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+body.dark-theme .main-content a {
+    color: #1e88e5 !important;
+}
+
+.main-content a:hover {
+    color: #2980b9;
+}
+
+body.dark-theme .main-content a:hover {
+    color: #42a5f5 !important;
+}
+
+/* 响应式布局 */
+@media (min-width: 576px) {
+    .container {
+        max-width: 540px;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 720px;
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* 调整导航栏和内容之间的间距 */
+.navbar {
+  margin-bottom: 0;
+  border-bottom: 1px solid #eee;
+}
+
+main {
+  margin-top: 0; /* 完全移除上边距 */
+}
+
+/* 移除其他可能影响间距的样式 */
+
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+    background: #fd7e14 !important;  /* 保持橙色背景 */
+    border: none !important;
+    padding: 6px !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+}
+
+.theme-toggle i {
+    font-size: 1.1rem;
+    color: white !important;  /* 图标颜色设置为白色 */
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+/* Logo 样式 */
+.logo-container {
+    text-align: center;
+    padding: 1.5rem 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+}
+
+.main-logo {
+    display: inline-block;
+    text-align: center;
+}
+
+.main-logo img {
+    height: 120px;
+    width: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 默认（浅色模式）下的 logo 显示规则 */
+.logo-light {
+    display: block !important;
+}
+
+.logo-dark {
+    display: none !important;
+}
+
+/* 移动端导航栏 logo */
+.navbar-logo {
+    display: none;
+}
+
+@media (max-width: 991.98px) {
+    .navbar-logo {
+        display: block;
+    }
+    
+    .logo-container {
+        display: none;
+    }
+}
+
+/* 消息提示样式 */
+.alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    min-width: 300px;
+    max-width: 90%;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 1rem 2.5rem 1rem 1.5rem;
+    margin: 0;
+    font-size: 0.95rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+.alert-error,
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.alert .btn-close {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.alert .btn-close:hover {
+    opacity: 1;
+}
+.message-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+}
+
+.alert {
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 4px;
+    animation: slideIn 0.5s ease-out;
+}
+
+.alert-dismissible {
+    padding-right: 35px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.fade-out {
+    animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+/* 消息提示动画 */
+@keyframes slideDown {
+    from {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+/* 深色模式适配 */
+[data-bs-theme="dark"] .alert {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .alert-success {
+    background-color: #1e462c;
+    color: #d4edda;
+}
+
+[data-bs-theme="dark"] .alert-info {
+    background-color: #0c3c48;
+    color: #d1ecf1;
+}
+
+[data-bs-theme="dark"] .alert-warning {
+    background-color: #533f03;
+    color: #fff3cd;
+}
+
+[data-bs-theme="dark"] .alert-error,
+[data-bs-theme="dark"] .alert-danger {
+    background-color: #4c161b;
+    color: #f8d7da;
+}
+  

@@ -140,12 +140,12 @@ function Navbar() {
               className="flex items-center"
             >
               <img 
-                src="/static/images/logo_black.png" 
+                src="/assets/images/logo_black.png" 
                 alt="书味网" 
                 className="logo-light h-10 w-auto dark:hidden" 
               />
               <img 
-                src="/static/images/logo_white.png" 
+                src="/assets/images/logo_white.png" 
                 alt="书味网" 
                 className="logo-dark h-10 w-auto hidden dark:block" 
               />
@@ -183,12 +183,12 @@ function Navbar() {
                 onClick={handleLinkClick}
               >
                 <img 
-                  src="/static/images/logo_black.png" 
+                  src="/assets/images/logo_black.png" 
                   alt="书味网" 
                   className="logo-light h-8 w-auto dark:hidden" 
                 />
                 <img 
-                  src="/static/images/logo_white.png" 
+                  src="/assets/images/logo_white.png" 
                   alt="书味网" 
                   className="logo-dark h-8 w-auto hidden dark:block" 
                 />

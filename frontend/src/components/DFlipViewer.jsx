@@ -35,7 +35,7 @@ function DFlipViewer({ fileUrl }) {
     // 确保 PDF.js worker 路径已设置
     if (typeof window !== 'undefined' && window.pdfjsLib) {
       if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/dflip/js/libs/pdf.worker.min.js'
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/assets/dflip/js/libs/pdf.worker.min.js'
       }
     }
 
@@ -48,7 +48,7 @@ function DFlipViewer({ fileUrl }) {
         // 确保 PDF.js worker 路径已设置（每次检查时都设置）
         if (typeof window !== 'undefined' && window.pdfjsLib) {
           if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/dflip/js/libs/pdf.worker.min.js'
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/assets/dflip/js/libs/pdf.worker.min.js'
             console.log('DFlipViewer: 已设置 PDF.js worker 路径')
           }
         }
