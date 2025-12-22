@@ -4,7 +4,6 @@ import {
   TwitterIcon,
 } from 'react-share'
 import { Send, Camera } from 'lucide-react'
-import './ShareButtons.css'
 
 function ShareButtons({ url, title, description }) {
   // 获取当前页面的完整 URL
@@ -102,148 +101,63 @@ function ShareButtons({ url, title, description }) {
   }
 
   return (
-    <div 
-      className="share-buttons-container"
-      style={{
-        margin: 0,
-        padding: 0,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '15px',
-        marginLeft: 'auto',
-        flexShrink: 0
-      }}
-    >
-      <span 
-        className="share-divider"
-        style={{
-          color: '#ddd',
-          fontSize: '14px',
-          fontWeight: 300,
-          userSelect: 'none'
-        }}
-      >
+    <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
+      <span className="text-gray-400 text-sm font-light select-none hidden md:inline">
         |
       </span>
-      <div 
-        className="share-buttons"
-        style={{
-          display: 'flex',
-          gap: '8px',
-          alignItems: 'center',
-          flexWrap: 'wrap'
-        }}
-      >
+      <div className="flex items-center gap-2 flex-wrap">
         {/* 微信分享 */}
         <button
           type="button"
-          className="share-button share-button-wechat"
           onClick={handleWeChatShare}
           title="分享到微信"
           aria-label="分享到微信"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '32px',
-            height: '32px',
-            padding: 0,
-            border: '1px solid #07C160',
-            borderRadius: '50%',
-            background: 'transparent',
-            color: '#07C160',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            textDecoration: 'none',
-            fontFamily: 'inherit',
-            lineHeight: 1
-          }}
+          className="inline-flex items-center justify-center w-8 h-8 md:w-8 md:h-8 rounded-full border border-[#07C160] bg-transparent text-[#07C160] cursor-pointer transition-all duration-300 hover:bg-[#07C160] hover:text-white hover:-translate-y-0.5 hover:scale-110 hover:shadow-md active:translate-y-0 active:scale-100 focus:outline-none focus:ring-2 focus:ring-[#07C160] focus:ring-offset-1"
         >
-          <Send className="w-3.5 h-3.5" aria-hidden="true" style={{ width: '14px', height: '14px', flexShrink: 0 }} />
+          <Send className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" strokeWidth={2} />
         </button>
 
         {/* WhatsApp 分享 - 直接打开应用 */}
         <button
           type="button"
-          className="share-button share-button-whatsapp"
           onClick={handleWhatsAppShare}
           title="分享到 WhatsApp"
           aria-label="分享到 WhatsApp"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '32px',
-            height: '32px',
-            padding: 0,
-            border: '1px solid #25D366',
-            borderRadius: '50%',
-            background: 'transparent',
-            color: '#25D366',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            textDecoration: 'none',
-            fontFamily: 'inherit',
-            lineHeight: 1
-          }}
+          className="inline-flex items-center justify-center w-8 h-8 md:w-8 md:h-8 rounded-full border border-[#25D366] bg-transparent text-[#25D366] cursor-pointer transition-all duration-300 hover:bg-[#25D366] hover:text-white hover:-translate-y-0.5 hover:scale-110 hover:shadow-md active:translate-y-0 active:scale-100 focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-1"
         >
-          <WhatsappIcon size={14} round={false} style={{ width: '14px', height: '14px', flexShrink: 0 }} />
+          <WhatsappIcon 
+            size={14} 
+            round={false} 
+            className="w-3.5 h-3.5 flex-shrink-0"
+            style={{ fill: 'currentColor' }}
+          />
         </button>
 
         {/* Twitter 分享 - 直接打开应用 */}
         <button
           type="button"
-          className="share-button share-button-twitter"
           onClick={handleTwitterShare}
           title="分享到 Twitter"
           aria-label="分享到 Twitter"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '32px',
-            height: '32px',
-            padding: 0,
-            border: '1px solid #1DA1F2',
-            borderRadius: '50%',
-            background: 'transparent',
-            color: '#1DA1F2',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            textDecoration: 'none',
-            fontFamily: 'inherit',
-            lineHeight: 1
-          }}
+          className="inline-flex items-center justify-center w-8 h-8 md:w-8 md:h-8 rounded-full border border-[#1DA1F2] bg-transparent text-[#1DA1F2] cursor-pointer transition-all duration-300 hover:bg-[#1DA1F2] hover:text-white hover:-translate-y-0.5 hover:scale-110 hover:shadow-md active:translate-y-0 active:scale-100 focus:outline-none focus:ring-2 focus:ring-[#1DA1F2] focus:ring-offset-1"
         >
-          <TwitterIcon size={14} round={false} style={{ width: '14px', height: '14px', flexShrink: 0 }} />
+          <TwitterIcon 
+            size={14} 
+            round={false} 
+            className="w-3.5 h-3.5 flex-shrink-0"
+            style={{ fill: 'currentColor' }}
+          />
         </button>
 
         {/* Instagram 分享 */}
         <button
           type="button"
-          className="share-button share-button-instagram"
           onClick={handleInstagramShare}
           title="分享到 Instagram"
           aria-label="分享到 Instagram"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '32px',
-            height: '32px',
-            padding: 0,
-            border: '1px solid #E4405F',
-            borderRadius: '50%',
-            background: 'transparent',
-            color: '#E4405F',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            textDecoration: 'none',
-            fontFamily: 'inherit',
-            lineHeight: 1
-          }}
+          className="inline-flex items-center justify-center w-8 h-8 md:w-8 md:h-8 rounded-full border border-[#E4405F] bg-transparent text-[#E4405F] cursor-pointer transition-all duration-300 hover:bg-[#E4405F] hover:text-white hover:-translate-y-0.5 hover:scale-110 hover:shadow-md active:translate-y-0 active:scale-100 focus:outline-none focus:ring-2 focus:ring-[#E4405F] focus:ring-offset-1"
         >
-          <Camera className="w-3.5 h-3.5" aria-hidden="true" style={{ width: '14px', height: '14px', flexShrink: 0 }} />
+          <Camera className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" strokeWidth={2} />
         </button>
       </div>
     </div>

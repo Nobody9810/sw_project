@@ -72,8 +72,8 @@ else:
 # CSRF Cookie配置
 if IS_PRODUCTION:
     # 生产环境使用更安全的设置
-    CSRF_COOKIE_HTTPONLY = True
-    CSRF_COOKIE_SAMESITE = 'Strict'
+    CSRF_COOKIE_HTTPONLY = False
+    CSRF_COOKIE_SAMESITE = 'Lax'
     CSRF_USE_SESSIONS = False
 else:
     # 开发环境 - 确保跨域请求可以设置cookie

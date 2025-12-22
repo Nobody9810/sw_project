@@ -156,7 +156,7 @@ function HadithDetailPage() {
   const quranChapters = Array.from({ length: 114 }, (_, i) => i + 1);
 
   return (
-    <div className="flex bg-gray-50 dark:bg-gray-900 transition-colors relative" style={{ height: 'calc(100vh - 200px)', minHeight: 'calc(100vh - 200px)' }}>
+    <div className="bg-gray-50 dark:bg-gray-900 transition-colors min-h-screen">
       {/* 移动端遮罩层 */}
       {sidebarOpen && (
         <div
@@ -165,144 +165,155 @@ function HadithDetailPage() {
         />
       )}
 
-      {/* 左侧侧边栏 */}
-      <div
-        className={`fixed md:static inset-y-0 left-0 w-80 bg-white dark:bg-gray-800 shadow-lg overflow-y-auto border-r border-gray-200 dark:border-gray-700 z-50 md:z-auto transform transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }`}
-      >
-        <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg md:text-xl font-bold text-green-700 dark:text-green-400 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 md:w-6 md:h-6" />
-              经训大全
-            </h2>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          
-          {/* 内容类型切换 */}
-          <div className="flex gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
-            <button
-              onClick={() => {
-                setContentType("hadith");
-                setViewMode("daily");
-              }}
-              className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition ${
-                contentType === "hadith"
-                  ? "bg-white dark:bg-gray-600 text-green-700 dark:text-green-400 shadow-sm"
-                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-              }`}
-            >
-              <BookOpen className="w-4 h-4 inline mr-1" />
-              圣训
-            </button>
-            <button
-              onClick={() => {
-                setContentType("quran");
-                if (!quranData.arab) {
-                  loadQuranChapter(1);
-                }
-              }}
-              className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition ${
-                contentType === "quran"
-                  ? "bg-white dark:bg-gray-600 text-green-700 dark:text-green-400 shadow-sm"
-                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-              }`}
-            >
-              <Book className="w-4 h-4 inline mr-1" />
-              古兰经
-            </button>
-          </div>
-        </div>
-
-        <div className="p-3 md:p-4 space-y-2 md:space-y-3">
-          {contentType === "quran" ? (
-            // 古兰经章节列表
-            <div className="space-y-1">
-              <div className="px-2 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                古兰经章节（共114章）
-              </div>
-              <div className="grid grid-cols-6 gap-1 max-h-[calc(100vh-300px)] overflow-y-auto">
-                {quranChapters.map((ch) => (
-                  <button
-                    key={ch}
-                    onClick={() => loadQuranChapter(ch)}
-                    className={`px-2 py-2 text-xs md:text-sm rounded-lg transition ${
-                      quranChapter === ch
-                        ? "bg-green-600 text-white dark:bg-green-500"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                    }`}
-                  >
-                    {ch}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            // 圣训集列表
-            collections.map(coll => (
-            <div key={coll.id} className="border-b border-gray-200 dark:border-gray-700 pb-2 md:pb-3">
-              {/* 圣训集 */}
+      <div className="flex gap-6 max-w-7xl mx-auto px-4 py-6">
+        {/* 左侧侧边栏 - 桌面端sticky定位，移动端fixed */}
+        <div
+          className={`fixed md:sticky md:top-6 inset-y-0 left-0 w-80 bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 rounded-xl z-50 md:z-auto transform transition-transform duration-300 ease-in-out flex-shrink-0 md:h-[calc(100vh-3rem)] h-full overflow-y-auto ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          }`}
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          <style>{`
+            .sidebar-scroll::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
+          <div className="sidebar-scroll h-full overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-0 z-10">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg md:text-xl font-bold text-green-700 dark:text-green-400 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 md:w-6 md:h-6" />
+                经训大全
+              </h2>
               <button
-                onClick={() => toggleCollection(coll.id)}
-                className="w-full flex items-center justify-between py-2 px-2 md:px-3 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition"
+                onClick={() => setSidebarOpen(false)}
+                className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
               >
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  {openCollections.has(coll.id) ? 
-                    <ChevronDown className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" /> : 
-                    <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                  }
-                  <span className="font-semibold text-xs md:text-sm truncate">{coll.name}</span>
-                </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">{coll.total_hadiths} 段</span>
+                <X className="w-5 h-5" />
               </button>
-
-              {/* 章节列表 */}
-              {openCollections.has(coll.id) && coll.chapters && coll.chapters.length > 0 && (
-                <div className="ml-4 md:ml-6 mt-2 space-y-1">
-                  {coll.chapters.map((ch) => {
-                    const chapterKey = `${coll.id}-${ch.name}`;
-                    return (
-                      <div key={chapterKey}>
-                        <button
-                          onClick={() => {
-                            toggleChapter(chapterKey);
-                            loadChapterHadiths(coll.id, ch.name);
-                          }}
-                          className="w-full text-left py-1.5 px-2 md:px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center justify-between group text-xs md:text-sm"
-                        >
-                          <span className="flex items-center gap-2 flex-1 min-w-0">
-                            {openChapters.has(chapterKey) ? 
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" /> : 
-                              <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                            }
-                            <span className="text-gray-700 dark:text-gray-300 text-xs truncate">
-                              {ch.name}
-                            </span>
-                          </span>
-                          <span className="text-xs bg-gray-100 dark:bg-gray-700 px-1.5 md:px-2 py-0.5 rounded flex-shrink-0 ml-2">
-                            {ch.count}
-                          </span>
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
-          ))
-          )}
-        </div>
-      </div>
+            
+            {/* 内容类型切换 */}
+            <div className="flex gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+              <button
+                onClick={() => {
+                  setContentType("hadith");
+                  setViewMode("daily");
+                }}
+                className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition ${
+                  contentType === "hadith"
+                    ? "bg-white dark:bg-gray-600 text-green-700 dark:text-green-400 shadow-sm"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                }`}
+              >
+                <BookOpen className="w-4 h-4 inline mr-1" />
+                圣训
+              </button>
+              <button
+                onClick={() => {
+                  setContentType("quran");
+                  if (!quranData.arab) {
+                    loadQuranChapter(1);
+                  }
+                }}
+                className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition ${
+                  contentType === "quran"
+                    ? "bg-white dark:bg-gray-600 text-green-700 dark:text-green-400 shadow-sm"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                }`}
+              >
+                <Book className="w-4 h-4 inline mr-1" />
+                古兰经
+              </button>
+            </div>
+          </div>
 
-      {/* 右侧主内容区 */}
-      <div className="flex-1 overflow-y-auto w-full md:w-auto bg-gray-50 dark:bg-gray-900 h-full">
-        <div className="max-w-5xl mx-auto px-3 md:px-4 py-4 md:py-6">
+          <div className="p-3 md:p-4 space-y-2 md:space-y-3">
+            {contentType === "quran" ? (
+              // 古兰经章节列表
+              <div className="space-y-1">
+                <div className="px-2 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  古兰经章节（共114章）
+                </div>
+                <div className="grid grid-cols-6 gap-1">
+                  {quranChapters.map((ch) => (
+                    <button
+                      key={ch}
+                      onClick={() => loadQuranChapter(ch)}
+                      className={`px-2 py-2 text-xs md:text-sm rounded-lg transition ${
+                        quranChapter === ch
+                          ? "bg-green-600 text-white dark:bg-green-500"
+                          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      {ch}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              // 圣训集列表
+              collections.map(coll => (
+              <div key={coll.id} className="border-b border-gray-200 dark:border-gray-700 pb-2 md:pb-3">
+                {/* 圣训集 */}
+                <button
+                  onClick={() => toggleCollection(coll.id)}
+                  className="w-full flex items-center justify-between py-2 px-2 md:px-3 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition"
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {openCollections.has(coll.id) ? 
+                      <ChevronDown className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" /> : 
+                      <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                    }
+                    <span className="font-semibold text-xs md:text-sm truncate">{coll.name}</span>
+                  </div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">{coll.total_hadiths} 段</span>
+                </button>
+
+                {/* 章节列表 */}
+                {openCollections.has(coll.id) && coll.chapters && coll.chapters.length > 0 && (
+                  <div className="ml-4 md:ml-6 mt-2 space-y-1">
+                    {coll.chapters.map((ch) => {
+                      const chapterKey = `${coll.id}-${ch.name}`;
+                      return (
+                        <div key={chapterKey}>
+                          <button
+                            onClick={() => {
+                              toggleChapter(chapterKey);
+                              loadChapterHadiths(coll.id, ch.name);
+                            }}
+                            className="w-full text-left py-1.5 px-2 md:px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center justify-between group text-xs md:text-sm"
+                          >
+                            <span className="flex items-center gap-2 flex-1 min-w-0">
+                              {openChapters.has(chapterKey) ? 
+                                <ChevronDown className="w-3 h-3 flex-shrink-0" /> : 
+                                <ChevronRight className="w-3 h-3 flex-shrink-0" />
+                              }
+                              <span className="text-gray-700 dark:text-gray-300 text-xs truncate">
+                                {ch.name}
+                              </span>
+                            </span>
+                            <span className="text-xs bg-gray-100 dark:bg-gray-700 px-1.5 md:px-2 py-0.5 rounded flex-shrink-0 ml-2">
+                              {ch.count}
+                            </span>
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))
+            )}
+          </div>
+          </div>
+        </div>
+
+        {/* 右侧主内容区 - 自然流式布局，无滚动限制 */}
+        <div className="flex-1 min-w-0">
           {/* 移动端顶部栏 */}
           <div className="md:hidden mb-4 flex items-center justify-between bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm">
             <button
@@ -346,7 +357,7 @@ function HadithDetailPage() {
                 <>
                   <div className="bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 text-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-xl">
                     {quranData.arab.chapter_name_ar && (
-                      <p className="text-2xl md:text-3xl mb-2 text-center opacity-95" style={{ fontFamily: "Scheherazade New, Arial", direction: "rtl" }} dir="rtl">
+                      <p className="text-2xl md:text-3xl mb-2 text-center opacity-95" style={{ fontFamily: "Amiri Quran, serif", direction: "rtl" }} dir="rtl">
                         {quranData.arab.chapter_name_ar}
                       </p>
                     )}
@@ -360,7 +371,7 @@ function HadithDetailPage() {
                   
                   <div 
                     className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-4 md:p-6"
-                    style={{ direction: "rtl", fontFamily: "Scheherazade New, Arial" }}
+                    style={{ direction: "rtl", fontFamily: "Amiri Quran, serif" }}
                     dir="rtl"
                   >
                     {quranData.arab.verses.map((v, i) => (
@@ -371,7 +382,7 @@ function HadithDetailPage() {
                       >
                         <div 
                           className="flex-1 text-right text-2xl md:text-3xl"
-                          style={{ fontFamily: "Scheherazade New, Arial" }}
+                          style={{ fontFamily: "Amiri Quran, serif" }}
                         >
                           {v.text} 
                           <small className="text-gray-500 dark:text-gray-400 text-sm md:text-base ml-2">

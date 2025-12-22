@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import PDFThumbnail from './PDFThumbnail'
+
 
 const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -16,22 +16,25 @@ const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
 
   const totalSlides = slides.length
 
-  // 自动播放
+  // 自动播放逻辑
   useEffect(() => {
     if (totalSlides <= 1) return
 
     const startAutoplay = () => {
+      // 清除可能存在的旧定时器
+      if (autoplayRef.current) clearInterval(autoplayRef.current)
+      
       autoplayRef.current = setInterval(() => {
-        setCurrentIndex(prev => (prev + 1) % totalSlides)
-      }, 5000) // 每5秒切换一次
+        if (!document.hidden) { // 页面不可见时不轮播，节省资源
+          setCurrentIndex(prev => (prev + 1) % totalSlides)
+        }
+      }, 5000)
     }
 
     startAutoplay()
 
     return () => {
-      if (autoplayRef.current) {
-        clearInterval(autoplayRef.current)
-      }
+      if (autoplayRef.current) clearInterval(autoplayRef.current)
     }
   }, [totalSlides])
 
@@ -45,23 +48,13 @@ const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
   const goToSlide = (index) => {
     if (isTransitioning) return
     setCurrentIndex(index)
-    // 重置自动播放
+    // 重置自动播放计时器
     if (autoplayRef.current) {
       clearInterval(autoplayRef.current)
       autoplayRef.current = setInterval(() => {
-        setCurrentIndex(prev => (prev + 1) % totalSlides)
+         if (!document.hidden) setCurrentIndex(prev => (prev + 1) % totalSlides)
       }, 5000)
     }
-  }
-
-  const goPrev = () => {
-    if (isTransitioning) return
-    goToSlide((currentIndex - 1 + totalSlides) % totalSlides)
-  }
-
-  const goNext = () => {
-    if (isTransitioning) return
-    goToSlide((currentIndex + 1) % totalSlides)
   }
 
   if (books.length === 0) {
@@ -84,9 +77,7 @@ const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
         >
           {slides.map((slide, slideIndex) => (
             <div key={slideIndex} className="min-w-full flex-shrink-0" style={{ width: '100%' }}>
-              <div className="grid gap-2 py-2 w-full
-                              grid-cols-5
-                              max-sm:grid-cols-3">
+              <div className="grid gap-2 py-2 w-full grid-cols-5 max-sm:grid-cols-3">
                 {slide.map(book => (
                   <div 
                     key={book.id} 
@@ -106,28 +97,22 @@ const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
                       className="block w-full h-full no-underline text-inherit"
                     >
                       <div className="relative w-full h-full overflow-hidden bg-gray-100 dark:bg-[#1a1a1a]">
-                        {book.文档 ? (
-                          <div className="w-full h-full relative">
-                            <PDFThumbnail 
-                              pdfUrl={book.文档} 
-                              alt={book.标题}
-                              lazy={true}
-                              onError={(err) => {
-                                console.error(`PDF缩略图加载失败 (${book.标题}):`, err, 'URL:', book.文档)
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <img
-                            src={book.图片 || '/assets/images/default-placeholder.png'}
-                            alt={book.标题}
-                            loading="lazy"
-                            className="w-full h-full object-contain transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-105"
-                            onError={(e) => {
-                              e.target.src = '/assets/images/default-placeholder.png'
-                            }}
-                          />
-                        )}
+                        {/* 核心修改：
+                           无论是否有文档，都只显示图片。
+                           后端应该保证：如果有PDF，会自动生成第一页作为图片。
+                           如果后端还没生成，就显示默认图，绝不要在列表页渲染PDF。
+                        */}
+                        <img
+                          src={book.图片 || '/assets/images/default-placeholder.png'}
+                          alt={book.标题}
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-105"
+                          onError={(e) => {
+                            e.target.onerror = null; // 防止死循环
+                            e.target.src = '/assets/images/default-placeholder.png'
+                          }}
+                        />
+                        
                         <div className="absolute bottom-0 left-0 right-0 
                                         bg-gradient-to-t from-black/90 via-black/70 to-transparent 
                                         px-3 pt-4 pb-3 
@@ -160,14 +145,14 @@ const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
 
       {/* 指示器 */}
       {totalSlides > 1 && (
-        <div className="flex justify-center items-center gap-2 p-2">
+        <div className="flex justify-center items-center gap-2 p-2 mt-2">
           {slides.map((_, index) => (
             <button
               key={index}
-              className={`h-2.5 rounded-full border-none cursor-pointer transition-all duration-300 ease-in-out p-0
+              className={`h-1.5 rounded-full border-none cursor-pointer transition-all duration-300 ease-in-out p-0
                          ${index === currentIndex 
-                           ? 'w-6 h-2.5 rounded-[5px] bg-[#fd7e14] shadow-[0_2px_8px_rgba(253,126,20,0.4)]' 
-                           : 'w-2.5 bg-black/20 dark:bg-white/20 hover:bg-[#fd7e14]/50 hover:scale-110'
+                           ? 'w-6 bg-green-500' 
+                           : 'w-2 bg-gray-300 dark:bg-gray-600 hover:bg-green-400'
                          }`}
               onClick={() => goToSlide(index)}
               aria-label={`跳转到第 ${index + 1} 页`}
@@ -180,4 +165,3 @@ const BookCarousel = ({ books = [], itemsPerSlide = 5 }) => {
 }
 
 export default BookCarousel
-

@@ -4,10 +4,9 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from .models import Hadith, HadithCollection
 from .serializers import HadithSerializer, HadithCollectionSerializer
-
-# quran/views.py  （新建也行，放哪都行）
-from django.http import JsonResponse
+import time
 import requests
+from django.http import JsonResponse
 import logging
 
 logger = logging.getLogger(__name__)
@@ -130,6 +129,122 @@ QURAN_CHAPTER_NAMES_ZH = {
     114: "世人章（拿斯）",
 }
 
+QURAN_CHAPTER_NAMES_AR = {
+    1: "الفاتحة",
+    2: "البقرة",
+    3: "آل عمران",
+    4: "النساء",
+    5: "المائدة",
+    6: "الأنعام",
+    7: "الأعراف",
+    8: "الأنفال",
+    9: "التوبة",
+    10: "يونس",
+    11: "هود",
+    12: "يوسف",
+    13: "الرعد",
+    14: "إبراهيم",
+    15: "الحجر",
+    16: "النحل",
+    17: "الإسراء",
+    18: "الكهف",
+    19: "مريم",
+    20: "طه",
+    21: "الأنبياء",
+    22: "الحج",
+    23: "المؤمنون",
+    24: "النور",
+    25: "الفرقان",
+    26: "الشعراء",
+    27: "النمل",
+    28: "القصص",
+    29: "العنكبوت",
+    30: "الروم",
+    31: "لقمان",
+    32: "السجدة",
+    33: "الأحزاب",
+    34: "سبأ",
+    35: "فاطر",
+    36: "يس",
+    37: "الصافات",
+    38: "ص",
+    39: "الزمر",
+    40: "غافر",
+    41: "فصلت",
+    42: "الشورى",
+    43: "الزخرف",
+    44: "الدخان",
+    45: "الجاثية",
+    46: "الأحقاف",
+    47: "محمد",
+    48: "الفتح",
+    49: "الحجرات",
+    50: "ق",
+    51: "الذاريات",
+    52: "الطور",
+    53: "النجم",
+    54: "القمر",
+    55: "الرحمن",
+    56: "الواقعة",
+    57: "الحديد",
+    58: "المجادلة",
+    59: "الحشر",
+    60: "الممتحنة",
+    61: "الصف",
+    62: "الجمعة",
+    63: "المنافقون",
+    64: "التغابن",
+    65: "الطلاق",
+    66: "التحريم",
+    67: "الملك",
+    68: "القلم",
+    69: "الحاقة",
+    70: "المعارج",
+    71: "نوح",
+    72: "الجن",
+    73: "المزمل",
+    74: "المدثر",
+    75: "القيامة",
+    76: "الإنسان",
+    77: "المرسلات",
+    78: "النبأ",
+    79: "النازعات",
+    80: "عبس",
+    81: "التكوير",
+    82: "الإنفطار",
+    83: "المطففين",
+    84: "الإنشقاق",
+    85: "البروج",
+    86: "الطارق",
+    87: "الأعلى",
+    88: "الغاشية",
+    89: "الفجر",
+    90: "البلد",
+    91: "الشمس",
+    92: "الليل",
+    93: "الضحى",
+    94: "الشرح",
+    95: "التين",
+    96: "العلق",
+    97: "القدر",
+    98: "البينة",
+    99: "الزلزلة",
+    100: "العاديات",
+    101: "القارعة",
+    102: "التكاثر",
+    103: "العصر",
+    104: "الهمزة",
+    105: "الفيل",
+    106: "قريش",
+    107: "الماعون",
+    108: "الكوثر",
+    109: "الكافرون",
+    110: "النصر",
+    111: "المسد",
+    112: "الإخلاص",
+    113: "الفلق",
+    114: "الناس",
+}
 class HadithPagination(PageNumberPagination):
     """圣训分页配置"""
     page_size = 20
@@ -259,226 +374,245 @@ class HadithCollectionViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 
+def fetch_with_retry(url, retries=3, backoff_factor=2, timeout=15):
+    """带重试和更长超时的 requests.get"""
+    last_error = None
+    for attempt in range(retries):
+        try:
+            response = requests.get(url, timeout=timeout)
+            response.raise_for_status()
+            return response
+        except requests.exceptions.RequestException as e:
+            last_error = e
+            logger.warning(f"尝试 {attempt + 1}/{retries} 失败 ({url}): {str(e)}")
+            if attempt < retries - 1:
+                sleep_time = backoff_factor ** attempt
+                logger.info(f"等待 {sleep_time} 秒后重试...")
+                time.sleep(sleep_time)
+    
+    # 所有重试都失败
+    raise last_error
 
+def fetch_arabic_text(chapter, edition):
+    """获取阿拉伯原文，使用多个 CDN 源作为 fallback"""
+    
+    # 定义多个数据源（按优先级排序）
+    # 使用 quran-simple-clean 版本，适合 Amiri Quran 字体显示
+    sources = [
+        {
+            'name': 'jsdelivr CDN',
+            'url': f"https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ara-quransimple/{chapter}.json"
+        },
+        {
+            'name': 'GitHub Raw',
+            'url': f"https://raw.githubusercontent.com/fawazahmed0/quran-api/1/editions/ara-quransimple/{chapter}.json"
+        },
+        {
+            'name': 'Alternative API',
+            'url': f"https://api.alquran.cloud/v1/surah/{chapter}/ar.alafasy"
+        }
+    ]
+    
+    last_error = None
+    
+    for source in sources:
+        try:
+            logger.info(f"尝试从 {source['name']} 获取阿拉伯文...")
+            response = fetch_with_retry(source['url'], retries=2, timeout=12)
+            data = response.json()
+            
+            # 根据不同 API 格式解析数据
+            if 'data' in data and 'ayahs' in data['data']:
+                # alquran.cloud API 格式
+                verses = []
+                for ayah in data['data']['ayahs']:
+                    verses.append({
+                        'verse': ayah.get('numberInSurah', 1),
+                        'text': ayah.get('text', '')
+                    })
+            else:
+                # fawazahmed0 API 格式
+                verses = []
+                if isinstance(data, dict):
+                    found_list = find_list_in_dict(data)
+                    if found_list:
+                        verses = found_list
+                
+                parsed_verses = []
+                for verse in verses:
+                    if not isinstance(verse, dict):
+                        continue
+                    verse_number = verse.get('verse') or verse.get('number') or 1
+                    verse_text = verse.get('text') or ''
+                    if verse_text:
+                        parsed_verses.append({
+                            'verse': verse_number,
+                            'text': verse_text
+                        })
+                verses = parsed_verses
+            
+            if verses and len(verses) > 0:
+                logger.info(f"成功从 {source['name']} 获取 {len(verses)} 节经文")
+                
+                # 使用映射获取章节名称
+                chapter_name_ar = QURAN_CHAPTER_NAMES_AR.get(int(chapter), '')
+                chapter_name_zh = QURAN_CHAPTER_NAMES_ZH.get(int(chapter), f'第 {chapter} 章')
+                
+                formatted_data = {
+                    'chapter': int(chapter),
+                    'chapter_name_ar': chapter_name_ar,
+                    'chapter_name': chapter_name_zh,
+                    'verses': verses,
+                    'source': source['name']  # 标记数据来源
+                }
+                return formatted_data
+            else:
+                logger.warning(f"{source['name']} 返回空数据")
+                
+        except Exception as e:
+            last_error = e
+            logger.error(f"{source['name']} 失败: {str(e)}")
+            continue
+    
+    # 所有源都失败
+    raise ValueError(f'所有数据源均失败，最后错误: {str(last_error)}')
 
+def fetch_chinese_translation(chapter):
+    """获取中文翻译，使用多个 CDN 源作为 fallback"""
+    
+    # 定义多个数据源
+    sources = [
+        {
+            'name': 'jsdelivr CDN',
+            'url': f"https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/zho-majian/{chapter}.json"
+        },
+        {
+            'name': 'GitHub Raw',
+            'url': f"https://raw.githubusercontent.com/fawazahmed0/quran-api/1/editions/zho-majian/{chapter}.json"
+        }
+    ]
+    
+    last_error = None
+    
+    for source in sources:
+        try:
+            logger.info(f"尝试从 {source['name']} 获取中文翻译...")
+            response = fetch_with_retry(source['url'], retries=2, timeout=12)
+            data = response.json()
+            
+            verses = []
+            if isinstance(data, list):
+                verses = data
+            elif isinstance(data, dict):
+                if 'verses' in data:
+                    verses = data['verses']
+                elif 'chapter' in data and isinstance(data['chapter'], list):
+                    verses = data['chapter']
+                else:
+                    verses = find_list_in_dict(data)
+            
+            if not verses:
+                logger.warning(f"{source['name']} 返回空数据")
+                continue
+            
+            parsed_verses = []
+            for i, verse in enumerate(verses):
+                if not isinstance(verse, dict):
+                    continue
+                verse_number = (
+                    verse.get('verse') or 
+                    verse.get('number') or 
+                    verse.get('numberInSurah') or 
+                    (i + 1)
+                )
+                verse_text = (
+                    verse.get('text') or 
+                    verse.get('translation') or 
+                    ''
+                )
+                if verse_text:
+                    parsed_verses.append({
+                        'verse': verse_number,
+                        'text': verse_text
+                    })
+            
+            if parsed_verses and len(parsed_verses) > 0:
+                logger.info(f"成功从 {source['name']} 获取 {len(parsed_verses)} 节翻译")
+                
+                chapter_name_zh = QURAN_CHAPTER_NAMES_ZH.get(int(chapter), f'第 {chapter} 章')
+                
+                formatted_data = {
+                    'chapter': int(chapter),
+                    'chapter_name': chapter_name_zh,
+                    'chapter_name_ar': '',
+                    'verses': parsed_verses,
+                    'source': source['name']
+                }
+                
+                return formatted_data
+            else:
+                logger.warning(f"{source['name']} 解析后无有效数据")
+                
+        except Exception as e:
+            last_error = e
+            logger.error(f"{source['name']} 失败: {str(e)}")
+            continue
+    
+    # 所有源都失败
+    raise ValueError(f'所有数据源均失败，最后错误: {str(last_error)}')
 
 def quran_proxy(request, edition, path=""):
+    """古兰经代理接口，带详细日志和错误处理"""
+    
     if not path:
-        return JsonResponse({'error': '请指定章节号，例如：/api/hadith/quran/quran-uthmani/1/'}, status=400)
+        return JsonResponse({
+            'error': '请指定章节号，例如：/api/hadith/quran/quran-uthmani/1/'
+        }, status=400)
     
     # 移除末尾斜杠并确保路径格式正确
     clean_path = path.rstrip('/').strip()
     chapter = clean_path.split('/')[0]
     
+    logger.info(f"开始获取古兰经 - 版本: {edition}, 章节: {chapter}")
+    
     try:
         if edition == 'zho-majian':
             data = fetch_chinese_translation(chapter)
+            logger.info(f"成功获取中文翻译 - 章节 {chapter}")
         else:  # 阿拉伯文
             data = fetch_arabic_text(chapter, edition)
+            logger.info(f"成功获取阿拉伯文 - 章节 {chapter}")
         
         return JsonResponse(data, json_dumps_params={'ensure_ascii': False})
     
+    except ValueError as e:
+        logger.error(f"获取古兰经数据失败 (章节 {chapter}): {str(e)}")
+        return JsonResponse({
+            'error': f'无法获取古兰经数据: {str(e)}',
+            'chapter': chapter,
+            'edition': edition
+        }, status=502)
+    
     except Exception as e:
-        return JsonResponse({'error': f'无法获取古兰经数据: {str(e)}'}, status=502)
-def fetch_arabic_text(chapter, edition):
-    """获取阿拉伯原文，使用alquran.cloud作为主要数据源"""
-    url = f"https://api.alquran.cloud/v1/surah/{chapter}/quran-uthmani"
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    
-    data = response.json()
-    if data.get('code') != 200 or not data.get('data'):
-        raise ValueError('alquran.cloud API返回数据格式不正确')
-    
-    surah_data = data['data']
-    # 优先从API响应中获取章节名称，如果没有则使用映射表作为备选
-    chapter_name_zh = (
-        surah_data.get('englishNameTranslation') or 
-        surah_data.get('name') or 
-        QURAN_CHAPTER_NAMES_ZH.get(int(chapter)) or 
-        f'第 {chapter} 章'
-    )
-    formatted_data = {
-        'chapter': int(chapter),
-        'chapter_name_ar': surah_data.get('name', ''),
-        'chapter_name': chapter_name_zh,
-        'verses': [
-            {
-                'verse': verse.get('numberInSurah'),
-                'text': verse.get('text', '')
-            }
-            for verse in surah_data.get('ayahs', [])
-        ]
-    }
-    return formatted_data
+        logger.error(f"未预期的错误 (章节 {chapter}): {str(e)}", exc_info=True)
+        return JsonResponse({
+            'error': f'服务器内部错误: {str(e)}',
+            'chapter': chapter,
+            'edition': edition
+        }, status=500)
 
-def fetch_chinese_translation(chapter):
-    """获取中文翻译，优先使用quran-api"""
-    # 首先尝试quran-api的CDN版本
-    primary_url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/zho-majian/{chapter}.json"
-    
-    try:
-        response = requests.get(primary_url, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        
-        # 处理quran-api的响应格式
-        # quran-api 可能返回的格式：
-        # 1. 直接是数组: [{verse: 1, text: "..."}, ...]
-        # 2. 对象包含 verses: {verses: [...]}
-        # 3. 对象包含 chapter.verses: {chapter: {verses: [...]}}
-        verses = []
-        if isinstance(data, list):
-            # 如果直接是数组
-            verses = data
-        elif isinstance(data, dict):
-            # 尝试不同的键
-            if 'verses' in data:
-                verses = data['verses']
-            elif 'chapter' in data and isinstance(data['chapter'], dict) and 'verses' in data['chapter']:
-                verses = data['chapter']['verses']
-            # 尝试其他可能的键名
-            elif 'ayahs' in data:
-                verses = data['ayahs']
-            elif 'data' in data and isinstance(data['data'], list):
-                verses = data['data']
-            elif 'data' in data and isinstance(data['data'], dict) and 'ayahs' in data['data']:
-                verses = data['data']['ayahs']
-        
-        # 确保 verses 是列表
-        if not isinstance(verses, list):
-            logger.debug(f'quran-api返回的数据格式 (章节 {chapter}): 类型={type(data)}, 键={list(data.keys()) if isinstance(data, dict) else "N/A"}, 数据样本={str(data)[:200] if isinstance(data, dict) else str(data)[:200]}')
-            raise ValueError(f'quran-api返回的数据格式不正确: verses不是列表')
-        
-        # 如果 verses 列表为空，尝试从原始数据中查找
-        if len(verses) == 0 and isinstance(data, dict):
-            logger.debug(f'quran-api返回的数据 (章节 {chapter}): 字典键={list(data.keys())}, 数据样本={str(data)[:500]}')
-            # 尝试递归查找数组
-            def find_list_in_dict(obj, depth=0):
-                if depth > 3:  # 限制递归深度
-                    return None
-                if isinstance(obj, list) and len(obj) > 0:
-                    return obj
-                if isinstance(obj, dict):
-                    for key, value in obj.items():
-                        if isinstance(value, list) and len(value) > 0:
-                            # 检查是否是经文数组（包含字典元素）
-                            if value and isinstance(value[0], dict):
-                                return value
-                        result = find_list_in_dict(value, depth + 1)
-                        if result:
-                            return result
-                return None
-            
-            found_list = find_list_in_dict(data)
-            if found_list:
-                verses = found_list
-                logger.debug(f'quran-api: 通过递归查找找到 {len(verses)} 个元素')
-        
-        # 解析经文数据，尝试多种可能的键名
-        parsed_verses = []
-        for i, verse in enumerate(verses):
-            if not isinstance(verse, dict):
-                continue
-            
-            # 尝试多种可能的键名组合
-            verse_number = (
-                verse.get('verse') or 
-                verse.get('number') or 
-                verse.get('numberInSurah') or 
-                verse.get('verse_number') or
-                verse.get('ayah') or
-                verse.get('id') or
-                (i + 1)
-            )
-            
-            verse_text = (
-                verse.get('text') or 
-                verse.get('translation') or 
-                verse.get('translated_text') or
-                verse.get('translatedText') or
-                verse.get('translation_text') or
-                ''
-            )
-            
-            # 只有当文本不为空时才添加
-            if verse_text:
-                parsed_verses.append({
-                    'verse': verse_number,
-                    'text': verse_text
-                })
-        
-        # 尝试从API数据中提取章节名称
-        chapter_name_zh = None
-        if isinstance(data, dict):
-            # 尝试从不同位置获取章节名称
-            chapter_name_zh = (
-                data.get('name') or
-                data.get('chapter_name') or
-                data.get('englishNameTranslation') or
-                data.get('title') or
-                (data.get('chapter', {}) if isinstance(data.get('chapter'), dict) else {}).get('name') or
-                (data.get('chapter', {}) if isinstance(data.get('chapter'), dict) else {}).get('title')
-            )
-        
-        # 如果API没有返回，使用映射表作为备选
-        if not chapter_name_zh:
-            chapter_name_zh = QURAN_CHAPTER_NAMES_ZH.get(int(chapter), f'第 {chapter} 章')
-        
-        formatted_data = {
-            'chapter': int(chapter),
-            'chapter_name': chapter_name_zh,
-            'chapter_name_ar': '',
-            'verses': parsed_verses
-        }
-        
-        # 验证是否有数据
-        if not formatted_data['verses']:
-            # 记录详细的调试信息以便排查
-            if verses and len(verses) > 0:
-                logger.debug(f'quran-api返回的数据结构 (章节 {chapter}): verses列表长度={len(verses)}, '
-                            f'第一个元素类型={type(verses[0])}, 第一个元素键={list(verses[0].keys()) if isinstance(verses[0], dict) else "N/A"}, '
-                            f'第一个元素内容={str(verses[0])[:300] if isinstance(verses[0], dict) else verses[0]}')
-            else:
-                logger.debug(f'quran-api返回的数据结构 (章节 {chapter}): 数据类型={type(data)}, '
-                            f'数据键={list(data.keys()) if isinstance(data, dict) else "N/A"}, '
-                            f'数据样本={str(data)[:500]}')
-            raise ValueError(f'quran-api返回的数据中没有有效的经文 (找到 {len(verses)} 个元素，但无法解析)')
-        
-        return formatted_data
-        
-    except (requests.exceptions.RequestException, ValueError, KeyError, TypeError) as e:
-        # 如果quran-api不可用或数据格式错误，使用alquran.cloud的中文版本作为备选
-        logger.warning(f'quran-api获取中文翻译失败 (章节 {chapter}): {str(e)}，尝试使用alquran.cloud')
-        
-        try:
-            url = f"https://api.alquran.cloud/v1/surah/{chapter}/zh-majian"
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-            
-            data = response.json()
-            if data.get('code') == 200 and data.get('data'):
-                surah_data = data['data']
-                # 优先从API获取中文章节名称，如果没有则使用映射表作为备选
-                chapter_name_zh = (
-                    surah_data.get('englishNameTranslation') or 
-                    surah_data.get('name') or 
-                    QURAN_CHAPTER_NAMES_ZH.get(int(chapter)) or 
-                    f'第 {chapter} 章'
-                )
-                return {
-                    'chapter': int(chapter),
-                    'chapter_name': chapter_name_zh,
-                    'chapter_name_ar': surah_data.get('name', ''),
-                    'verses': [
-                        {
-                            'verse': verse.get('numberInSurah'),
-                            'text': verse.get('text', '')
-                        }
-                        for verse in surah_data.get('ayahs', [])
-                    ]
-                }
-            raise ValueError('alquran.cloud API返回数据格式不正确')
-        except Exception as fallback_error:
-            logger.error(f'所有数据源均无法获取中文翻译 (章节 {chapter}): 主源错误: {str(e)}, 备选源错误: {str(fallback_error)}')
-            raise ValueError(f'无法获取中文翻译: {str(fallback_error)}')
+def find_list_in_dict(obj, depth=0):
+    """递归查找字典中的列表（保持不变）"""
+    if depth > 3:
+        return None
+    if isinstance(obj, list) and len(obj) > 0:
+        return obj
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if isinstance(value, list) and len(value) > 0:
+                if value and isinstance(value[0], dict):
+                    return value
+            result = find_list_in_dict(value, depth + 1)
+            if result:
+                return result
+    return None

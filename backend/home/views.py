@@ -534,15 +534,14 @@ def api_list_view(request, content_type):
         # 获取内容，确保返回完整的HTML内容
         content_value = ''
         if hasattr(item, '内容'):
-            # 直接获取内容值，不进行 or '' 转换，以保留原始值
-            raw_content = getattr(item, '内容', None)
-            if raw_content is not None:
-                content_value = str(raw_content)
-                # 如果内容是默认值，设为空
-                if content_value == '暂无内容简介':
-                    content_value = ''
-            # 如果内容是None，保持为空字符串（这种情况不应该发生，因为已经过滤）
-        
+            raw_content = getattr(item, '内容', '') or ''
+            if raw_content:
+                # 1. 去除 HTML 标签
+                text_content = strip_tags(str(raw_content))
+                # 2. 截取前 150 个字符作为简介
+                content_value = text_content[:150] + '...' if len(text_content) > 150 else text_content
+        if hasattr(item, '内容简介') and getattr(item, '内容简介', ''):
+            content_value = getattr(item, '内容简介', '')
         # 标准处理
         if True:
             item_data = {
