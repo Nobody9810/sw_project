@@ -14,7 +14,7 @@
     "preview": "next start",
     "preview:prod": "next start",
     "start": "next start",
-    "test": "node tests/routes.test.js && node tests/article-share.test.js && node tests/clients-reader.test.cjs && node tests/quran-reading.test.js && node tests/hadith-collection.test.cjs && node tests/daily-hadith.test.js && node tests/avatar-presets.test.js && node tests/video-embed.test.js && node tests/loading.test.cjs && node tests/styles.test.cjs && node tests/external-resources.test.cjs && node tests/prayer-time.test.js",
+    "test": "node tests/routes.test.js && node tests/article-share.test.js && node tests/clients-reader.test.cjs && node tests/quran-reading.test.js && node tests/hadith-collection.test.cjs && node tests/daily-hadith.test.js && node tests/avatar-presets.test.js && node tests/video-embed.test.js && node tests/loading.test.cjs && node tests/styles.test.cjs && node tests/external-resources.test.cjs && node tests/prayer-time.test.js && node tests/updates.test.cjs",
     "test:ssr": "node tests/server-page.test.cjs",
     "test:e2e": "node tests/ssr-http.test.cjs",
     "audit:external": "node scripts/audit-external-resources.mjs"

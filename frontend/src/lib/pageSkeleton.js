@@ -11,6 +11,7 @@ export function pageSkeleton(value) {
     parts = Array.isArray(value) ? value : new URL(value, 'https://site.local').pathname.split('/').filter(Boolean).map(decodeURIComponent)
   } catch { return { kind: 'article', section: '' } }
   const [section = ''] = parts
+  if (section === '更新说明') return { kind: 'updates', section }
   const route = classifyRoute(parts)
   if (route === 'home') return { kind: 'home', section }
   if (route === 'category') return { kind: 'reviews', section }

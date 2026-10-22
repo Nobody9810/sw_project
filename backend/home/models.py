@@ -6,6 +6,34 @@ from django.urls import reverse
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from home.storage import CompressedFileSystemStorage
+from django.utils import timezone
+from django.core.validators import RegexValidator
+
+
+class ReleaseNote(models.Model):
+    version = models.CharField('版本标识', max_length=50, unique=True,
+                               validators=[RegexValidator(r'^[A-Za-z0-9][A-Za-z0-9._-]*$', '使用英文字母、数字、点、下划线或连字符，以字母或数字开头。')],
+                               help_text='例如 2026.10；新版本使用新标识，修改文案不需要改标识。')
+    title = models.CharField('标题', max_length=150)
+    summary = models.CharField('简短摘要', max_length=240)
+    content = CKEditor5Field('详细介绍', config_name='default')
+    published_at = models.DateTimeField('发布日期', default=timezone.now)
+    is_published = models.BooleanField('是否发布', default=False)
+    notify = models.BooleanField('提醒用户', default=False,
+                               help_text='仅最新已发布版本可提醒；用户关闭或查看后不再提醒该版本。')
+
+    class Meta:
+        verbose_name = '更新说明'
+        verbose_name_plural = verbose_name
+        ordering = ('-published_at', '-pk')
+
+    def __str__(self):
+        return f'{self.version} · {self.title}'
+
+    def save(self, *args, **kwargs):
+        from .html import safe_html
+        self.content = safe_html(self.content)
+        super().save(*args, **kwargs)
 
 class 总类(models.Model):
     """基础文章类"""

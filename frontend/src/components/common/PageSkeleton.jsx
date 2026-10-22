@@ -1,4 +1,5 @@
 import PrayerSkeleton from '@/features/prayers/PrayerSkeleton'
+import { UPDATES_FRAME } from '@/lib/contentLayout'
 import { AUTH_FRAME } from '@/lib/contentLayout'
 import MobileListHeading from '@/components/content/MobileListHeading'
 import ContentWithSidebar from './ContentWithSidebar'
@@ -63,6 +64,7 @@ function HomeSkeleton() {
 }
 
 function PageShape({ kind, section }) {
+  if (kind === 'updates') return <div className={UPDATES_FRAME}><Block className="mb-3 h-8 w-32" /><Block className="mb-6 h-5 w-64 max-w-full" /><LoadingState kind="updates" count={5} animate={false} /></div>
   if (['list', 'books', 'reviews'].includes(kind)) return <div className={LIST_FRAME}>{kind !== 'reviews' && <MobileListHeading title={section || '内容'} loading />}{kind === 'list' && section === '书评' && <CategoryTabsSkeleton />}<ContentWithSidebar placeholder mobileCollapsible sidebar={<SidebarSkeleton section={section} />}><LoadingState animate={false} kind={kind} /></ContentWithSidebar></div>
   if (['article', 'news', 'library', 'document'].includes(kind)) {
     const library = kind === 'library'

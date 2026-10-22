@@ -5,6 +5,15 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .forms import ArticleAdminForm
 from .models import 通讯, 书讯, 书评, 观点, 文艺, 译林, 文史, 论文, 古籍, 书库, Feedback, 书评_分类, 书讯Sale
+from .models import ReleaseNote
+
+
+@admin.register(ReleaseNote)
+class ReleaseNoteAdmin(LibraryModelAdmin):
+    list_display = ('version', 'title', 'published_at', 'is_published', 'notify')
+    list_filter = ('is_published', 'notify')
+    search_fields = ('version', 'title', 'summary')
+    fields = ('version', 'title', 'summary', 'content', 'published_at', 'is_published', 'notify')
 
 
 @admin.action(description="清空点赞数、点踩数和浏览量")

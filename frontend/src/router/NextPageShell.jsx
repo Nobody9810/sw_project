@@ -26,6 +26,7 @@ function ResolvedErrorPage() {
 }
 
 const PrayerTimesPage = dynamic(() => import('@/features/prayers/PrayerTimesPage'), { loading: LoadingFallback })
+const UpdatesPage = dynamic(() => import('@/features/updates/UpdatesPage'), { loading: LoadingFallback })
 const LoginPage = dynamic(() => import('@/features/auth/LoginPage'), { loading: LoadingFallback })
 const HomePage = dynamic(() => import('@/features/content/pages/HomePage'), { loading: LoadingFallback })
 const ArticleList = dynamic(() => import('@/features/content/pages/ArticleList'), { loading: LoadingFallback })
@@ -51,6 +52,7 @@ function CurrentPage({ routeParts, initialArticle, initialError }) {
   if (section === '书评' && subSection === '分类' && id) return <BookReviewCategoryList key={id} />
   if (articleTypes.has(section) && subSection) return <ArticleDetail key={`${section}/${subSection}`} type={section} initialArticle={initialArticle} initialError={initialError} />
   if (section === '登录') return <LoginPage />
+  if (section === '更新说明') return <UpdatesPage />
   if (section === '问答') return <QAPage />
   if (section === '礼拜时间') return <PrayerTimesPage />
   if (section === '经训') return <HadithDetailPage />

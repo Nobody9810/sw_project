@@ -1,5 +1,5 @@
 export const articleTypes = new Set(['书讯', '书评', '观点', '译林', '文艺', '文史', '通讯', '论文', '古籍', '书库'])
-const staticSections = new Set(['问答', '经训', '礼拜时间', '关于我们', '版权声明', '搜索', '登录'])
+const staticSections = new Set(['问答', '经训', '礼拜时间', '关于我们', '版权声明', '搜索', '登录', '更新说明'])
 const positiveId = value => /^\d+$/.test(value || '') && Number.isSafeInteger(Number(value)) && Number(value) > 0
 
 export function classifyRoute(parts = []) {

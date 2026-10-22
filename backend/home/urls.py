@@ -1,9 +1,12 @@
 from django.urls import path,include
 from . import views
+from . import releases
 from django.views.generic import TemplateView
 from django.contrib import admin
 
 urlpatterns = [
+    path('api/releases/', releases.release_list, name='release_list'),
+    path('api/releases/latest/', releases.latest_release, name='latest_release'),
 
 
 

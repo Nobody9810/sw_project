@@ -1,4 +1,4 @@
-import { AUTH_CARD } from '@/lib/contentLayout'
+import { AUTH_CARD, UPDATES_CARD } from '@/lib/contentLayout'
 import { ARTICLE_ROW, ARTICLE_IMAGE, ARTICLE_BODY, BOOK_COLUMNS, BOOK_COVER, BOOK_CARD, DETAIL_CARD, NEWS_BOOK_COLUMNS, NEWS_BOOK_TABS, NEWS_BOOK_TAB, LIBRARY_HEADER, SIDEBAR_ROW, HOME_FEATURED_CARD, HOME_FEATURED_CONTENT, QA_CARD, QA_QUESTION_BODY, QA_ANSWER_BODY, QURAN_FRAME, QURAN_ROW, DOCUMENT_BLEED, DOCUMENT_VIEWER_FRAME, DOCUMENT_VIEWER_HEIGHT } from '@/lib/contentLayout'
 
 export function SkeletonBlock({ className = '', onDark = false, rounded = true }) {
@@ -115,6 +115,7 @@ export function CarouselSkeleton() {
 }
 
 export default function SkeletonContent({ kind, count, onDark }) {
+  if (kind === 'updates') return <div className="space-y-4">{Array.from({ length: count ?? 5 }, (_, index) => <div key={index} className={UPDATES_CARD}><SkeletonBlock className="mb-3 h-4 w-36" /><SkeletonBlock className="mb-4 h-7 w-3/4" /><TextSkeleton lines={4} /></div>)}</div>
   if (kind === 'auth') return <div className={AUTH_CARD}><SkeletonBlock className="h-8 w-36" /><TextSkeleton lines={2} className="mt-3" /><SkeletonBlock className="mt-6 h-5 w-14" /><SkeletonBlock className="mt-2 h-11 w-full" /><SkeletonBlock className="mt-5 h-11 w-full" /><SkeletonBlock className="mx-auto mt-3 h-11 w-40" /><SkeletonBlock className="mt-5 h-11 w-full" /><SkeletonBlock className="mt-3 h-5 w-full" /></div>
   if (kind === 'quran') return <div className={`py-4 md:p-4 ${QURAN_FRAME}`}><SkeletonBlock className="mx-auto mb-4 h-8 w-36" />{[0, 1, 2].map(row => <div key={row} className={QURAN_ROW}><SkeletonBlock className="h-4 w-4" /><div><SkeletonBlock className="ml-auto h-16 w-4/5" /><SkeletonBlock className="mt-3 h-8 w-full" /></div></div>)}</div>
   if (kind === 'list' || kind === 'reviews') return <ArticleRowsSkeleton count={count ?? 15} category={kind === 'reviews'} />

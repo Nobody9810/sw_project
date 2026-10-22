@@ -1,4 +1,6 @@
 // Geometry shared by real pages and their loading placeholders.
+export const UPDATES_FRAME = 'mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-8'
+export const UPDATES_CARD = 'rounded-xl border border-gray-200 bg-white p-4 dark:border-night-700 dark:bg-night-800 sm:p-6'
 export const LIST_FRAME = 'w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 mt-6'
 export const DETAIL_FRAME = 'w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-6 sm:py-8'
 export const CONTENT_COLUMNS = 'grid grid-cols-1 gap-6 lg:gap-8'
