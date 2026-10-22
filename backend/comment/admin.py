@@ -1,11 +1,12 @@
 from django.contrib import admin
 from shuwei.admin_base import LibraryModelAdmin
 from shuwei.admin_formatting import admin_text_preview
+from notifications.admin_cascade import ReviewCascadeDeleteMixin
 from .models import Comment
 
 
 @admin.register(Comment)
-class CommentAdmin(LibraryModelAdmin):
+class CommentAdmin(ReviewCascadeDeleteMixin, LibraryModelAdmin):
     list_display = ('user_name', 'author_type', 'user_email', 'comment_preview', 'content_object', 'is_public', 'is_removed', 'submit_date')
     list_filter = ('is_guest', 'is_public', 'is_removed', 'submit_date')
     search_fields = ('user_name', 'user_email', 'comment')
