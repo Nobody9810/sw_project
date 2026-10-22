@@ -9,6 +9,7 @@ class Question(models.Model):
     ]
 
     content = models.TextField(verbose_name='问题')
+    guest_name = models.CharField('访客昵称', max_length=50, blank=True, default='')
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='提问者', null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', verbose_name='状态')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')

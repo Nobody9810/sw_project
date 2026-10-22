@@ -1,0 +1,35 @@
+{% load i18n %}
+{% translate 'Light' as light_label %}
+{% translate 'Dark' as dark_label %}
+{% translate 'System' as system_label %}
+
+<div class="admin-library-header-tools" data-admin-header-tools>
+    {% if not theme %}
+    <div class="admin-library-header-menu" x-data="{ openTheme: false }" x-on:keydown.escape.window="openTheme = false">
+        <button type="button" class="admin-library-header-button" aria-label="切换主题" aria-controls="admin-theme-options"
+                x-bind:aria-expanded="openTheme" x-on:click="openTheme = !openTheme">
+            <span class="material-symbols-outlined" aria-hidden="true" x-text="adminTheme === 'dark' ? 'dark_mode' : adminTheme === 'light' ? 'light_mode' : 'computer'">computer</span>
+        </button>
+        <div id="admin-theme-options" class="admin-library-header-dropdown" x-cloak x-show="openTheme" x-on:click.outside="openTheme = false">
+            {% include 'admin/library/theme_option.html' with value='light' label=light_label icon='light_mode' %}
+            {% include 'admin/library/theme_option.html' with value='dark' label=dark_label icon='dark_mode' %}
+            {% include 'admin/library/theme_option.html' with value='auto' label=system_label icon='computer' %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="admin-library-header-menu" x-data="{ openAccount: false }" x-on:keydown.escape.window="openAccount = false">
+        <button id="admin-account-trigger" type="button" class="admin-library-header-account" aria-label="账号菜单" aria-controls="admin-account-options"
+                x-bind:aria-expanded="openAccount" x-on:click="openAccount = !openAccount">
+            {% include 'unfold/helpers/avatar.html' with user=request.user %}
+            <span class="admin-library-header-username">{{ user.get_full_name|default:user.get_username }}</span>
+            <span class="material-symbols-outlined admin-library-header-chevron" aria-hidden="true">expand_more</span>
+        </button>
+        <nav id="admin-account-options" aria-labelledby="admin-account-trigger" class="admin-library-header-dropdown admin-library-account-dropdown"
+             x-cloak x-show="openAccount" x-on:click.outside="openAccount = false">
+            {% include 'unfold/helpers/language_switch.html' %}
+            {% if extra_userlinks %}{{ extra_userlinks }}{% endif %}
+            {% include 'unfold/helpers/account_links.html' %}
+        </nav>
+    </div>
+</div>

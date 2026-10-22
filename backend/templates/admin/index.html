@@ -1,245 +1,103 @@
-{% extends 'admin/base.html' %}
-
+{% extends 'admin/base_site.html' %}
 {% load i18n %}
 
-{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
-
-{% block branding %}
-    {% include "unfold/helpers/site_branding.html" %}
-{% endblock %}
-
 {% block content %}
-    <div class="flex flex-col gap-6">
-        <!-- 数据统计卡片 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- 评论统计 -->
-            <div class="bg-white dark:bg-base-800 rounded-lg shadow p-6 border border-base-200 dark:border-base-700">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-base-600 dark:text-base-400">评论总数</p>
-                        <p class="text-2xl font-bold text-base-900 dark:text-base-100">{{ stats.comments.total }}</p>
-                    </div>
-                    <div class="p-3 bg-primary-100 dark:bg-primary-900 rounded-lg">
-                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">comment</span>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center text-sm">
-                    <span class="text-base-500 dark:text-base-400">待审核: {{ stats.comments.pending }}</span>
-                    <span class="ml-4 text-base-500 dark:text-base-400">今日: {{ stats.comments.today }}</span>
-                </div>
-            </div>
-
-            <!-- 内容统计 -->
-            <div class="bg-white dark:bg-base-800 rounded-lg shadow p-6 border border-base-200 dark:border-base-700">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-base-600 dark:text-base-400">文章总数</p>
-                        <p class="text-2xl font-bold text-base-900 dark:text-base-100">{{ stats.content.total_articles }}</p>
-                    </div>
-                    <div class="p-3 bg-primary-100 dark:bg-primary-900 rounded-lg">
-                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">article</span>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center text-sm">
-                    <span class="text-base-500 dark:text-base-400">已发布: {{ stats.content.published_articles }}</span>
-                </div>
-            </div>
-
-            <!-- 浏览量统计 -->
-            <div class="bg-white dark:bg-base-800 rounded-lg shadow p-6 border border-base-200 dark:border-base-700">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-base-600 dark:text-base-400">总浏览量</p>
-                        <p class="text-2xl font-bold text-base-900 dark:text-base-100">{{ stats.views.total }}</p>
-                    </div>
-                    <div class="p-3 bg-primary-100 dark:bg-primary-900 rounded-lg">
-                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">visibility</span>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center text-sm">
-                    <span class="text-base-500 dark:text-base-400">今日: {{ stats.views.today }}</span>
-                </div>
-            </div>
+<div class="admin-library-dashboard">
+    <header class="admin-library-welcome">
+        <div class="admin-library-welcome-copy">
+            <span class="admin-library-eyebrow">内容管理中心</span>
+            <h1>书味工作台</h1>
+            <p>管理内容、处理审核，查看站点的最新动态。</p>
         </div>
-
-        <!-- 第二行统计卡片 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- 建议统计 -->
-            <div class="bg-white dark:bg-base-800 rounded-lg shadow p-6 border border-base-200 dark:border-base-700">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-base-600 dark:text-base-400">建议总数</p>
-                        <p class="text-2xl font-bold text-base-900 dark:text-base-100">{{ stats.feedbacks.total }}</p>
-                    </div>
-                    <div class="p-3 bg-primary-100 dark:bg-primary-900 rounded-lg">
-                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">feedback</span>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center text-sm">
-                    <span class="text-base-500 dark:text-base-400">待处理: {{ stats.feedbacks.pending }}</span>
-                    <span class="ml-4 text-base-500 dark:text-base-400">今日: {{ stats.feedbacks.today }}</span>
-                </div>
-            </div>
-
-            <!-- 互动统计 -->
-            <div class="bg-white dark:bg-base-800 rounded-lg shadow p-6 border border-base-200 dark:border-base-700">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-base-600 dark:text-base-400">总点赞数</p>
-                        <p class="text-2xl font-bold text-base-900 dark:text-base-100">{{ stats.interactions.total_likes }}</p>
-                    </div>
-                    <div class="p-3 bg-primary-100 dark:bg-primary-900 rounded-lg">
-                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">thumb_up</span>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center text-sm">
-                    <span class="text-base-500 dark:text-base-400">点踩数: {{ stats.interactions.total_dislikes }}</span>
-                </div>
-            </div>
+        <div class="admin-library-welcome-date">
+            <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
+            <time datetime="{{ dashboard_date|date:'Y-m-d' }}">{{ dashboard_date|date:'Y年n月j日' }}</time>
         </div>
+    </header>
 
-        <!-- 最新评论、问答和建议 -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- 最新评论 -->
-            <div class="bg-white dark:bg-base-800 rounded-lg shadow border border-base-200 dark:border-base-700">
-                <div class="p-4 border-b border-base-200 dark:border-base-700">
-                    <h3 class="text-lg font-semibold text-base-900 dark:text-base-100 flex items-center">
-                        <span class="material-symbols-outlined mr-2">comment</span>
-                        最新评论
-                    </h3>
-                </div>
-                <div class="p-4">
-                    {% if latest_comments %}
-                        <div class="space-y-4">
-                            {% for comment in latest_comments %}
-                                <div class="border-b border-base-100 dark:border-base-700 pb-4 last:border-0 last:pb-0">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex-1">
-                                            <p class="text-sm font-medium text-base-900 dark:text-base-100">
-                                                {{ comment.user_name }}
-                                            </p>
-                                            <p class="text-sm text-base-600 dark:text-base-400 mt-1">
-                                                {{ comment.comment|truncatewords:20 }}
-                                            </p>
-                                            <div class="flex items-center mt-2 text-xs text-base-500 dark:text-base-400">
-                                                <span>{{ comment.submit_date|date:"Y-m-d H:i" }}</span>
-                                                {% if not comment.is_public %}
-                                                    <span class="ml-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded">待审核</span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <a href="/admin/comment/comment/{{ comment.id }}/change/" class="ml-4 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
-                                            <span class="material-symbols-outlined text-sm">edit</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <div class="mt-4">
-                            <a href="/admin/comment/comment/" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
-                                查看所有评论 →
-                            </a>
-                        </div>
-                    {% else %}
-                        <p class="text-sm text-base-500 dark:text-base-400">暂无评论</p>
-                    {% endif %}
-                </div>
+    {% if dashboard_cards %}
+    <section aria-label="数据概览" class="admin-library-stats">
+        {% for card in dashboard_cards %}
+        <article class="admin-library-card admin-library-stat">
+            <div class="admin-library-stat-heading">
+                <h2 class="admin-library-label">{{ card.label }}</h2>
+                <span class="material-symbols-outlined admin-library-stat-icon" aria-hidden="true">{{ card.icon }}</span>
             </div>
+            <p class="admin-library-number">{{ card.value }}</p>
+            <p class="admin-library-detail">{{ card.detail }}</p>
+            {% if card.url %}<a href="{{ card.url }}" class="admin-library-stat-link" aria-label="查看{{ card.label }}记录"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>{% endif %}
+        </article>
+        {% endfor %}
+    </section>
+    {% endif %}
 
-            <!-- 最新问答 -->
-            <div class="bg-white dark:bg-base-800 rounded-lg shadow border border-base-200 dark:border-base-700">
-                <div class="p-4 border-b border-base-200 dark:border-base-700">
-                    <h3 class="text-lg font-semibold text-base-900 dark:text-base-100 flex items-center">
-                        <span class="material-symbols-outlined mr-2">help</span>
-                        最新问答
-                    </h3>
-                </div>
-                <div class="p-4">
-                    {% if latest_questions %}
-                        <div class="space-y-4">
-                            {% for question in latest_questions %}
-                                <div class="border-b border-base-100 dark:border-base-700 pb-4 last:border-0 last:pb-0">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex-1">
-                                            <p class="text-sm font-medium text-base-900 dark:text-base-100">
-                                                {{ question.content|truncatewords:15 }}
-                                            </p>
-                                            <div class="flex items-center mt-2 text-xs text-base-500 dark:text-base-400">
-                                                <span>{{ question.created_at|date:"Y-m-d H:i" }}</span>
-                                                <span class="ml-2 px-2 py-1 
-                                                    {% if question.status == 'published' %}bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200
-                                                    {% elif question.status == 'draft' %}bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200
-                                                    {% else %}bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200{% endif %} rounded">
-                                                    {{ question.get_status_display }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <a href="/admin/qa/question/{{ question.id }}/change/" class="ml-4 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
-                                            <span class="material-symbols-outlined text-sm">edit</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <div class="mt-4">
-                            <a href="/admin/qa/question/" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
-                                查看所有问题 →
-                            </a>
-                        </div>
-                    {% else %}
-                        <p class="text-sm text-base-500 dark:text-base-400">暂无问题</p>
-                    {% endif %}
-                </div>
+    {% if dashboard_tasks or dashboard_shortcuts %}
+    <div class="admin-library-workgrid">
+        {% if dashboard_tasks %}
+        <section class="admin-library-card">
+            <div class="admin-library-section-heading">
+                <h2>待办事项</h2>
+                <span class="admin-library-section-note">{{ dashboard_pending }} 项待处理</span>
             </div>
-
-            <!-- 最新建议 -->
-            <div class="bg-white dark:bg-base-800 rounded-lg shadow border border-base-200 dark:border-base-700">
-                <div class="p-4 border-b border-base-200 dark:border-base-700">
-                    <h3 class="text-lg font-semibold text-base-900 dark:text-base-100 flex items-center">
-                        <span class="material-symbols-outlined mr-2">feedback</span>
-                        最新建议
-                    </h3>
-                </div>
-                <div class="p-4">
-                    {% if latest_feedbacks %}
-                        <div class="space-y-4">
-                            {% for feedback in latest_feedbacks %}
-                                <div class="border-b border-base-100 dark:border-base-700 pb-4 last:border-0 last:pb-0">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex-1">
-                                            <p class="text-sm font-medium text-base-900 dark:text-base-100">
-                                                {{ feedback.姓名 }}
-                                            </p>
-                                            <p class="text-sm text-base-600 dark:text-base-400 mt-1">
-                                                {{ feedback.建议内容|truncatewords:15 }}
-                                            </p>
-                                            <div class="flex items-center mt-2 text-xs text-base-500 dark:text-base-400">
-                                                <span>{{ feedback.提交时间|date:"Y-m-d H:i" }}</span>
-                                                {% if not feedback.已处理 %}
-                                                    <span class="ml-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded">待处理</span>
-                                                {% else %}
-                                                    <span class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded">已处理</span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <a href="/admin/home/feedback/{{ feedback.id }}/change/" class="ml-4 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
-                                            <span class="material-symbols-outlined text-sm">edit</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <div class="mt-4">
-                            <a href="/admin/home/feedback/" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
-                                查看所有建议 → 
-                            </a>
-                        </div>
-                    {% else %}
-                        <p class="text-sm text-base-500 dark:text-base-400">暂无建议</p>
-                    {% endif %}
-                </div>
+            <div class="admin-library-tasks">
+                {% for task in dashboard_tasks %}
+                <a href="{{ task.url }}" class="admin-library-task">
+                    <span class="material-symbols-outlined admin-library-task-icon" aria-hidden="true">{{ task.icon }}</span>
+                    <span>{{ task.label }}</span>
+                    <strong class="{% if task.count %}admin-library-task-pending{% endif %}">{{ task.count }}</strong>
+                    <span class="material-symbols-outlined admin-library-task-arrow" aria-hidden="true">chevron_right</span>
+                </a>
+                {% endfor %}
             </div>
-        </div>
+        </section>
+        {% endif %}
+        {% if dashboard_shortcuts %}
+        <section class="admin-library-card">
+            <div class="admin-library-section-heading">
+                <h2>内容管理</h2>
+                <span class="admin-library-section-note">选择板块进入</span>
+            </div>
+            <div class="admin-library-shortcuts">
+                {% for shortcut in dashboard_shortcuts %}
+                <a href="{{ shortcut.url }}" class="admin-library-shortcut">
+                    <span>{{ shortcut.label }}</span><span class="admin-library-shortcut-count">{{ shortcut.count }}</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
     </div>
-{% endblock %}
+    {% endif %}
 
+    {% if dashboard_lists %}
+    <section aria-label="最近动态">
+        <div class="admin-library-section-heading admin-library-activity-heading"><h2>最近动态</h2><span class="admin-library-section-note">各栏目最近 5 条记录</span></div>
+        <div class="admin-library-panels">
+            {% for panel in dashboard_lists %}
+            <section class="admin-library-card admin-library-activity">
+                <div class="admin-library-panel-header">
+                    <h3 class="admin-library-panel-title"><span class="material-symbols-outlined" aria-hidden="true">{{ panel.icon }}</span>{{ panel.title }}</h3>
+                    <a href="{{ panel.url }}" class="admin-library-panel-more">全部<span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
+                </div>
+                <ul class="admin-library-items">
+                    {% for item in panel.items %}
+                    <li>
+                        <div class="admin-library-item-heading"><a href="{{ item.url }}" class="admin-library-item-title">{{ item.title }}</a><span class="admin-library-status{% if item.pending %} admin-library-status-pending{% endif %}">{{ item.status }}</span></div>
+                        {% if item.text %}<p class="admin-library-excerpt">{{ item.text }}</p>{% endif %}
+                        <time class="admin-library-meta" datetime="{{ item.date|date:'c' }}">{{ item.date|date:'Y-m-d H:i' }}</time>
+                    </li>
+                    {% empty %}
+                    <li class="admin-library-empty"><span class="material-symbols-outlined" aria-hidden="true">inbox</span><span>暂无记录</span></li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    {% if not dashboard_cards and not dashboard_lists %}
+    <p class="admin-library-detail">当前账号没有可展示的概览数据，请从侧栏进入已授权的管理模块。</p>
+    {% endif %}
+</div>
+{% endblock %}

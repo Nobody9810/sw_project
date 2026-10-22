@@ -8,6 +8,8 @@ urlpatterns = [
     path('api/like/<str:app_label>/<str:model_name>/<int:item_id>/', views.like_item, name='like_item'),
     path('api/dislike/<str:app_label>/<str:model_name>/<int:item_id>/', views.dislike_item, name='dislike_item'),
     
+    path('api/reaction/<str:app_label>/<str:model_name>/<int:item_id>/', views.get_reaction, name='get_reaction'),
+
     # 浏览量 API
     path('api/view/<str:app_label>/<str:model_name>/<int:item_id>/', views.update_view_count, name='update_view_count'),
     path('api/view/<str:app_label>/<str:model_name>/<int:item_id>/get/', views.get_view_count, name='get_view_count'),

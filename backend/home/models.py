@@ -1,14 +1,11 @@
 from django.db import models
+from django.conf import settings
 from django_ckeditor_5.fields import CKEditor5Field
 from sorl.thumbnail import ImageField
 from django.urls import reverse
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from home.storage import CompressedFileSystemStorage
-
-# UserReaction 模型已迁移到 interactions app
-# 如需使用，请从 interactions.models 导入
-
 
 class 总类(models.Model):
     """基础文章类"""
@@ -70,10 +67,19 @@ class 总类(models.Model):
 
     def __str__(self):
         return self.标题
+
+    def save(self, *args, **kwargs):
+        from .html import HTML_FIELDS, safe_html
+        update_fields = kwargs.get('update_fields')
+        for field in self._meta.fields:
+            if field.name in HTML_FIELDS and (update_fields is None or field.name in update_fields):
+                setattr(self, field.name, safe_html(getattr(self, field.name)))
+        return super().save(*args, **kwargs)
     
     def get_absolute_url(self):
         """获取文章详情页URL"""
-        return reverse(f'home:{self._meta.model_name}detail', args=[str(self.id)])
+        from urllib.parse import quote
+        return f'/{quote(self._meta.model_name)}/{self.id}/'
 
 class 通讯(总类):
     图片 = ImageField(
@@ -322,6 +328,12 @@ class 论文(总类):
         verbose_name_plural = "论文"
 
 class 古籍(总类):
+    图片 = ImageField(
+        upload_to='images/guji/',
+        default='null',
+        null=True,
+        verbose_name="封面图片"
+    )
     文档 = models.FileField(
         upload_to='pdf/guji/',
         verbose_name="PDF文档",
@@ -393,6 +405,8 @@ class Contact(models.Model):
 
 class Feedback(models.Model):
     """用户反馈/建议模型"""
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                               verbose_name='提交账户')
     姓名 = models.CharField(
         max_length=100,
         null=False,
@@ -401,7 +415,7 @@ class Feedback(models.Model):
     )
     邮箱 = models.EmailField(
         null=False,
-        blank=False,
+        blank=True,
         verbose_name="邮箱"
     )
     建议内容 = models.TextField(

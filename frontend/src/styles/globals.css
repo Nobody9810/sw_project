@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* One global reset (Tailwind Preflight), one theme selector (html.dark).
+   Component geometry and typography belong in utilities or CSS Modules. */
+@layer base {
+  :root {
+    color-scheme: light;
+    --site-bg: #f8f9fa;
+    --site-text: #212529;
+    --site-link: #047857;
+    --site-border: #dee2e6;
+    --site-prose: #374151;
+    --site-scrollbar: theme('colors.gray.300');
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  html.dark {
+    --site-bg: theme('colors.night.950');
+    --site-text: theme('colors.night.200');
+    --site-link: theme('colors.sage.400');
+    --site-border: theme('colors.night.700');
+    --site-prose: theme('colors.night.300');
+    --site-scrollbar: theme('colors.night.600');
+    color-scheme: dark;
+  }
+
+  body {
+    min-height: 100vh;
+    overflow-x: clip;
+    background-color: var(--site-bg);
+    color: var(--site-text);
+  }
+
+  /* scrollbar-color is inherited, so the page and every inner scroll area share one thin, theme-aware style. */
+  html {
+    scroll-behavior: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--site-scrollbar) transparent;
+  }
+
+  #__next {
+    min-height: 100vh;
+    width: 100%;
+  }
+}

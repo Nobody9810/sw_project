@@ -16,7 +16,11 @@ Django settings for shuwei project.
 
 import os
 from pathlib import Path
+from functools import partial
+from shuwei.admin_access import can_view_admin
+from shuwei.admin_assets import admin_stylesheet
 from django.contrib.messages import constants as messages
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # =========================================
@@ -26,6 +30,12 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 env_path = BASE_DIR.parent / '.env'
 load_dotenv(env_path)
+
+# Quran Foundation Content API; required for Quran, never exposed to the browser.
+QF_CLIENT_ID = os.getenv('QF_CLIENT_ID', '')
+QF_CLIENT_SECRET = os.getenv('QF_CLIENT_SECRET', '')
+QF_ENV = os.getenv('QF_ENV', 'prelive')
+QF_TRANSLATION_ID = os.getenv('QF_TRANSLATION_ID', '')
 
 # 判断运行环境：development 或 production
 # 默认是开发环境，生产环境需要设置 DJANGO_ENV=production
@@ -40,6 +50,12 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
 # 安全配置 - 从环境变量读取，生产环境必须设置
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-102a$v)!_9vtve+1y)(ojiwf23j&nm2&qejnzicp8m(epjnedu')
+if IS_PRODUCTION:
+    if not os.getenv('SECRET_KEY') or SECRET_KEY.startswith('django-insecure-') or len(SECRET_KEY) < 50:
+        raise ImproperlyConfigured('生产环境必须设置至少 50 字符的随机 SECRET_KEY')
+    if not os.getenv('DB_PASSWORD'):
+        raise ImproperlyConfigured('生产环境必须显式设置 DB_PASSWORD')
+
 # DEBUG 配置：生产环境默认为 False，开发环境从环境变量读取（默认为 True）
 if IS_PRODUCTION:
     DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
@@ -67,6 +83,8 @@ else:
     CSRF_TRUSTED_ORIGINS = [
         'http://localhost:5173',
         'http://127.0.0.1:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
     ]
 
 # CSRF Cookie配置
@@ -102,6 +120,8 @@ INSTALLED_APPS = [
     'comment',                   # 评论系统
     'interactions',              # 用户互动（浏览量和点赞）
     'hadith',
+    'notifications',             # 外部消息队列（登录邮件等）
+    'users',                     # 读者头像（昵称沿用 User.first_name）
     # 第三方应用
     
     'django_ckeditor_5',          # 富文本编辑器
@@ -114,20 +134,43 @@ INSTALLED_APPS = [
     'sorl.thumbnail',           # 图片处理
     # # 'mptt',                     # 树形结构
     'rest_framework',           # REST API
-
+    'rest_framework_simplejwt',
+    # 读者登录：邮箱验证码＋Google（配置见 users/auth_settings.py）
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.headless',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React 开发服务器
+    "http://10.0.2.2:8000",   # Android 模拟器访问本机
+]
+
 
 # =========================================
 # 中间件配置
 # =========================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'users.session_middleware.SiteSessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 # 生产环境安全配置
@@ -163,10 +206,26 @@ STATICFILES_FINDERS = [
 
 # 媒体文件配置
 MEDIA_URL = '/media/'
+MEDIA_FILE_HOSTS = [host.strip() for host in os.getenv('MEDIA_FILE_HOSTS', '').split(',') if host.strip()]
 MEDIA_ROOT =  BASE_DIR / 'media'
 
 # 文件存储配置 - 使用自定义压缩存储
-DEFAULT_FILE_STORAGE = 'home.storage.CompressedFileSystemStorage' 
+STORAGES = {
+    'default': {'BACKEND': 'home.storage.CompressedFileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+}
+
+# Configure these only for proxies that append a verified client address.
+SUBMISSION_TRUSTED_PROXIES = [
+    value.strip() for value in os.getenv('SUBMISSION_TRUSTED_PROXIES', '').split(',') if value.strip()
+]
+if os.getenv('CACHE_URL'):
+    CACHES = {'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': os.environ['CACHE_URL'],
+    }}
+
+MAX_UPLOAD_SIZE = 25 * 1024 * 1024
 
 # =========================================
 # 模板配置
@@ -202,7 +261,7 @@ DATABASES = {
         'OPTIONS': {
             'charset': 'utf8mb4',
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        } if IS_PRODUCTION else {},
+        } if IS_PRODUCTION and os.getenv('DB_ENGINE', 'django.db.backends.mysql') == 'django.db.backends.mysql' else {},
     }
 }
 
@@ -217,15 +276,17 @@ CKEDITOR_5_UPLOADS = "uploads/"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"
 
 # 自定义配置
-CKEDITOR_5_CUSTOM_CSS = None
+CKEDITOR_5_CUSTOM_CSS = "/static/admin_library/editor.css"
 CKEDITOR_5_JS = []
 
 # 详细编辑器配置
 CKEDITOR_5_CONFIGS = {
     'default': {
-        'toolbar': [
+        'toolbar': {
+            'shouldNotGroupWhenFull': False,
+            'items': [
             'heading', '|',
-            'fontFamily', 'fontSize', 'lineHeight', 'fontColor', 'fontBackgroundColor', '|',
+            'fontFamily', 'fontSize', 'fontColor', 'fontBackgroundColor', '|',
             'bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', '|',
             'alignment',  '|',
             'link', 'bulletedList', 'numberedList', 'todoList', '|',
@@ -233,11 +294,9 @@ CKEDITOR_5_CONFIGS = {
             'blockQuote', 'insertTable', 'imageUpload', 'mediaEmbed', 'horizontalLine', '|',
             'specialCharacters', '|',
             'highlight', 'removeFormat', '|',
-            'undo', 'redo', 'findAndReplace', '|','fullscreen'
+            'undo', 'redo', 'findAndReplace'
 
-        ],
-        'pasteFromOffice': {
-            'keepFormatting': True  # 保留 Word 的格式
+            ],
         },
         'fontSize': {
             'options': [
@@ -261,14 +320,12 @@ CKEDITOR_5_CONFIGS = {
                 'imageStyle:alignCenter', 'imageStyle:alignRight', 'resizeImage'
             ],
             'styles': [
-                'alignLeft', 'alignCenter', 'alignRight', 'full', 'side'
+                'inline', 'alignLeft', 'alignCenter', 'alignRight', 'side'
             ]
         },
         # 配置 SimpleUploadAdapter 的上传 URL
         'simpleUpload': {
-            # 使用相对路径，由 Vite 代理到后端
-            # 开发环境：Vite 会代理到 http://localhost:8000/ckeditor5/image_upload/
-            # 生产环境：直接使用相对路径
+            # 同源上传；Next.js 开发代理及生产 Nginx 使用相同路径。
             'uploadUrl': '/ckeditor5/image_upload/',
             'withCredentials': True,  # 发送 cookies（用于 CSRF token）
         },
@@ -290,30 +347,16 @@ CKEDITOR_5_CONFIGS = {
                 {'model': 'greenPen', 'class': 'pen-green', 'title': '绿笔', 'color': 'var(--ck-highlight-pen-green)', 'type': 'pen'},
             ]
         },
-        'exportPdf': {
-            'stylesheets': ['/static/css/export-pdf.css'],  # 定义导出 PDF 的样式
-        },
-        'exportWord': {
-            'stylesheets': ['/static/css/export-word.css'],  # 定义导出 Word 的样式
-        },
         'htmlEmbed': {
             'showPreviews': True
-        },
-        'removeFormat': {
-            'toolbar': ['removeFormat']  # 快速清除格式
         },
         'indentBlock': {
             'offset': 1,  # 缩进的间距
             'unit': 'em'
         },
-        'pageBreak': True,  # 支持分页符
-        'sourceEditing': True,  # 支持源代码编辑
         # 'language': 'zh-cn',  # 暂时移除语言设置，避免语言文件404错误
-        'ui': 'default', 
-        'tabSpaces':2,
     }
 }
-CKEDITOR_5_CONFIGS['default']['allowedContent'] = True
 
 # =========================================
 # 评论系统配置
@@ -370,6 +413,29 @@ if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
     DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', '15'))
+
+# 外部消息队列：请求只写入数据库，由 `manage.py run_outbound_worker` 发送并重试。
+OUTBOUND_SEND_TIMEOUT = EMAIL_TIMEOUT
+OUTBOUND_MAX_ATTEMPTS = 5
+# 登录/注册验证码10分钟失效，过期未发出的邮件直接放弃。
+OUTBOUND_MESSAGE_TTL = 600
+
+# Server-only Telegram moderation reminders. Empty configuration disables this channel.
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '').strip()
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '').strip()
+TELEGRAM_NOTIFICATION_TTL = 86400
+# Public article channel: deliberately no fallback to the private moderation bot/chat.
+TELEGRAM_PUBLISH_BOT_TOKEN = os.getenv('TELEGRAM_PUBLISH_BOT_TOKEN', '').strip()
+TELEGRAM_PUBLISH_CHANNEL_ID = os.getenv('TELEGRAM_PUBLISH_CHANNEL_ID', '').strip()
+# Private-chat recipient can review by default. Groups require explicit Telegram user IDs.
+_telegram_reviewers = os.getenv('TELEGRAM_REVIEWER_IDS', '').strip()
+if _telegram_reviewers and not all(value.strip().isdigit() for value in _telegram_reviewers.split(',')):
+    raise ImproperlyConfigured('TELEGRAM_REVIEWER_IDS应为逗号分隔的Telegram用户数字ID')
+TELEGRAM_REVIEWER_IDS = {int(value.strip()) for value in _telegram_reviewers.split(',') if value.strip()}
+
+# 读者登录（django-allauth，同源 Session）
+from users.auth_settings import *  # noqa: E402,F401,F403
 
 # 消息框架配置
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
@@ -411,7 +477,9 @@ logging_handlers = {
 # 只在可以使用文件日志时添加文件处理器
 if use_file_logging:
     logging_handlers['file'] = {
-        'class': 'logging.FileHandler',
+        'class': 'logging.handlers.RotatingFileHandler',
+        'maxBytes': 10 * 1024 * 1024,
+        'backupCount': 5,
         'filename': str(log_dir / 'django.log'),
         'formatter': 'verbose',
     }
@@ -480,8 +548,8 @@ LOGGING = {
 
 UNFOLD = {
     # 网站基本信息
-    "SITE_TITLE": "素材管理系统",
-    "SITE_HEADER": "素材库后台",
+    "SITE_TITLE": "书味后台",
+    "SITE_HEADER": "书味后台",
     "SITE_URL": "/",
     "SITE_SYMBOL": "settings",  # 网站图标（Material Symbols）
     
@@ -569,6 +637,21 @@ UNFOLD = {
                         "icon": "group",
                         "link": "/admin/auth/group/",
                     },
+                    {
+                        "title": "读者头像",
+                        "icon": "account_circle",
+                        "link": "/admin/users/userprofile/",
+                    },
+                    {
+                        "title": "发信队列",
+                        "icon": "outgoing_mail",
+                        "link": "/admin/notifications/outboundmessage/",
+                    },
+                    {
+                        "title": "Telegram审核记录",
+                        "icon": "fact_check",
+                        "link": "/admin/notifications/telegramreview/",
+                    },
                 ],
             },
             {
@@ -644,22 +727,23 @@ UNFOLD = {
         ],
     },
     
-    # 主题颜色配置
+    # 后台沿用 Unfold 主题变量，使用站点绿色，包含深色模式常用的950色阶。
     "COLORS": {
         "primary": {
-            "50": "250 245 255",
-            "100": "243 232 255",
-            "200": "233 213 255",
-            "300": "216 180 254",
-            "400": "192 132 252",
-            "500": "168 85 247",
-            "600": "147 51 234",
-            "700": "126 34 206",
-            "800": "107 33 168",
-            "900": "88 28 135",
+            "50": "rgb(240 253 244)",
+            "100": "rgb(220 252 231)",
+            "200": "rgb(187 247 208)",
+            "300": "rgb(134 239 172)",
+            "400": "rgb(74 222 128)",
+            "500": "rgb(34 197 94)",
+            "600": "rgb(22 163 74)",
+            "700": "rgb(21 128 61)",
+            "800": "rgb(22 101 52)",
+            "900": "rgb(20 83 45)",
+            "950": "rgb(5 46 22)",
         },
     },
-    
+
     # 扩展配置
     "EXTENSIONS": {
         "modeltranslation": {
@@ -676,7 +760,7 @@ UNFOLD = {
     
     # 自定义样式和脚本
     "STYLES": [
-        lambda request: "/static/unfold/css/custom.css",
+        admin_stylesheet,
     ],
     "SCRIPTS": [],
     
@@ -684,3 +768,9 @@ UNFOLD = {
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
 }
+
+# Custom links must follow the same view/change permissions as Django's app list.
+for _group in UNFOLD['SIDEBAR']['navigation']:
+    for _item in _group['items']:
+        _admin_prefix, _app_label, _model_name = _item['link'].strip('/').split('/')
+        _item['permission'] = partial(can_view_admin, model_label=f'{_app_label}.{_model_name}')

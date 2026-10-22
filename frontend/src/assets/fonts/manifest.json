@@ -1,0 +1,12 @@
+{
+  "UthmanicHafs1Ver18.woff2": {
+    "source": "https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2",
+    "sha256": "8c00e7a7d5f773bcfb1642fdcfba505dbd81975fef39f14718827a32d075020c",
+    "bytes": 87760
+  },
+  "indopak-nastaleeq-waqf-lazim-v4.2.1.woff2": {
+    "source": "https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2",
+    "sha256": "ca2a573bd46af4a03f208ebfbaa0336242d0ea4199f1e20b1f06e1e2a1d87900",
+    "bytes": 83560
+  }
+}

@@ -18,9 +18,16 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from home.ckeditor_views import upload_file as ckeditor_upload_file
+from users.views import google_entry
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/prayers/', include(('prayers.urls', 'prayers'), namespace='prayers')),
+    path('api/auth/', include('users.urls')),
+    # Our CSRF-confirmed Google entry precedes allauth's own provider URLs (callback).
+    path('accounts/google/login/', google_entry),
+    path('accounts/', include('allauth.urls')),
+    path('_allauth/', include('allauth.headless.urls')),
     path('api/qa/', include(('qa.urls', 'qa'), namespace='qa')),
     path('api/hadith/', include(('hadith.urls', 'hadith'), namespace='hadith')),
     path('', include(('home.urls', 'home'), namespace='home')),

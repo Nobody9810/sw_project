@@ -8,4 +8,5 @@ class HomeConfig(AppConfig):
     def ready(self):
         """注册信号处理器"""
         import home.signals  # noqa
+        import home.checks  # noqa
 

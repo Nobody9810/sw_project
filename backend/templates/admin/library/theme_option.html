@@ -1,0 +1,5 @@
+<button type="button" class="admin-library-theme-option"
+        x-on:click="adminTheme = '{{ value }}'; openTheme = false"
+        x-bind:aria-pressed="adminTheme === '{{ value }}'">
+    <span class="material-symbols-outlined" aria-hidden="true">{{ icon }}</span>{{ label }}
+</button>

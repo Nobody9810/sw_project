@@ -1,0 +1,61 @@
+/* CKEditor-only bounds; do not clip the root, which owns dropdowns and toolbars. */
+.change-form .form-row:has(.ck-editor-container),
+.change-form .field-line:has(.ck-editor-container),
+.change-form .form-row :has(> .ck-editor-container),
+.change-form .ck-editor-container,
+.change-form .ck.ck-editor,
+.change-form .ck-editor__top,
+.change-form .ck-editor__main {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.change-form .ck-editor-container,
+.change-form .ck.ck-editor {
+    width: 100%;
+}
+
+.change-form .ck.ck-toolbar,
+.change-form .ck-toolbar__items {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.change-form .ck.ck-editor__editable {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-wrap: anywhere;
+}
+
+.change-form .ck.ck-editor__editable img {
+    max-width: 100%;
+    height: auto;
+}
+
+.change-form .ck.ck-balloon-panel {
+    max-width: calc(100vw - 24px);
+}
+
+/* The interface follows Unfold's html.dark. Authored content stays editable as saved. */
+html.dark .change-form {
+    --ck-color-base-foreground: var(--color-base-800, #1f2937);
+    --ck-color-base-background: var(--color-base-900, #111827);
+    --ck-color-base-border: var(--color-base-700, #374151);
+    --ck-color-base-text: var(--color-base-100, #f3f4f6);
+    --ck-color-text: var(--color-base-100, #f3f4f6);
+    --ck-color-toolbar-background: var(--color-base-900, #111827);
+    --ck-color-toolbar-border: var(--color-base-700, #374151);
+    --ck-color-panel-background: var(--color-base-900, #111827);
+    --ck-color-panel-border: var(--color-base-700, #374151);
+    --ck-color-dropdown-panel-background: var(--color-base-900, #111827);
+    --ck-color-dropdown-panel-border: var(--color-base-700, #374151);
+    --ck-color-input-background: var(--color-base-950, #030712);
+    --ck-color-input-text: var(--color-base-100, #f3f4f6);
+    --ck-color-input-border: var(--color-base-700, #374151);
+    --ck-color-button-default-hover-background: var(--color-base-800, #1f2937);
+    --ck-color-button-default-active-background: var(--color-base-800, #1f2937);
+    --ck-color-button-on-background: var(--color-primary-900, #14532d);
+    --ck-color-button-on-color: var(--color-primary-300, #86efac);
+}

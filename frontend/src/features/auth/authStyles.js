@@ -1,0 +1,3 @@
+// Form controls shared by the sign-in form and the account page.
+export const inputClass = 'mt-2 min-h-11 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-base text-gray-900 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-500/20 dark:border-night-700 dark:bg-night-900 dark:text-night-100'
+export const buttonClass = 'inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sage-600 dark:hover:bg-sage-700'

@@ -15,9 +15,14 @@ class Comment(models.Model):
     object_id = models.PositiveIntegerField(verbose_name="对象ID")
     content_object = GenericForeignKey('content_type', 'object_id')
     
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                             on_delete=models.SET_NULL, related_name='article_comments', verbose_name='关联账户')
+
     # 评论内容
     user_name = models.CharField(max_length=50, verbose_name="用户名")
-    user_email = models.EmailField(verbose_name="邮箱")
+    user_email = models.EmailField(verbose_name="邮箱", blank=True)
+    # None preserves unknown provenance of historical comments; never infer it from email/name.
+    is_guest = models.BooleanField('访客评论', null=True, default=None)
     comment = models.TextField(verbose_name="评论内容")
     
     # 回复相关

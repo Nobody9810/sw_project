@@ -75,8 +75,11 @@ htmlcov/
 /backend/hadith-data*.json
 /backend/media/
 /backend/hadith_exports/
+/backend/docs/
 /backend/*.pdf
 /backend/*.epub
+/backend/*.csv
+/backend/home/management/commands/example_hadith_data.json
 /backend/穆斯林圣训实录全集.txt
 /backend/requirements-import.txt
 /backend/requirements-legacy-tools.txt

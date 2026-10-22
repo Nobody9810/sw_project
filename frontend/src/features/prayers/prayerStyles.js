@@ -1,0 +1,1 @@
+export const PRAYER_BUTTON = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 disabled:cursor-wait disabled:opacity-60 dark:bg-sage-700 dark:hover:bg-sage-600'

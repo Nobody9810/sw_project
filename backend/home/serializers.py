@@ -17,6 +17,23 @@ DEFAULT_SALE_INFO = {
 }
 
 
+def normalize_media_fields(data, instance):
+    for name in ('图片', '文档'):
+        if name not in data:
+            continue
+        file = getattr(instance, name, None)
+        if getattr(file, 'name', None) in (None, '', 'null', 'None'):
+            data[name] = None
+        else:
+            # Keep local media on the frontend's /media/ proxy. DRF otherwise
+            # expands it to the API host, which browser PDF fetches cannot use
+            # without CORS headers. Absolute CDN storage URLs stay unchanged.
+            url = file.url
+            if url.startswith('/') and not url.startswith('//'):
+                data[name] = url
+    return data
+
+
 class BookSaleSerializer(serializers.ModelSerializer):
     sale_price = serializers.SerializerMethodField()
 
@@ -48,6 +65,14 @@ class BaseArticleSerializer(serializers.ModelSerializer):
     """“总类”抽象模型的公共字段"""
     app_label = serializers.SerializerMethodField()
     model_name = serializers.SerializerMethodField()
+
+    def to_representation(self, instance):
+        from .html import HTML_FIELDS, public_html
+        data = super().to_representation(instance)
+        for name in HTML_FIELDS:
+            if name in data:
+                data[name] = public_html(data[name])
+        return normalize_media_fields(data, instance)
 
     class Meta:
         fields = [
@@ -130,7 +155,7 @@ class LunWenSerializer(BaseArticleSerializer):
 class GuJiSerializer(BaseArticleSerializer):
     class Meta(BaseArticleSerializer.Meta):
         model = 古籍
-        fields = _fields_no_content + ["文档"]
+        fields = _fields_no_content + ["图片", "文档"]
 
 
 class ShuKuSerializer(BaseArticleSerializer):
@@ -155,8 +180,19 @@ DETAIL_SERIALIZER_MAP = {
 
 # ========== 列表页序列化器（内容截断，字段更轻量） ==========
 
+def list_cover(data, instance):
+    """List cards: the uploaded cover, else the article's first content image; None shows the default."""
+    if '图片' in data and not data['图片']:
+        from .html import first_content_image
+        data['图片'] = first_content_image(getattr(instance, '内容', None))
+    return data
+
+
 class BaseListSerializer(serializers.ModelSerializer):
     内容 = serializers.SerializerMethodField()
+
+    def to_representation(self, instance):
+        return list_cover(normalize_media_fields(super().to_representation(instance), instance), instance)
 
     class Meta:
         fields = ["id", "标题", "作者", "内容", "更新时间"]
@@ -180,15 +216,30 @@ class TongXunListSerializer(BaseListSerializer):
 
 class ShuXunListSerializer(BaseListSerializer):
     is_for_sale = serializers.SerializerMethodField()
+    作者简介 = serializers.SerializerMethodField()
 
     class Meta(BaseListSerializer.Meta):
         model = 书讯
         fields = BaseListSerializer.Meta.fields + [
-            "图片", "出版社", "出版年", "ISBN", "页数", "装帧", "is_for_sale",
+            "图片",
+            "出版社",
+            "出版年",
+            "ISBN",
+            "页数",
+            "装帧",
+            "作者简介",
+            "is_for_sale",
         ]
 
     def get_is_for_sale(self, obj):
         return get_is_for_sale(obj)
+
+    def get_作者简介(self, obj):
+        raw = getattr(obj, "作者简介", "") or ""
+        if not raw:
+            return ""
+        text = " ".join(strip_tags(str(raw)).split())
+        return text[:120] + "..." if len(text) > 120 else text
 
 
 class ShuPingListSerializer(BaseListSerializer):
@@ -232,7 +283,7 @@ class LunWenListSerializer(BaseListSerializer):
 class GuJiListSerializer(BaseListSerializer):
     class Meta(BaseListSerializer.Meta):
         model = 古籍
-        fields = _list_fields_no_content + ["文档"]
+        fields = _list_fields_no_content + ["图片", "文档"]
 
 
 class ShuKuListSerializer(BaseListSerializer):

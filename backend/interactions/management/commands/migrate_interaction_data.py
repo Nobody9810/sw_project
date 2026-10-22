@@ -11,11 +11,8 @@
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from datetime import date
-from home.models import (
-    通讯, 书讯, 书评, 观点, 文艺, 文史, 译林, 论文, 古籍, 书库
-)
-from interactions.models import UserReaction, ViewCount
+from interactions.services import CONTENT_MODELS, merge_legacy_view_counts
+from interactions.models import UserReaction
 
 
 class Command(BaseCommand):
@@ -44,7 +41,7 @@ class Command(BaseCommand):
         if not dry_run:
             self.stdout.write(self.style.SUCCESS('数据迁移完成！'))
         else:
-            self.stdout.write(self.style.WARNING('试运行完成，使用 --no-dry-run 执行实际迁移'))
+            self.stdout.write(self.style.WARNING('试运行完成，去掉 --dry-run 执行实际迁移'))
 
     def migrate_user_reactions(self, dry_run):
         """迁移用户反应数据"""
@@ -148,15 +145,12 @@ class Command(BaseCommand):
         self.stdout.write('开始迁移浏览量数据...')
         
         # 定义所有需要迁移的模型
-        models_to_migrate = [
-            通讯, 书讯, 书评, 观点, 文艺, 文史, 译林, 论文, 古籍, 书库
-        ]
-        
+        models_to_migrate = CONTENT_MODELS
+
         total_migrated = 0
         
         for model_class in models_to_migrate:
             model_name = model_class.__name__
-            content_type = ContentType.objects.get_for_model(model_class)
             
             # 获取所有有浏览量数据的对象
             items = model_class.objects.filter(
@@ -173,33 +167,10 @@ class Command(BaseCommand):
             
             if not dry_run:
                 migrated = 0
-                for item in items:
-                    view_count, created = ViewCount.objects.get_or_create(
-                        content_type=content_type,
-                        object_id=item.id,
-                        defaults={
-                            '总浏览量': getattr(item, '总浏览量', 0),
-                            '今日浏览量': getattr(item, '今日浏览量', 0),
-                            '最后统计日期': getattr(item, '最后统计日期', None) or date.today()
-                        }
-                    )
-                    
-                    if not created:
-                        # 如果已存在，更新数据（取较大值）
-                        view_count.总浏览量 = max(
-                            view_count.总浏览量,
-                            getattr(item, '总浏览量', 0)
-                        )
-                        view_count.今日浏览量 = max(
-                            view_count.今日浏览量,
-                            getattr(item, '今日浏览量', 0)
-                        )
-                        if hasattr(item, '最后统计日期') and item.最后统计日期:
-                            view_count.最后统计日期 = item.最后统计日期
-                        view_count.save()
-                    
+                for item_id in items.order_by('pk').values_list('pk', flat=True).iterator():
+                    merge_legacy_view_counts(model_class, item_id)
                     migrated += 1
-                
+
                 self.stdout.write(self.style.SUCCESS(f'    {model_name}: 成功迁移 {migrated} 条记录'))
                 total_migrated += migrated
             else:

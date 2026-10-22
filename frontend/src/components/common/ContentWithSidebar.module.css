@@ -1,0 +1,97 @@
+.layout {
+  position: relative;
+}
+
+.panel,
+.clip {
+  min-width: 0;
+}
+
+.rail {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .layout[data-sidebar-layout] {
+    /* Match the original 12-track grid, including its eleven 32px gaps. */
+    --sidebar-track: calc((100% - 96px) / 4);
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--sidebar-track));
+    column-gap: 32px;
+    transition: grid-template-columns 300ms cubic-bezier(0.22, 1, 0.36, 1), column-gap 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .layout.wide {
+    --sidebar-track: calc((100% - 64px) / 3);
+  }
+
+  .panel {
+    display: grid;
+    grid-template-rows: 1fr;
+    overflow: clip;
+    opacity: 1;
+    translate: 0 0;
+    visibility: visible;
+    transition: grid-template-rows 300ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease, translate 300ms ease, visibility 0s;
+  }
+
+  .clip {
+    min-height: 0;
+    overflow: clip;
+  }
+
+  .content {
+    /* Keep the side text stable while its visible column shrinks. */
+    width: var(--sidebar-content, 100%);
+  }
+
+  .rail {
+    position: absolute;
+    z-index: 10;
+    inset-block: 0;
+    right: -44px;
+    display: block;
+    width: 36px;
+    padding-block: 8px;
+    pointer-events: none;
+  }
+
+  .rail .toggle {
+    /* Follow the viewport while staying inside this page's content bounds. */
+    position: sticky;
+    top: calc(50vh - 18px);
+    opacity: 0;
+    translate: 4px 0;
+    pointer-events: none;
+    transition: opacity 180ms ease, translate 180ms ease, color 150ms, border-color 150ms;
+  }
+
+  .rail .toggle[data-visible='true'],
+  .rail .toggle:focus-visible {
+    opacity: 1;
+    translate: 0 0;
+    pointer-events: auto;
+  }
+
+  :global(html[data-content-sidebar='collapsed']) .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0px);
+    column-gap: 0;
+  }
+
+  :global(html[data-content-sidebar='collapsed']) .panel {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    translate: 12px 0;
+    visibility: hidden;
+    transition-delay: 0s, 0s, 0s, 300ms;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout[data-sidebar-layout],
+  .panel,
+  .rail,
+  .rail .toggle {
+    transition: none;
+  }
+}
