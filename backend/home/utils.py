@@ -1,7 +1,5 @@
-from faker import Faker
 import hashlib
 
-fake = Faker()
 
 
 def generate_avatar(username):

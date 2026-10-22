@@ -1,0 +1,21 @@
+[Unit]
+Description=SW Project outbound email and Telegram worker
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/sw_project/backend
+Environment=DJANGO_ENV=production
+Environment=PYTHONUNBUFFERED=1
+# Django reads /var/www/sw_project/.env; this user must be able to read it.
+ExecStart=/var/www/sw_project/venv/bin/python manage.py run_outbound_worker
+Restart=always
+RestartSec=10
+TimeoutStopSec=90
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

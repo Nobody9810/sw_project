@@ -1,0 +1,238 @@
+.content {
+  display: flow-root;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--site-prose);
+  text-align: justify;
+  overflow-wrap: break-word;
+}
+
+.article {
+  line-height: 1.625;
+}
+
+.book {
+  font-size: 15px;
+  line-height: 2;
+}
+
+.article :where(p) {
+  margin-bottom: 0;
+}
+
+.book :where(p) {
+  margin-bottom: 1rem;
+}
+
+.book :where(p:last-child) {
+  margin-bottom: 0;
+}
+
+.content :where(img) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Preserve article quotations without changing quotes elsewhere on the site. */
+.content :where(blockquote) {
+  position: relative;
+  margin: 2rem 0;
+  padding: 2rem 3rem;
+  border-left: 4px solid #fd7e14;
+  border-radius: 0 15px 15px 0;
+  background-color: rgb(253 126 20 / 0.05);
+  font-style: italic;
+}
+
+.content :where(blockquote)::before {
+  content: '"';
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  color: rgb(253 126 20 / 0.2);
+  font-family: serif;
+  font-size: 4rem;
+}
+
+.content :where(blockquote footer) {
+  margin-top: 1rem;
+  color: #7f8c8d;
+  font-size: 1rem;
+  text-align: right;
+}
+
+
+/* Tables scroll inside their own figure, never widen the article or the page. */
+.content :where(figure) {
+  min-width: 0;
+  max-width: 100% !important;
+  margin: 1.25rem 0;
+}
+
+.content :global(figure.table) {
+  display: block;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+/* Mirror CKEditor's image layout using its persisted, unmodified class names. */
+.content :global(figure.image) {
+  display: table;
+  clear: both;
+  box-sizing: border-box;
+  margin: 1.25rem auto;
+  text-align: center;
+}
+
+.content :global(figure.image) :where(img) {
+  display: block;
+  min-width: 100%;
+  margin: 0 auto;
+}
+
+.content :global(figure.image.image_resized) {
+  display: block;
+}
+
+.content :global(figure.image.image_resized) :where(img) {
+  width: 100%;
+}
+
+.content :global(figure.image) > :where(figcaption) {
+  display: table-caption;
+  caption-side: bottom;
+  overflow-wrap: anywhere;
+}
+
+.content :global(figure.image.image_resized) > :where(figcaption) {
+  display: block;
+}
+
+/* Inline images follow the paragraph's authored text alignment. */
+.content :where(p, h2, h3, h4, li, td, th, a) > img,
+.content :global(.image-inline) {
+  display: inline-block;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.content :global(.image-inline) :where(img) {
+  display: inline-block;
+  margin: 0;
+}
+
+.content :global(.image-style-align-left),
+.content :global(figure.image.image-style-align-left) {
+  float: left;
+  clear: none;
+  margin: 0.5rem 1.5rem 0.5rem 0;
+}
+
+.content :global(.image-style-align-right),
+.content :global(figure.image.image-style-align-right),
+.content :global(figure.image.image-style-side) {
+  float: right;
+  clear: none;
+  margin: 0.5rem 0 0.5rem 1.5rem;
+}
+
+.content :global(figure.image.image-style-side) {
+  max-width: 50% !important;
+}
+
+.content :global(.image-style-align-center) {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.content :global(figure.image.image-style-block-align-left) {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.content :global(figure.image.image-style-block-align-right) {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.content :where(table) {
+  width: 100%;
+  border-collapse: collapse;
+  color: inherit;
+  border: 1px solid var(--site-border);
+}
+
+.content :where(th, td) {
+  border: 1px solid var(--site-border);
+  padding: 0.625rem 0.75rem;
+  vertical-align: top;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.content :where(th) {
+  font-weight: 600;
+  background: var(--site-bg);
+}
+
+/* Only neutral editor/pasted ink and fills adapt. Authored accent colors remain. */
+:global(html.dark) .content :global(.richtext-theme-color) {
+  color: var(--site-prose) !important;
+}
+
+:global(html.dark) .content :global(.richtext-theme-background) {
+  background-color: transparent !important;
+}
+
+.content :where(pre) {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: var(--site-bg);
+  text-align: start;
+}
+
+.content :where(ul, ol) {
+  margin: 1rem 0;
+  padding-inline-start: 1.5rem;
+  text-align: start;
+}
+
+.content :where(ul) { list-style-type: disc; }
+.content :where(ol) { list-style-type: decimal; }
+.content :where(li) { margin-block: 0.25rem; }
+.content :where(a) { color: var(--site-link); text-decoration: underline; text-underline-offset: 3px; }
+.content :where(h2, h3, h4) { margin-block: 1.25rem 0.75rem; font-weight: 600; line-height: 1.5; text-align: start; }
+.content :where(h2) { font-size: 1.5rem; }
+.content :where(h3) { font-size: 1.25rem; }
+.content :where(h4) { font-size: 1.125rem; }
+.content :where(figcaption) { margin-top: 0.5rem; text-align: center; font-size: 0.875rem; color: var(--site-prose); }
+.content :where(hr) { margin-block: 1.5rem; border-color: var(--site-border); }
+.content :where(mark) { color: #1c1917; }
+.content :global(.marker-yellow) { background-color: #fef08a; color: #1c1917; }
+.content :global(.marker-green) { background-color: #bbf7d0; color: #1c1917; }
+.content :global(.marker-pink) { background-color: #fbcfe8; color: #1c1917; }
+.content :global(.marker-blue) { background-color: #bfdbfe; color: #1c1917; }
+.content :global(.pen-red) { color: #ef4444; background-color: transparent; }
+.content :global(.pen-green) { color: var(--site-link); background-color: transparent; }
+
+@media (max-width: 639px) {
+  .content :where(blockquote) { padding: 1rem 1.25rem; }
+  .content :where(blockquote)::before { display: none; }
+}
+
+.content :where(p, div, blockquote, ul, ol) {
+  box-sizing: border-box;
+  max-width: 100% !important;
+}
+
+:global(html.dark) .content :global(.richtext-theme-border) {
+  border-color: var(--site-border) !important;
+}

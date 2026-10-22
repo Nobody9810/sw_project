@@ -1,0 +1,10 @@
+/* Isolated, server-rendered OAuth confirmation. No external fonts or scripts. */
+.auth-consent { margin: 0; padding: 24px; min-height: 100dvh; box-sizing: border-box; display: grid; place-items: center; font: 16px/1.6 system-ui, sans-serif; color: #1f2937; background: #f8f9fa; }
+.auth-consent main { box-sizing: border-box; width: 100%; max-width: 400px; padding: 28px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; }
+.auth-consent h1 { margin: 0; font-size: 24px; line-height: 1.4; }
+.auth-consent p { color: #6b7280; font-size: 14px; }
+.auth-consent button { width: 100%; min-height: 44px; border: 0; border-radius: 8px; padding: 10px 16px; font: inherit; color: #fff; background: #059669; cursor: pointer; }
+.auth-consent button:focus-visible, .auth-consent a:focus-visible { outline: 2px solid #059669; outline-offset: 4px; }
+.auth-consent a { display: inline-flex; align-items: center; min-height: 44px; margin-top: 8px; color: #047857; text-decoration: none; }
+.auth-consent .hint { margin-bottom: 0; font-size: 12px; }
+@media (prefers-color-scheme: dark) { .auth-consent { color: #edf0ed; background: #191d1a; } .auth-consent main { background: #262c28; border-color: #38413b; } .auth-consent p { color: #a5afa8; } .auth-consent a { color: #91b6a0; } }

@@ -1,0 +1,6 @@
+.footer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: layout style paint;
+  -webkit-font-smoothing: subpixel-antialiased;
+}

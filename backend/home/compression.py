@@ -20,99 +20,39 @@ def print_flush(*args, **kwargs):
 
 
 def compress_image(image_file, quality=85, max_width=1920, max_height=1920):
-    """
-    压缩图片文件
-    
-    参数:
-        image_file: Django上传的文件对象
-        quality: JPEG质量 (1-100, 默认85)
-        max_width: 最大宽度 (默认1920)
-        max_height: 最大高度 (默认1920)
-    
-    返回:
-        压缩后的InMemoryUploadedFile对象
-    """
-    start_time = time.time()
-    file_name = getattr(image_file, 'name', '未知文件')
-    
-    # 获取原始文件大小
-    image_file.seek(0, os.SEEK_END)
-    original_size = image_file.tell()
+    """Preserve file format, alpha and animated originals during optimization."""
+    import logging
+    logger = logging.getLogger(__name__)
     image_file.seek(0)
-    
-    print_flush(f"[压缩] 开始压缩图片: {file_name}")
-    print_flush(f"[压缩] 原始大小: {original_size / 1024:.2f} KB")
-    
+    original = image_file.read()
+    image_file.seek(0)
     try:
-        # 打开图片
-        img = Image.open(image_file)
-        
-        # 如果是RGBA模式，转换为RGB（JPEG不支持透明度）
-        if img.mode in ('RGBA', 'LA', 'P'):
-            # 创建白色背景
-            background = Image.new('RGB', img.size, (255, 255, 255))
-            if img.mode == 'P':
-                img = img.convert('RGBA')
-            background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
-            img = background
-        elif img.mode != 'RGB':
-            img = img.convert('RGB')
-        
-        # 获取原始尺寸
-        original_width, original_height = img.size
-        print_flush(f"[压缩] 原始尺寸: {original_width}x{original_height} 像素")
-        
-        # 计算新尺寸（保持宽高比）
-        if original_width > max_width or original_height > max_height:
-            ratio = min(max_width / original_width, max_height / original_height)
-            new_width = int(original_width * ratio)
-            new_height = int(original_height * ratio)
-            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-            print_flush(f"[压缩] 调整尺寸: {new_width}x{new_height} 像素 (缩放比例: {ratio:.2%})")
-        
-        # 保存到内存
-        output = io.BytesIO()
-        img.save(output, format='JPEG', quality=quality, optimize=True)
-        output.seek(0)
-        
-        # 获取压缩后的大小
-        compressed_size = len(output.getvalue())
-        compression_ratio = (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
-        elapsed_time = time.time() - start_time
-        
-        print_flush(f"[压缩] 压缩后大小: {compressed_size / 1024:.2f} KB")
-        saved_size = original_size - compressed_size
-        print_flush(f"[压缩] 压缩比例: {compression_ratio:.1f}% (节省 {saved_size / 1024:.2f} KB)")
-        print_flush(f"[压缩] 耗时: {elapsed_time:.2f} 秒")
-        print_flush(f"[压缩] ✓ 图片压缩完成: {file_name}\n")
-        
-        # 获取压缩后的数据大小
-        compressed_data = output.getvalue()
-        compressed_size = len(compressed_data)
-        
-        # 创建新的InMemoryUploadedFile
-        # 注意：需要重新创建BytesIO对象，因为output已经被读取
-        output_file = io.BytesIO(compressed_data)
-        compressed_file = InMemoryUploadedFile(
-            output_file,
-            'ImageField',
-            image_file.name,
-            'image/jpeg',
-            compressed_size,
-            None
-        )
-        # 标记已压缩，避免存储类重复压缩
-        compressed_file._compressed = True
-        print_flush(f"[压缩] 图片压缩已设置压缩标记: _compressed=True")
-        
-        return compressed_file
-        
-    except Exception as e:
-        # 如果压缩失败，返回原文件
-        print_flush(f"[压缩] ✗ 图片压缩失败: {file_name}")
-        print_flush(f"[压缩] 错误信息: {str(e)}")
-        print_flush(f"[压缩] 使用原始文件\n")
-        image_file.seek(0)  # 重置文件指针
+        with Image.open(io.BytesIO(original)) as image:
+            if getattr(image, 'is_animated', False):
+                return image_file
+            extension = os.path.splitext(image_file.name)[1].lower()
+            image_format = {'.jpg': 'JPEG', '.jpeg': 'JPEG', '.png': 'PNG',
+                            '.webp': 'WEBP', '.gif': 'GIF', '.bmp': 'BMP'}.get(extension)
+            if image_format is None or image.format != image_format:
+                return image_file
+            image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+            if image_format == 'JPEG' and image.mode not in ('RGB', 'L'):
+                image = image.convert('RGB')
+            output = io.BytesIO()
+            options = {'quality': quality} if image_format in ('JPEG', 'WEBP') else {}
+            if image_format in ('JPEG', 'PNG'):
+                options['optimize'] = True
+            image.save(output, format=image_format, **options)
+            if output.tell() >= len(original):
+                return image_file
+            output.seek(0)
+            result = InMemoryUploadedFile(output, 'ImageField', image_file.name,
+                                          Image.MIME[image_format], len(output.getvalue()), None)
+            result._compressed = True
+            return result
+    except Exception:
+        logger.exception('图片优化失败，保留原文件: %s', image_file.name)
+        image_file.seek(0)
         return image_file
 
 
@@ -395,61 +335,16 @@ def compress_pdf(pdf_file, _tried_ghostscript=False):
 
 
 def should_compress_file(file, file_type=None):
-    """
-    判断文件是否需要压缩
-    
-    参数:
-        file: 文件对象
-        file_type: 文件类型 ('image' 或 'pdf')
-    
-    返回:
-        bool: 是否需要压缩
-    """
-    file_name = getattr(file, 'name', '未知文件')
-    
-    if file_type is None:
-        # 根据文件扩展名判断
-        name = getattr(file, 'name', '')
-        if not name:
-            print_flush(f"[压缩] 无法判断文件类型: 文件名为空")
-            return False
-        
-        ext = os.path.splitext(name)[1].lower()
-        image_exts = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
-        pdf_exts = ['.pdf']
-        
-        if ext in image_exts:
-            file_type = 'image'
-        elif ext in pdf_exts:
-            file_type = 'pdf'
-        else:
-            print_flush(f"[压缩] 不支持的文件类型: {ext}")
-            return False
-    
-    # 检查文件大小（大于100KB才压缩）
+    """Only optimize images over 100 KB in upload requests."""
+    extension = os.path.splitext(getattr(file, 'name', None) or '')[1].lower()
+    if file_type == 'pdf' or extension == '.pdf':
+        return False
+    if extension not in ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'):
+        return False
     try:
         file.seek(0, os.SEEK_END)
-        file_size = file.tell()
+        size = file.tell()
         file.seek(0)
-    except Exception as e:
-        print_flush(f"[压缩] 无法获取文件大小: {file_name}, 错误: {e}")
+        return size > 100 * 1024
+    except (OSError, ValueError):
         return False
-    
-    # 打印文件信息（用于调试）
-    if file_type == 'pdf':
-        print_flush(f"[压缩] 检查PDF文件: {file_name} (大小: {file_size / 1024:.2f} KB, 阈值: 500 KB)")
-    
-    if file_type == 'image' and file_size > 100 * 1024:  # 100KB
-        return True
-    elif file_type == 'pdf' and file_size > 500 * 1024:  # 500KB
-        print_flush(f"[压缩] ✓ PDF文件需要压缩: {file_name} ({file_size / 1024:.2f} KB > 500 KB)")
-        return True
-    
-    # 如果文件太小，不需要压缩
-    if file_type == 'image':
-        print_flush(f"[压缩] 跳过小图片: {file_name} ({file_size / 1024:.2f} KB < 100 KB)")
-    elif file_type == 'pdf':
-        print_flush(f"[压缩] 跳过小PDF: {file_name} ({file_size / 1024:.2f} KB < 500 KB)")
-    
-    return False
-

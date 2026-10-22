@@ -1,17 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getCurrentTheme, setTheme, toggleTheme as toggleThemeUtil, watchSystemTheme } from '../utils/themeUtils'
+import { getCurrentTheme, setTheme, toggleTheme as toggleThemeUtil, watchSystemTheme, watchStoredTheme } from '@/lib/themeUtils'
 
 /**
  * 自定义 Hook：管理主题状态
  * @returns {{ isDark: boolean, theme: 'dark' | 'light', toggleTheme: () => void, setTheme: (theme: 'dark' | 'light') => void }}
  */
 export const useTheme = () => {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof document !== 'undefined') {
-      return getCurrentTheme() === 'dark'
-    }
-    return false
-  })
+  const [isDark, setIsDark] = useState(false)
 
   // 检查主题变化
   const checkTheme = useCallback(() => {
@@ -42,20 +37,22 @@ export const useTheme = () => {
 
     document.addEventListener('themeChange', handleThemeChange)
 
-    // 使用 MutationObserver 监听 body 类变化
+    // Tailwind and all theme consumers share the html.dark selector.
     const observer = new MutationObserver(checkTheme)
-    observer.observe(document.body, {
+    observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class']
     })
 
     // 监听系统主题变化（仅在未手动设置主题时）
     const unwatchSystem = watchSystemTheme(checkTheme)
+    const unwatchStorage = watchStoredTheme()
 
     return () => {
       document.removeEventListener('themeChange', handleThemeChange)
       observer.disconnect()
       unwatchSystem()
+      unwatchStorage()
     }
   }, [checkTheme])
 

@@ -7,47 +7,140 @@
 """
 import os
 import re
+import html
+import logging
+from pathlib import Path
+from django.db import transaction, close_old_connections
 from urllib.parse import urlparse, unquote
-from django.db.models.signals import post_delete, pre_save, post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.conf import settings
 from sorl.thumbnail import delete as delete_thumbnail
 from .models import (
     通讯, 书讯, 书评, 观点, 文艺, 译林, 文史, 论文, 古籍, 书库
 )
-from .compression import compress_image, compress_pdf, should_compress_file
 
 # ==================== 文件删除相关函数 ====================
 
-def delete_file(file_field):
-    """删除文件字段对应的物理文件"""
-    if not file_field:
-        return
-    
-    file_name = getattr(file_field, 'name', '')
-    if not file_name or file_name in ('null', 'None', ''):
-        return
-    
+ARTICLE_MODELS = (通讯, 书讯, 书评, 观点, 文艺, 译林, 文史, 论文, 古籍, 书库)
+HTML_FIELDS = ('内容', '作者简介', '目录', '前言', '内容简介')
+logger = logging.getLogger(__name__)
+
+
+def media_name_from_url(file_url):
+    """Return a local media name only when the URL and resolved path are trusted."""
+    parsed = urlparse(html.unescape(str(file_url)))
+    media_url = urlparse(settings.MEDIA_URL)
+    if parsed.scheme and parsed.scheme not in ('http', 'https'):
+        return None
+    if parsed.netloc:
+        trusted_hosts = set(getattr(settings, 'MEDIA_FILE_HOSTS', []))
+        if media_url.hostname:
+            trusted_hosts.add(media_url.hostname)
+        if parsed.hostname not in trusted_hosts:
+            return None
+    prefix = media_url.path.rstrip('/') + '/'
+    path = unquote(parsed.path)
+    if not path.startswith(prefix):
+        return None
+    name = path[len(prefix):]
+    return _safe_media_name(name)
+
+
+def _safe_media_name(name):
+    if not name or name in ('null', 'None') or '\\' in name:
+        return None
+    root = Path(settings.MEDIA_ROOT).resolve()
+    target = (root / name).resolve()
+    if not target.is_relative_to(root) or target == root:
+        return None
+    return target.relative_to(root).as_posix()
+
+
+def _referenced_media_names(names):
+    """Check all candidates in one pass through each model's rich text."""
+    referenced = set()
+    for model in ARTICLE_MODELS:
+        file_fields = [field for field in model._meta.fields if hasattr(field, 'upload_to')]
+        for field in file_fields:
+            referenced.update(model.objects.filter(**{field.name + '__in': names}).values_list(field.name, flat=True))
+        if referenced >= names:
+            return referenced
+        html_fields = [field.name for field in model._meta.fields if field.name in HTML_FIELDS]
+        if html_fields:
+            for values in model.objects.values_list(*html_fields).iterator(chunk_size=500):
+                for value in values:
+                    for url in extract_ckeditor_files(str(value or '')):
+                        name = media_name_from_url(url)
+                        if name in names:
+                            referenced.add(name)
+                if referenced >= names:
+                    return referenced
+    return referenced
+
+
+def _is_media_referenced(name):
+    return name in _referenced_media_names({name})
+
+
+def _delete_unreferenced_media_batch(entries):
     try:
-        try:
-            delete_thumbnail(file_field, delete_file=False)
-        except Exception:
-            pass
-        
-        if hasattr(file_field, 'storage') and hasattr(file_field.storage, 'delete'):
-            if file_name:
-                file_field.storage.delete(file_name)
-        
-        if hasattr(file_field, 'path'):
+        names = {name for name in entries if _safe_media_name(name) == name}
+        referenced = _referenced_media_names(names) if names else set()
+        from django.core.files.storage import default_storage
+        for name in names - referenced:
             try:
-                if os.path.isfile(file_field.path):
-                    os.remove(file_field.path)
+                delete_thumbnail(name, delete_file=False)
+                (entries[name] or default_storage).delete(name)
             except Exception:
-                pass
-                
-    except Exception as e:
-        file_path = getattr(file_field, 'path', getattr(file_field, 'name', '未知路径'))
-        print(f"删除文件失败: {file_path}, 错误: {e}")
+                logger.exception('媒体文件清理失败: %s', name)
+    except Exception:
+        # A failed reference query must preserve all candidate files.
+        logger.exception('媒体引用检查失败')
+
+
+def _delete_unreferenced_media(name, storage=None):
+    _delete_unreferenced_media_batch({name: storage})
+
+
+from contextlib import contextmanager
+from contextvars import ContextVar
+
+_cleanup_batch = ContextVar('media_cleanup_batch', default=None)
+
+
+def schedule_media_cleanup(entries):
+    batch = _cleanup_batch.get()
+    if batch is not None:
+        batch.update(entries)
+    elif entries:
+        transaction.on_commit(lambda: _delete_unreferenced_media_batch(entries))
+
+
+@contextmanager
+def media_cleanup_batch():
+    if _cleanup_batch.get() is not None:
+        yield
+        return
+    entries = {}
+    token = _cleanup_batch.set(entries)
+    try:
+        yield
+    except BaseException:
+        raise
+    else:
+        schedule = dict(entries)
+        if schedule:
+            transaction.on_commit(lambda: _delete_unreferenced_media_batch(schedule))
+    finally:
+        _cleanup_batch.reset(token)
+
+
+def delete_file(file_field):
+    if file_field:
+        name = _safe_media_name(file_field.name)
+        if name:
+            schedule_media_cleanup({name: file_field.storage})
 
 
 def extract_ckeditor_files(html_content):
@@ -69,268 +162,133 @@ def extract_ckeditor_files(html_content):
 
 
 def delete_ckeditor_file(file_url):
-    """删除CKEditor上传的文件"""
-    try:
-        parsed = urlparse(file_url)
-        path = parsed.path if parsed.netloc else file_url
-        path = unquote(path)
-        
-        if path.startswith('/'):
-            path = path[1:]
-        if path.startswith('media/'):
-            path = path[6:]
-        
-        file_path = os.path.join(settings.MEDIA_ROOT, path)
-        
-        if os.path.isfile(file_path):
+    name = media_name_from_url(file_url)
+    if not name:
+        return False
+    schedule_media_cleanup({name: None})
+    return True
+
+
+@receiver(post_delete)
+def delete_article_media(sender, instance, **kwargs):
+    if sender not in ARTICLE_MODELS:
+        return
+    from django.contrib.contenttypes.models import ContentType
+    from notifications.models import ArticleDistribution
+    ArticleDistribution.objects.filter(content_type=ContentType.objects.get_for_model(sender), object_id=instance.pk).delete()
+    entries = {}
+    for field in instance._meta.fields:
+        value = getattr(instance, field.name)
+        if hasattr(field, 'upload_to') and value:
+            name = _safe_media_name(value.name)
+            if name:
+                entries[name] = value.storage
+        elif field.name in HTML_FIELDS:
+            for url in extract_ckeditor_files(str(value or '')):
+                name = media_name_from_url(url)
+                if name:
+                    entries.setdefault(name, None)
+    schedule_media_cleanup(entries)
+
+
+# ==================== PDF 封面后台处理 ====================
+# Limit work in each web process. The repair command retries missing covers after restart.
+from threading import Thread, Lock, BoundedSemaphore
+from uuid import uuid4
+
+_thumbnail_lock = Lock()
+_thumbnail_slots = BoundedSemaphore(2)
+_thumbnail_pending = set()
+
+
+def queue_pdf_thumbnail(model, pk, document_name):
+    key = (model._meta.label_lower, pk, document_name)
+    with _thumbnail_lock:
+        if key in _thumbnail_pending or not _thumbnail_slots.acquire(blocking=False):
+            return
+        _thumbnail_pending.add(key)
+
+    def run():
+        close_old_connections()
+        try:
+            _generate_pdf_thumbnail_task(model, pk, document_name)
+        finally:
             try:
-                os.remove(file_path)
-                file_type = "图片" if path.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp')) else "文件"
-                print(f"[删除] 已删除CKEditor{file_type}: {path}")
-                return True
-            except Exception as e:
-                print(f"[删除] 删除CKEditor文件失败: {path}, 错误: {e}")
-                return False
-        else:
-            print(f"[删除] CKEditor文件不存在: {path}")
+                close_old_connections()
+            finally:
+                with _thumbnail_lock:
+                    _thumbnail_pending.discard(key)
+                    _thumbnail_slots.release()
+    try:
+        Thread(target=run, daemon=True).start()
+    except Exception:
+        with _thumbnail_lock:
+            _thumbnail_pending.discard(key)
+            _thumbnail_slots.release()
+        logger.exception('启动封面任务失败: %s', key)
+
+
+@receiver(post_save, sender=论文)
+@receiver(post_save, sender=古籍)
+@receiver(post_save, sender=书库)
+def generate_pdf_thumbnail(sender, instance, **kwargs):
+    if kwargs.get('raw'):
+        return
+    document_name = instance.文档.name
+    if document_name and document_name.lower().endswith('.pdf') and getattr(instance.图片, 'name', None) in (None, '', 'null', 'None'):
+        pk = instance.pk
+        transaction.on_commit(lambda: queue_pdf_thumbnail(sender, pk, document_name))
+
+
+def _generate_pdf_thumbnail_task(model, pk, document_name):
+    """Apply only the cover field, guarded against deletion, new documents and manual covers."""
+    from django.core.files.base import ContentFile
+    from django.db.models import Q
+    cover_name = None
+    storage = model._meta.get_field('图片').storage
+    try:
+        import fitz
+        item = model.objects.filter(pk=pk, 文档=document_name).first()
+        if not item or getattr(item.图片, 'name', item.图片) not in (None, '', 'null', 'None') or not document_name.lower().endswith('.pdf'):
             return False
-            
-    except Exception as e:
-        print(f"[删除] 处理CKEditor文件URL失败: {file_url}, 错误: {e}")
+        with item.文档.open('rb') as source:
+            with fitz.open(stream=source.read(), filetype='pdf') as document:
+                if document.page_count < 1:
+                    return False
+                page = document.load_page(0)
+                # Bound output dimensions even for unusually large PDF pages.
+                scale = min(1.5, 1920 / max(page.rect.width, page.rect.height))
+                pixmap = page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
+                blob = pixmap.tobytes('jpeg')
+        filename = f'{Path(document_name).stem}_{uuid4().hex}_thumb.jpg'
+        field = model._meta.get_field('图片')
+        cover_name = storage.save(field.generate_filename(item, filename), ContentFile(blob, name=filename),
+                                  max_length=field.max_length)
+        updated = model.objects.filter(pk=pk, 文档=document_name).filter(
+            Q(图片__in=['', 'null', 'None']) | Q(图片__isnull=True)
+        ).update(图片=cover_name)
+        if not updated:
+            storage.delete(cover_name)
+            return False
+        logger.info('生成 PDF 封面: %s %s', model._meta.label_lower, pk)
+        invalidate_home_feed()
+        return True
+    except Exception:
+        # A database failure after applying the update must not delete a referenced cover.
+        if cover_name:
+            _delete_unreferenced_media(cover_name, storage)
+        logger.exception('生成 PDF 封面失败: %s %s', model._meta.label_lower, pk)
         return False
 
 
-def delete_ckeditor_images_from_content(instance):
-    """从文章内容中提取并删除所有CKEditor上传的文件"""
-    ckeditor_fields = ['内容', '作者简介', '目录', '前言', '内容简介']
-    
-    deleted_count = 0
-    for field_name in ckeditor_fields:
-        if hasattr(instance, field_name):
-            content = getattr(instance, field_name, None)
-            if content:
-                file_urls = extract_ckeditor_files(str(content))
-                for file_url in file_urls:
-                    if delete_ckeditor_file(file_url):
-                        deleted_count += 1
-    
-    if deleted_count > 0:
-        print(f"[删除] 共删除 {deleted_count} 个CKEditor文件")
-
-# ==================== post_delete 信号处理器 ====================
-
-@receiver(post_delete, sender=通讯)
-def delete_tongxun_files(sender, instance, **kwargs):
-    if instance.图片:
-        delete_file(instance.图片)
-    delete_ckeditor_images_from_content(instance)
+def invalidate_home_feed():
+    from .feed_cache import invalidate_home_feed as invalidate
+    invalidate()
 
 
-@receiver(post_delete, sender=书讯)
-def delete_shuxun_files(sender, instance, **kwargs):
-    if instance.图片:
-        delete_file(instance.图片)
-    delete_ckeditor_images_from_content(instance)
-
-
-@receiver(post_delete, sender=书评)
-def delete_shuping_files(sender, instance, **kwargs):
-    if instance.图片:
-        delete_file(instance.图片)
-    delete_ckeditor_images_from_content(instance)
-
-
-@receiver(post_delete, sender=观点)
-def delete_guandian_files(sender, instance, **kwargs):
-    if instance.图片:
-        delete_file(instance.图片)
-    delete_ckeditor_images_from_content(instance)
-
-
-@receiver(post_delete, sender=文艺)
-def delete_wenyi_files(sender, instance, **kwargs):
-    if instance.图片:
-        delete_file(instance.图片)
-    delete_ckeditor_images_from_content(instance)
-
-
-@receiver(post_delete, sender=译林)
-def delete_yiling_files(sender, instance, **kwargs):
-    if instance.图片:
-        delete_file(instance.图片)
-    delete_ckeditor_images_from_content(instance)
-
-
-@receiver(post_delete, sender=文史)
-def delete_wenshi_files(sender, instance, **kwargs):
-    if instance.图片:
-        delete_file(instance.图片)
-    delete_ckeditor_images_from_content(instance)
-
-
-@receiver(post_delete, sender=论文)
-def delete_lunwen_files(sender, instance, **kwargs):
-    if instance.图片:
-        delete_file(instance.图片)
-    if instance.文档:
-        delete_file(instance.文档)
-    delete_ckeditor_images_from_content(instance)
-
-
-@receiver(post_delete, sender=古籍)
-def delete_guji_files(sender, instance, **kwargs):
-    if instance.文档:
-        delete_file(instance.文档)
-    delete_ckeditor_images_from_content(instance)
-
-
-@receiver(post_delete, sender=书库)
-def delete_shuku_files(sender, instance, **kwargs):
-    if instance.文档:
-        delete_file(instance.文档)
-    delete_ckeditor_images_from_content(instance)
-
-
-# ==================== pre_save 信号处理器(压缩已禁用) ====================
-
-def compress_file_field(instance, field_name):
-    """
-    压缩文件字段(已禁用,由 CompressedFileSystemStorage 处理)
-    """
-    pass
-
-
-@receiver(pre_save, sender=通讯)
-def compress_tongxun_files(sender, instance, **kwargs):
-    compress_file_field(instance, '图片')
-
-
-@receiver(pre_save, sender=书讯)
-def compress_shuxun_files(sender, instance, **kwargs):
-    compress_file_field(instance, '图片')
-
-
-@receiver(pre_save, sender=书评)
-def compress_shuping_files(sender, instance, **kwargs):
-    compress_file_field(instance, '图片')
-
-
-@receiver(pre_save, sender=观点)
-def compress_guandian_files(sender, instance, **kwargs):
-    compress_file_field(instance, '图片')
-
-
-@receiver(pre_save, sender=文艺)
-def compress_wenyi_files(sender, instance, **kwargs):
-    compress_file_field(instance, '图片')
-
-
-@receiver(pre_save, sender=译林)
-def compress_yiling_files(sender, instance, **kwargs):
-    compress_file_field(instance, '图片')
-
-
-@receiver(pre_save, sender=文史)
-def compress_wenshi_files(sender, instance, **kwargs):
-    compress_file_field(instance, '图片')
-
-
-@receiver(pre_save, sender=论文)
-def compress_lunwen_files(sender, instance, **kwargs):
-    compress_file_field(instance, '图片')
-    compress_file_field(instance, '文档')
-
-
-@receiver(pre_save, sender=古籍)
-def compress_guji_files(sender, instance, **kwargs):
-    compress_file_field(instance, '文档')
-
-
-@receiver(pre_save, sender=书库)
-def compress_shuku_files(sender, instance, **kwargs):
-    compress_file_field(instance, '文档')
-
-
-# ==================== PDF缩略图生成 - 使用 post_save 异步处理 ====================
-
-@receiver(post_save, sender=论文)
-def generate_lunwen_thumbnail(sender, instance, created, **kwargs):
-    """
-    论文保存后异步生成PDF缩略图
-    使用 post_save 避免阻塞请求
-    """
-    if instance.文档 and not instance.图片:
-        try:
-            # TODO: 改用 Celery 或 Django-Q 异步任务
-            # 暂时使用线程避免阻塞(生产环境应使用消息队列)
-            from threading import Thread
-            Thread(target=_generate_pdf_thumbnail_task, args=(instance,), daemon=True).start()
-        except Exception as e:
-            print(f"启动PDF缩略图生成任务失败: {e}")
-
-
-@receiver(post_save, sender=古籍)
-def generate_guji_thumbnail(sender, instance, created, **kwargs):
-    """古籍保存后异步生成PDF缩略图"""
-    if instance.文档 and not instance.图片:
-        try:
-            from threading import Thread
-            Thread(target=_generate_pdf_thumbnail_task, args=(instance,), daemon=True).start()
-        except Exception as e:
-            print(f"启动PDF缩略图生成任务失败: {e}")
-
-
-@receiver(post_save, sender=书库)
-def generate_shuku_thumbnail(sender, instance, created, **kwargs):
-    """书库保存后异步生成PDF缩略图"""
-    if instance.文档 and not instance.图片:
-        try:
-            from threading import Thread
-            Thread(target=_generate_pdf_thumbnail_task, args=(instance,), daemon=True).start()
-        except Exception as e:
-            print(f"启动PDF缩略图生成任务失败: {e}")
-
-
-def _generate_pdf_thumbnail_task(instance):
-    """
-    PDF缩略图生成任务(异步执行)
-    
-    注意: 这是临时方案,生产环境应使用 Celery
-    """
-    try:
-        from pdf2image import convert_from_path
-        from io import BytesIO
-        from django.core.files.base import ContentFile
-        
-        if not instance.文档.name.lower().endswith('.pdf'):
-            return
-        
-        # 获取PDF路径
-        if hasattr(instance.文档, 'path'):
-            pdf_path = instance.文档.path
-        else:
-            print(f"无法获取PDF路径: {instance.文档.name}")
-            return
-        
-        if not os.path.exists(pdf_path):
-            print(f"PDF文件不存在: {pdf_path}")
-            return
-        
-        # 转换第一页为图片
-        images = convert_from_path(pdf_path, first_page=1, last_page=1, dpi=150)
-        
-        if images:
-            image = images[0]
-            blob = BytesIO()
-            image.save(blob, 'JPEG', quality=85, optimize=True)
-            
-            # 构建文件名
-            pdf_name = os.path.basename(instance.文档.name)
-            img_name = os.path.splitext(pdf_name)[0] + '_thumb.jpg'
-            
-            # 保存缩略图
-            instance.图片.save(img_name, ContentFile(blob.getvalue()), save=True)
-            print(f"自动生成PDF缩略图成功: {img_name}")
-            
-    except Exception as e:
-        print(f"自动生成PDF缩略图失败 (ID: {instance.id}): {e}")
+@receiver(post_save)
+@receiver(post_delete)
+def invalidate_content_cache(sender, **kwargs):
+    from .models import 书讯Sale, 书评_分类
+    if sender in ARTICLE_MODELS or sender in (书讯Sale, 书评_分类):
+        transaction.on_commit(invalidate_home_feed)

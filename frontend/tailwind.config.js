@@ -1,10 +1,14 @@
 /** @type {import('tailwindcss').Config} */
+const { night, sage } = require('./src/lib/themePalette.json')
+
 module.exports = {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: ["./pages/**/*.{js,ts,jsx,tsx}", "./src/**/*.{js,ts,jsx,tsx}"],
   darkMode: "class",
   theme: {
     extend: {
       colors: {
+        night,
+        sage,
         green: {
           500: "#10b981",
           600: "#059669",

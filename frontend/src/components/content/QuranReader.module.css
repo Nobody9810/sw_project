@@ -1,0 +1,31 @@
+.arabic {
+  font-family: var(--font-qpc-hafs), 'Traditional Arabic', serif;
+}
+
+.indopak {
+  font-family: var(--font-indopak), var(--font-qpc-hafs), serif;
+}
+
+.arabic,
+.indopak {
+  font-weight: 400;
+  font-synthesis: none;
+  font-style: normal;
+  letter-spacing: normal;
+  word-spacing: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+  unicode-bidi: isolate;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  min-height: 24rem;
+}
+
+.scroll {
+  min-width: 0;
+}
+
+

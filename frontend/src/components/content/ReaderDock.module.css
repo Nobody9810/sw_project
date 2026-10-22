@@ -1,0 +1,61 @@
+.dock {
+  position: sticky;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  z-index: 20;
+  isolation: isolate; /* keeps the fade layer behind the controls only */
+  margin-top: 1rem;
+  container: reader-dock / inline-size;
+}
+
+/* The directory reduces the reading column independently of viewport width. */
+.hadithLayout,
+.quranLayout {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.previousPage { width: 2.75rem; }
+.previousLabel,
+.chapterActions,
+.wideChapter { display: none; }
+.compactChapter { display: flex; }
+.reciterCell { order: -1; }
+
+/* Mid-width hadith bars keep chapter skips without squeezing the page controls. */
+@container reader-dock (min-width: 32rem) {
+  .hadithLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 0.25rem;
+  }
+  .hadithPosition { grid-column: 1 / -1; }
+  .previousPage { width: auto; padding-inline: 0.75rem; }
+  .previousLabel { display: inline; }
+  .chapterActions { display: flex; }
+  .reciter { position: relative; }
+  .reciterOptions {
+    left: auto;
+    right: 0;
+    width: 18rem;
+    max-width: calc(100cqw - 0.5rem);
+  }
+}
+
+/* Only use three columns once the dock itself has enough space. */
+@container reader-dock (min-width: 48rem) {
+  .hadithLayout,
+  .quranLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .hadithPosition { grid-column: auto; }
+  .compactChapter { display: none; }
+  .wideChapter { display: flex; }
+  .reciterCell { order: 0; justify-content: flex-end; }
+  .reciter { flex: 0 1 16rem; }
+  .playbackControls { gap: 0.5rem; }
+  .playbackControls > button:first-child,
+  .playbackControls > button:last-child { width: 2.75rem; }
+}

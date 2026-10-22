@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
@@ -17,6 +18,9 @@ class UserReaction(models.Model):
         db_index=True,
         verbose_name="用户会话ID"
     )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                             on_delete=models.SET_NULL, related_name='article_reactions', verbose_name='关联账户')
+    identity_key = models.CharField(max_length=64, default='', editable=False)
     reaction_type = models.CharField(
         max_length=10, 
         choices=REACTION_CHOICES,
@@ -35,13 +39,19 @@ class UserReaction(models.Model):
     )
     
     class Meta:
-        unique_together = ['user_session', 'content_type', 'object_id']
+        unique_together = ['identity_key', 'content_type', 'object_id']
         indexes = [
             models.Index(fields=['content_type', 'object_id']),
             models.Index(fields=['user_session']),
         ]
         verbose_name = "用户反应记录"
         verbose_name_plural = "用户反应记录"
+
+    def save(self, *args, **kwargs):
+        if not self.identity_key:
+            from .identity import reaction_key
+            self.identity_key = reaction_key(self.user_id, self.user_session)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user_session} - {self.get_reaction_type_display()} - {self.content_object}"
@@ -86,6 +96,8 @@ class ViewCount(models.Model):
 
 class ViewRecord(models.Model):
     """访问记录模型 - 用于防止重复计算浏览量"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                             on_delete=models.SET_NULL, related_name='article_views', verbose_name='关联账户')
     user_session = models.CharField(
         max_length=40,
         db_index=True,
@@ -115,6 +127,7 @@ class ViewRecord(models.Model):
             models.Index(fields=['content_type', 'object_id', 'viewed_at']),
             models.Index(fields=['user_session', 'content_type', 'object_id', 'viewed_at']),
             models.Index(fields=['user_session', 'viewed_at']),
+            models.Index(fields=['user', 'content_type', 'object_id', 'viewed_at'], name='viewrecord_account_window'),
         ]
         verbose_name = "访问记录"
         verbose_name_plural = "访问记录"
@@ -124,16 +137,17 @@ class ViewRecord(models.Model):
         return f"{self.user_session} - {self.content_object} - {self.viewed_at}"
     
     @classmethod
-    def should_count_view(cls, user_session, content_type, object_id, time_window_minutes=30):
+    def should_count_view(cls, user_session, content_type, object_id, time_window_minutes=30, *, user_id=None):
         """
         检查是否应该计算浏览量
-        策略：同一Session在指定时间窗口内（默认30分钟）只计算一次
+        策略：登录按账户、访客按Session，在指定时间窗口内（默认30分钟）只计算一次
         """
         time_threshold = timezone.now() - timedelta(minutes=time_window_minutes)
         
         # 获取最近一条访问记录
+        identity = {'user_id': user_id} if user_id is not None else {'user_id__isnull': True, 'user_session': user_session}
         recent_view = cls.objects.filter(
-            user_session=user_session,
+            **identity,
             content_type=content_type,
             object_id=object_id,
             viewed_at__gte=time_threshold
