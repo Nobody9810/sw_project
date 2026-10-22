@@ -677,9 +677,14 @@ UNFOLD = {
                 ],
             },
             {
-                "title": "用户反馈",
+                "title": "站点维护",
                 "separator": True,
                 "items": [
+                    {
+                        "title": "更新说明",
+                        "icon": "new_releases",
+                        "link": "/admin/home/releasenote/",
+                    },
                     {
                         "title": "用户反馈",
                         "icon": "feedback",

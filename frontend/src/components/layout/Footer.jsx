@@ -38,6 +38,8 @@ const Footer = memo(function Footer() {
                   <Link href="/版权声明" className="text-white transition-colors hover:text-white/80">版权声明</Link>
                   <span aria-hidden="true">|</span>
                   <a href="/admin/" className="text-white transition-colors hover:text-white/80">站点管理</a>
+                  <span aria-hidden="true">|</span>
+                  <Link href="/更新说明/" className="text-white transition-colors hover:text-white/80">更新说明</Link>
                 </nav>
               </div>
             </div>

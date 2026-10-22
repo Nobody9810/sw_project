@@ -7,6 +7,7 @@ import '@/styles/globals.css'
 import { ReadingToolsProvider } from '@/components/common/ReadingToolsContext'
 import { AuthProvider } from '@/features/auth/AuthContext'
 import FloatingTools from '@/components/layout/FloatingTools'
+import ReleaseNotice from '@/features/updates/ReleaseNotice'
 
 export default function FrontendApp({ Component, pageProps }: AppProps) {
   return (
@@ -22,6 +23,7 @@ export default function FrontendApp({ Component, pageProps }: AppProps) {
         <FloatingTools />
         <PrayerToolsDialog />
         <PrayerLocationNotice />
+        <ReleaseNotice />
       </PrayerToolsProvider>
       </ReadingToolsProvider>
       </AuthProvider>
