@@ -1,5 +1,6 @@
 from django.db import models
 from uuid import uuid4
+from .deletion import cascade_review
 
 
 class ArticleDistribution(models.Model):
@@ -52,8 +53,8 @@ class OutboundMessage(models.Model):
 class TelegramReview(models.Model):
     """Single-use review capability and audit, without comment text or reader email."""
     token = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    comment = models.OneToOneField('comment.Comment', on_delete=models.CASCADE, related_name='telegram_review', null=True, blank=True)
-    question = models.OneToOneField('qa.Question', on_delete=models.CASCADE, related_name='telegram_review', null=True, blank=True)
+    comment = models.OneToOneField('comment.Comment', on_delete=cascade_review, related_name='telegram_review', null=True, blank=True)
+    question = models.OneToOneField('qa.Question', on_delete=cascade_review, related_name='telegram_review', null=True, blank=True)
     fingerprint = models.CharField(max_length=64)
     status = models.CharField(max_length=16, default='pending', choices=[
         ('pending', '待审核'), ('approved', '已通过'), ('rejected', '未通过'),
