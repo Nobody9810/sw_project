@@ -47,7 +47,7 @@ const Footer = memo(function Footer() {
               <p className="text-[13px] leading-[1.8] text-white/80 mx-auto mb-4 max-w-[600px] px-4">
                 漢語穆斯林交流園地，資訊、知識、思想共用。<br/>
                 它是一粒種子，欲生一朵絢麗的希望之花。<br/>
-                它是一流，要穿過渾濁的世道。<br/>
+                它是一股清流，要穿過渾濁的世道。<br/>
                 它是一棵胡楊，挺立在大時代的壁戈荒漠，給身處死亡之穀的守望者一抹生的色彩。
               </p>
               <div className="text-2xl font-semibold text-white mb-5 tracking-wider">

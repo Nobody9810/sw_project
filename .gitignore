@@ -1,173 +1,176 @@
-# =========================================
-# Python / Django
-# =========================================
-# 字节码文件
+# Production source repository. Ignored files stay on the current machine.
+# These rules do not remove already tracked files or clean Git history.
+
+# Credentials and machine-specific configuration. Keep empty env templates.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.ssh/
+/.aws/
+/.agents/
+/.claude/
+/.codex/
+
+# Documentation and local review notes.
+*.[mM][dD]
+
+# Dependencies, Python environments and generated build output.
+# Keep package manifests, lockfiles, frontend/public and backend/static sources.
+.venv/
+venv/
+node_modules/
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
+*.tsbuildinfo
+/frontend/.next*/
+/frontend/out/
+/frontend/dist/
+/backend/staticfiles/
+
+# Tool caches, tests, coverage and test-only automation.
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.eslintcache
+.tox/
+.hypothesis/
+tests/
+__tests__/
+__snapshots__/
+test_*.py
+*_test.py
+tests.py
+testing.py
+*_test_settings.py
+*.test.*
+*.spec.*
+coverage/
+htmlcov/
+.coverage
+.coverage.*
+/test-results/
+/frontend/test-results/
+/frontend/playwright-report/
+/.github/workflows/checks.yml
+/scripts/
+
+# Migrations are production schema history, even when a name ends in _test.py.
+!**/migrations/*.py
+
+# Business data and offline source material: migrate separately from Git.
+# Do not globally ignore image/audio/video extensions: site assets need them.
 *.sql
-*.md
+*.sql.*
+*.dump
+*.dump.*
+*.sqlite3
+*.sqlite3-*
+*.db
+/hadith-data*.json
+/backend/hadith-data*.json
+/backend/media/
+/backend/hadith_exports/
+/backend/*.pdf
+/backend/*.epub
+/backend/穆斯林圣训实录全集.txt
+/backend/requirements-import.txt
+/backend/requirements-legacy-tools.txt
+/backend/requirements-bukhari-probe.txt
+/backend/requirements-quran-audio-audit.txt
+/backend/tools/
 
-# 虚拟环境
-venv/
-env/
-ENV/
-.venv
-
-# Django
+# Logs, temporary files, process state and editor backups.
 *.log
-*.pot
-*.pyc
-db.sqlite3
-db.sqlite3-journal
-local_settings.py
-/media
-/staticfiles
-*.csv
-
-# Python 打包
-*.egg
-*.egg-info/
-dist/
-build/
-eggs/
-.eggs/
-*.whl
-
-# =========================================
-# Node.js / React / Vite
-# =========================================
-# 依赖
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# 构建输出
-dist/
-dist-ssr/
-*.local
-build/
-.vite/
-
-# 编辑器目录和文件
-.vscode/*
-!.vscode/extensions.json
-.idea/
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# =========================================
-# 环境变量和配置文件
-# =========================================
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env*.local
-
-# =========================================
-# 媒体文件和用户上传内容
-# =========================================
-backend/media/
-backend/staticfiles/
-*.pdf
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.webp
-*.svg
-*.mp4
-*.mp3
-*.avi
-*.mov
-
-# =========================================
-# IDE 和编辑器
-# =========================================
-.vscode/
-.idea/
+/backend/logs/
+*.tmp
+*.temp
+*.cache
+*.pid
+*.pid.lock
+*.seed
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
 *.swp
 *.swo
 *~
+
+# IDE settings.
+.vscode/
+.vscode-test/
+.idea/
 .project
 .classpath
 .settings/
 *.sublime-project
 *.sublime-workspace
+*.code-workspace
 
-# =========================================
-# 操作系统文件
-# =========================================
-# Windows
-Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
+# Local operating-system installers and shortcuts.
 *.cab
 *.msi
 *.msix
 *.msm
 *.msp
 *.lnk
-*.Zone.Identifier
 
-# macOS
+# Operating-system metadata and downloaded-file metadata.
 .DS_Store
 .AppleDouble
 .LSOverride
 ._*
-
-# Linux
-*~
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.Zone.Identifier
+*:Zone.Identifier
 .directory
 .Trash-*
 
-# =========================================
-# 日志和临时文件
-# =========================================
-*.log
-*.tmp
-*.temp
-*.cache
-.cache/
-*.pid
-*.seed
-*.pid.lock
-
-# =========================================
-# 测试覆盖率
-# =========================================
-.coverage
-.coverage.*
-htmlcov/
-.tox/
-.pytest_cache/
-.hypothesis/
-
-# =========================================
-# 其他
-# =========================================
-*.bak
-*.backup
-*.old
-*.orig
-*.rej
-*.swo
-*.swp
-.vscode-test/
-*.code-workspace
-frontend/node_modules/
-frontend/dist/
-backend/media/
-backend/staticfiles/
+# Hadith: deploy database-backed reading, Quran API and migration dependencies.
+# Source import/OCR/repair tools and correction JSON remain local.
+/backend/hadith/*
+!/backend/hadith/__init__.py
+!/backend/hadith/apps.py
+!/backend/hadith/admin.py
+!/backend/hadith/models.py
+!/backend/hadith/urls.py
+!/backend/hadith/views.py
+!/backend/hadith/serializers.py
+!/backend/hadith/ordering.py
+!/backend/hadith/pagination.py
+!/backend/hadith/daily.py
+!/backend/hadith/reading_store.py
+!/backend/hadith/reading_patterns.py
+!/backend/hadith/presentation.py
+!/backend/hadith/notes.py
+!/backend/hadith/collection_rules.py
+!/backend/hadith/collection_profiles.py
+!/backend/hadith/collection_profiles_legacy.py
+!/backend/hadith/collection_introductions.py
+!/backend/hadith/quran.py
+!/backend/hadith/quran_reader.py
+!/backend/hadith/quran_audio.py
+!/backend/hadith/quran_constants.py
+!/backend/hadith/quran_chapters.py
+!/backend/hadith/quran_audio_reliability.json
+!/backend/hadith/migrations/
+!/backend/hadith/management/
+/backend/hadith/management/*
+!/backend/hadith/management/__init__.py
+!/backend/hadith/management/commands/
+/backend/hadith/management/commands/*
+!/backend/hadith/management/commands/__init__.py
+!/backend/hadith/management/commands/check_hadith_readings.py
+!/backend/hadith/management/commands/check_quran_api.py
+!/backend/hadith/management/commands/audit_quran.py
+!/backend/hadith/management/commands/sync_hadith_introductions.py

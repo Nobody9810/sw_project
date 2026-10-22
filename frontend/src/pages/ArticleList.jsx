@@ -98,7 +98,7 @@ function ArticleList({ type }) {
             <div className="space-y-3">
               {/* 骨架屏 - 显示3个占位项 */}
               {[...Array(3)].map((_, index) => (
-                <article key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden md:h-36 animate-pulse">
+              <article key={index} className="bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg shadow-none sm:shadow-sm border-b sm:border border-gray-200 dark:border-gray-700 overflow-hidden md:h-36 animate-pulse">
                   <div className="flex flex-col md:flex-row md:h-full">
                     <div className="w-full md:w-1/4 h-32 md:h-full bg-gray-200 dark:bg-gray-700"></div>
                     <div className="w-full md:w-3/4 p-3 flex flex-col justify-between">
@@ -134,7 +134,7 @@ function ArticleList({ type }) {
           ) : (
             <div className="space-y-3">
               {articles.map(article => (
-                <article key={article.id} className="group bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all md:h-36">
+               <article key={article.id} className="group bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg shadow-none sm:shadow-sm border-b border-gray-100 dark:border-gray-800 sm:border sm:border-gray-200 sm:dark:border-gray-700 overflow-hidden hover:shadow-md transition-all md:h-36">
                   <div className="flex flex-col md:flex-row md:h-full">
                     <div className="w-full md:w-1/4 flex-shrink-0 relative bg-gray-100 h-32 md:h-full">
                       <Link to={`/${type}/${article.id}`} className="absolute inset-0">

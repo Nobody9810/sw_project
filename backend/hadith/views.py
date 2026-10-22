@@ -8,7 +8,7 @@ import time
 import requests
 from django.http import JsonResponse
 import logging
-
+import re 
 logger = logging.getLogger(__name__)
 
 # 古兰经章节中文名称映射（前114章）
@@ -245,11 +245,7 @@ QURAN_CHAPTER_NAMES_AR = {
     113: "الفلق",
     114: "الناس",
 }
-class HadithPagination(PageNumberPagination):
-    """圣训分页配置"""
-    page_size = 20
-    page_size_query_param = 'page_size'
-    max_page_size = 100
+
 
 class HadithViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -259,11 +255,35 @@ class HadithViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Hadith.objects.all()
     serializer_class = HadithSerializer
     permission_classes = [permissions.AllowAny]
-    pagination_class = HadithPagination
+    pagination_class = None
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['text', 'chapter', 'collection_number']
     ordering_fields = ['collection_number', 'chapter', 'id']
     ordering = ['collection', 'collection_number']
+
+    @staticmethod
+    def _get_chapter_sort_key(chapter_name):
+        match = re.search(r'第(.+?)篇', chapter_name)
+        if match:
+            num_str = match.group(1)
+            chinese_nums = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10}
+            try:
+                if num_str.isdigit():
+                    return int(num_str)
+                else:
+                    # 处理 “第一”、“第九十九”
+                    key = 0
+                    temp_str = num_str
+                    for k, v in chinese_nums.items():
+                        temp_str = temp_str.replace(k, str(v))
+                    # 简单提取数字
+                    nums = re.findall(r'\d+', temp_str)
+                    return int(nums[0]) if nums else 999
+            except:
+                return 999
+        elif chapter_name.startswith('附'):
+            return 9999
+        return 0
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -293,8 +313,8 @@ class HadithViewSet(viewsets.ReadOnlyModelViewSet):
         sorted_list = sorted(
             list(queryset),
             key=lambda x: (
-                x.collection.name,
-                x.chapter,
+                x.collection.id,  # 建议改用 ID 排序，比 name 更稳定
+                self._get_chapter_sort_key(x.chapter),  # <--- 修复：使用数字逻辑排序章节
                 int(''.join(filter(str.isdigit, x.collection_number)) or 0)
             )
         )

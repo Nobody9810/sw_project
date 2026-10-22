@@ -33,7 +33,7 @@ function HomePage() {
     文史: [],
     qa: []
   })
-  
+
   // 分别跟踪每个部分的加载状态
   const [loadingStates, setLoadingStates] = useState({
     书讯: true,
@@ -67,46 +67,46 @@ function HomePage() {
 
       // 🔥 关键优化1: 并行请求所有数据
       const promises = endpoints.map(endpoint =>
-        apiClient.get(endpoint.url, { 
+        apiClient.get(endpoint.url, {
           params: endpoint.params,
           signal: signal // 🔥 关键优化2: 支持取消
         })
-        .then(response => {
-          if (!isMounted) return null
-          
-          const resultList = response.data.results || response.data || []
-          
-          // 🔥 关键优化3: 每个请求完成后立即更新UI (渐进式加载)
-          setData(prev => ({
-            ...prev,
-            [endpoint.key]: resultList
-          }))
-          
-          // 标记该部分加载完成
-          setLoadingStates(prev => ({
-            ...prev,
-            [endpoint.key]: false
-          }))
-          
-          return { key: endpoint.key, data: resultList }
-        })
-        .catch(err => {
-          // 忽略取消错误
-          if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
-            return null
-          }
-          
-          if (isMounted) {
-            console.error(`Fetching ${endpoint.key} failed:`, err)
-            // 失败也要标记为加载完成,避免一直显示loading
+          .then(response => {
+            if (!isMounted) return null
+
+            const resultList = response.data.results || response.data || []
+
+            // 🔥 关键优化3: 每个请求完成后立即更新UI (渐进式加载)
+            setData(prev => ({
+              ...prev,
+              [endpoint.key]: resultList
+            }))
+
+            // 标记该部分加载完成
             setLoadingStates(prev => ({
               ...prev,
               [endpoint.key]: false
             }))
-          }
-          
-          return { key: endpoint.key, data: [] }
-        })
+
+            return { key: endpoint.key, data: resultList }
+          })
+          .catch(err => {
+            // 忽略取消错误
+            if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+              return null
+            }
+
+            if (isMounted) {
+              console.error(`Fetching ${endpoint.key} failed:`, err)
+              // 失败也要标记为加载完成,避免一直显示loading
+              setLoadingStates(prev => ({
+                ...prev,
+                [endpoint.key]: false
+              }))
+            }
+
+            return { key: endpoint.key, data: [] }
+          })
       )
 
       // 等待所有请求完成(或失败)
@@ -124,7 +124,7 @@ function HomePage() {
   }, []) // 空依赖,只在组件挂载时执行一次
 
   const topBook = data.书讯?.[0]
-  
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-8">
       {/* 第一行:新书推荐(60%) + 书讯(40%) */}
@@ -133,10 +133,10 @@ function HomePage() {
         <div className="w-full lg:w-[60%]">
           {loadingStates.书讯 ? (
             // 骨架屏
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="w-full sm:w-[40%] h-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                <div className="flex-1 space-y-3">
+            <div className="bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg shadow-none sm:shadow-lg border-none sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-4 h-full animate-pulse">
+<div className="flex flex-row gap-3">
+  <div className="w-1/3 sm:w-[40%] h-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
+  <div className="flex-1 space-y-3">
                   <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
                   <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
                   <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
@@ -145,22 +145,31 @@ function HomePage() {
               </div>
             </div>
           ) : topBook ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full flex flex-col">
-              <div className="flex flex-col sm:flex-row gap-3 flex-1">
-                <img
-                  src={topBook.图片 || '/assets/images/default-placeholder.png'}
-                  alt={topBook.标题}
-                  className="w-full sm:w-[40%] h-auto object-cover rounded"
-                  loading="eager"
-                  onError={(e) => {
-                    e.target.src = '/assets/images/default-placeholder.png'
-                  }}
-                />
+            <div className="bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg shadow-none sm:shadow-lg border-none sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-4 h-full flex flex-col">
+<div className="flex flex-col sm:flex-row gap-3 flex-1">
+  <img
+    src={topBook.图片 || '/assets/images/default-placeholder.png'}
+    alt={topBook.标题}
+    className="w-full sm:w-[40%] h-auto object-cover rounded"
+    loading="eager"
+    onError={(e) => {
+      e.target.src = '/assets/images/default-placeholder.png'
+    }}
+  />
                 <div className="flex-1">
-                  <div className="text-sm bg-green-600 text-white mb-2 font-semibold px-2 py-1 rounded inline-block">新书推荐</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="text-sm bg-green-600 text-white font-semibold px-2 py-1 rounded inline-block">新书推荐</div>
+                    {topBook.is_for_sale && (
+                      <div className="flex items-center gap-1 text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold px-2 py-1 rounded inline-block">
+
+                        现货出售
+                      </div>
+                    )}
+                  </div>
                   <h2 className="text-xl sm:text-2xl font-bold mb-2 hover:text-green-600 dark:hover:text-green-400 transition-colors">
                     <Link to={`/书讯/${topBook.id}`}>{topBook.标题}</Link>
                   </h2>
+
                   <div className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300">
                     {topBook.作者 && topBook.作者.trim() && (
                       <div>
@@ -216,7 +225,7 @@ function HomePage() {
 
         {/* 书讯 - 40% */}
         <div className="w-full lg:w-[40%]">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full flex flex-col">
+          <div className="bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg shadow-none sm:shadow-lg border-none sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-4 h-full flex flex-col">
             <div className="flex justify-between items-center mb-0 pb-2 -mx-4 px-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-xl font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-[1em] before:w-1 before:bg-green-600 before:rounded-full">书讯</h3>
               <Link to="/书讯" className="text-green-600 dark:text-green-400 hover:underline text-sm">
@@ -232,23 +241,26 @@ function HomePage() {
                     <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
                   </div>
                 ))
-              ) : (
-                (data.书讯 || []).slice(1, 6).map(item => (
-                  <div key={item.id} className="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-0">
-                    <Link 
-                      to={`/书讯/${item.id}`}
-                      className="block hover:text-green-600 dark:hover:text-green-400 transition-colors line-clamp-2"
-                    >
-                      {item.标题}
-                    </Link>
-                    {item.作者 && (
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {item.作者}
-                      </div>
+              ) : (data.书讯 || []).slice(1, 6).map(item => (
+                <div key={item.id} className="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-0">
+                  <Link
+                    to={`/书讯/${item.id}`}
+                    className="flex items-center gap-1.5 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                  >
+                    <span className="line-clamp-2">{item.标题}</span>
+                    {item.is_for_sale && (
+                      <span className="flex-shrink-0 text-[10px] font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-1.5 py-0.5 rounded">
+                        在售
+                      </span>
                     )}
-                  </div>
-                ))
-              )}
+                  </Link>
+                  {item.作者 && (
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {item.作者}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -256,7 +268,7 @@ function HomePage() {
 
       {/* 第二行:书库 */}
       <div className="mb-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4">
+        <div className="bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg shadow-none sm:shadow-lg border-none sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-4">
           <div className="flex justify-between items-center mb-0 pb-2 -mx-4 px-4 border-b" style={{ borderColor: '#fd7e14' }}>
             <h3 className="text-xl font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-[1em] before:w-1 before:bg-green-600 before:rounded-full">书库</h3>
             <Link to="/书库" className="text-green-600 dark:text-green-400 hover:underline text-sm">
@@ -282,7 +294,7 @@ function HomePage() {
             <CategoryBlock data={data['观点']} title="观点" link="/观点" authorField="作者" loading={loadingStates.观点} />
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4">
+          <div className="bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg shadow-none sm:shadow-lg border-none sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-4">
             <div className="flex justify-between items-center mb-0 pb-2 -mx-4 px-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-xl font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-[1em] before:w-1 before:bg-green-600 before:rounded-full">近期问答</h3>
               <div className="flex items-center gap-3">
@@ -337,7 +349,7 @@ function CategoryBlock({ data = [], title, link, authorField, hideFirst = false,
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3 flex flex-col h-full animate-pulse">
+      <div className="bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg shadow-none sm:shadow-lg border-none sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-3 flex flex-col h-full animate-pulse">
         <div className="flex justify-between items-center mb-0 pb-2 -mx-3 px-3 border-b border-gray-200 dark:border-gray-700">
           <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12"></div>
@@ -356,7 +368,7 @@ function CategoryBlock({ data = [], title, link, authorField, hideFirst = false,
 
   if (!data.length) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3 flex flex-col h-full">
+      <div className="bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg shadow-none sm:shadow-lg border-none sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-3 flex flex-col h-full">
         <div className="flex justify-between items-center mb-0 pb-2 -mx-3 px-3 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-[1em] before:w-1 before:bg-green-600 before:rounded-full">{title}</h3>
           <Link to={link} className="text-green-600 dark:text-green-400 hover:underline text-sm">更多 ›</Link>
@@ -371,7 +383,7 @@ function CategoryBlock({ data = [], title, link, authorField, hideFirst = false,
   const displayCount = itemCount || (hideFirst ? 8 : 5)
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3 flex flex-col h-full">
+    <div className="bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg shadow-none sm:shadow-lg border-none sm:border border-gray-200 dark:border-gray-700 p-0 sm:p-3 flex flex-col h-full">
       <div className="flex justify-between items-center mb-0 pb-2 -mx-3 px-3 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-bold relative pl-3 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-[1em] before:w-1 before:bg-green-600 before:rounded-full">{title}</h3>
         <Link to={link} className="text-green-600 dark:text-green-400 hover:underline text-sm">更多 ›</Link>

@@ -165,6 +165,22 @@ class 书讯(总类):
         verbose_name = "书讯"
         verbose_name_plural = "书讯"
 
+
+class 书讯Sale(models.Model):
+    书讯 = models.OneToOneField(书讯, on_delete=models.CASCADE, related_name="sale_info")
+    is_active = models.BooleanField(default=False, verbose_name="是否公开售卖")
+    sale_price = models.DecimalField(
+        max_digits=8, decimal_places=2, 
+        null=True, blank=True, 
+        verbose_name="实际售卖价格")
+
+    class Meta:
+        verbose_name = "图书售卖信息"
+        verbose_name_plural = "图书售卖信息"
+
+    def __str__(self):
+        return f"{self.书讯.标题} 的售卖信息"
+
 class 书评_分类(models.Model):
     名称 = models.CharField(max_length=100)
 
@@ -330,13 +346,7 @@ class 书库(总类):
         verbose_name="作者简介",
         config_name='default'
     )
-    内容简介 = CKEditor5Field(
-        null=True,
-        blank=True,
-        default="暂无",
-        verbose_name="内容简介",
-        config_name='default'
-    )
+
     出版日期 = models.DateField(
         null=True,
         blank=True,

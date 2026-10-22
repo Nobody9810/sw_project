@@ -1,7 +1,7 @@
-from unfold.admin import ModelAdmin
+from unfold.admin import ModelAdmin, StackedInline
 from django.contrib import admin
 
-from .models import 通讯, 书讯, 书评, 观点, 文艺, 译林, 文史, 论文, 古籍, 书库, Feedback, 书评_分类
+from .models import 通讯, 书讯, 书评, 观点, 文艺, 译林, 文史, 论文, 古籍, 书库, Feedback, 书评_分类,书讯Sale
 
 # 通用批量操作函数
 def reset_likes_dislikes_and_views(modeladmin, request, queryset):
@@ -16,11 +16,24 @@ class 通讯Admin(ModelAdmin):
     exclude = ('likes', 'dislikes', '总浏览量', '今日浏览量', '最后统计日期')
     actions = [reset_likes_dislikes_and_views]
 
+
+class 书讯SaleInline(StackedInline):
+    model = 书讯Sale
+    can_delete = False
+    verbose_name_plural = "售卖设置"
+    fields = ("is_active", "sale_price")
+
 @admin.register(书讯)
 class 书讯Admin(ModelAdmin):
     list_display = ('标题', 'likes', '总浏览量', '更新时间', '发布状态')
     exclude = ('likes', 'dislikes', '总浏览量', '今日浏览量', '最后统计日期')
+    inlines = [书讯SaleInline]
     actions = [reset_likes_dislikes_and_views]
+
+    def sale_status(self, obj):
+        return getattr(obj.sale_info, "is_active", False)
+    sale_status.boolean = True
+    sale_status.short_description = "是否售卖"
 
 @admin.register(书评_分类)
 class 书评_分类Admin(ModelAdmin):

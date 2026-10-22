@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { Calendar, User, Building, Eye, TrendingUp, Book, UserCircle, List, MessageSquare, FileText } from 'lucide-react'
@@ -9,12 +10,13 @@ import LikeDislike from '../components/LikeDislike'
 import CommentSection from '../components/CommentSection'
 import ShareButtons from '../components/ShareButtons'
 import DFlipViewer from '../components/DFlipViewer'
+import PriceModal from '../components/PriceModal'
 
 function ArticleDetail({ type }) {
   const { id } = useParams()
   const [article, setArticle] = useState(null)
   const [loading, setLoading] = useState(true)
-
+  const [showPriceModal, setShowPriceModal] = useState(false)
   const formatDate = (value) => {
     if (!value) {
       return null
@@ -48,7 +50,7 @@ function ArticleDetail({ type }) {
     const updateViewCount = async () => {
       // 如果已经更新过，或者文章未加载，则跳过
       if (viewCountUpdated.current || !article || !id) return
-      
+
       try {
         const appLabel = article.app_label || 'home'
         const modelName = article.model_name || type
@@ -56,10 +58,10 @@ function ArticleDetail({ type }) {
           `/interactions/api/view/${appLabel}/${modelName}/${id}/`,
           {}
         )
-        
+
         // 标记为已更新
         viewCountUpdated.current = true
-        
+
         // 无论是否计算浏览量，都更新显示的数据（后端总是返回当前浏览量）
         if (response.data.success) {
           setArticle(prev => ({
@@ -133,10 +135,15 @@ function ArticleDetail({ type }) {
       return []
     }
     // 优先使用内容简介，如果存在内容简介则不显示内容字段，避免重复
-    const hasContentIntro = article['内容简介']
-    
+    const hasContentIntro = article['内容']
+
     const sections = [
-      { key: '内容简介', title: '内容简介', icon: Book },
+      {
+        key: '内容',
+        // 核心修改：判断类型，非书库/书讯则不给标题
+        title: (type === '书库' || type === '书讯') ? '图书简介' : null,
+        icon: Book
+      },
       { key: '作者简介', title: '作者简介', icon: UserCircle },
       { key: '目录', title: '目录', icon: List },
       { key: '前言', title: '前言', icon: MessageSquare },
@@ -169,7 +176,7 @@ function ArticleDetail({ type }) {
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-6 sm:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         <div className="lg:col-span-8">
-          <article className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-7 sm:p-6 md:p-8 mb-6">
+          <article className="bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-xl shadow-none sm:shadow-lg border-none sm:border sm:border-gray-200 sm:dark:border-gray-700 p-4 sm:p-6 md:p-8 mb-6">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
               {article.标题}
             </h1>
@@ -189,22 +196,22 @@ function ArticleDetail({ type }) {
                 </div>
               )}
               <div className="ml-auto">
-                <ShareButtons 
+                <ShareButtons
                   title={article.标题}
-                  description={article.内容简介 || (article.内容 ? article.内容.substring(0, 100).replace(/<[^>]*>/g, '') : '')}
+                  description={article.内容 || (article.内容 ? article.内容.substring(0, 100).replace(/<[^>]*>/g, '') : '')}
                 />
               </div>
             </div>
 
             {/* 书讯信息卡片 */}
             {type === "书讯" && (article.图片 || bookInfo.length > 0) && (
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 rounded-xl p-6 md:p-8 mb-8 border border-gray-200 dark:border-gray-700">
-                <div className="flex flex-col md:flex-row md:items-stretch gap-6 md:gap-8">
+              <div className="bg-gray-50 dark:bg-gray-800/60 rounded-xl p-6 md:p-8 mb-8 border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="flex flex-col md:flex-row gap-6 md:gap-10">
                   {article.图片 && (
                     <div className="flex-shrink-0 flex justify-center md:justify-start">
                       <div className="flex items-center">
-                        <img 
-                          src={article.图片 || '/assets/images/default-placeholder.png'} 
+                        <img
+                          src={article.图片 || '/assets/images/default-placeholder.png'}
                           alt={article.标题}
                           className="w-40 sm:w-48 md:w-56 max-w-[240px] rounded-lg object-contain shadow-lg"
                           loading="lazy"
@@ -212,6 +219,7 @@ function ArticleDetail({ type }) {
                       </div>
                     </div>
                   )}
+
                   <div className="flex-1 space-y-3 flex flex-col justify-center">
                     {bookInfo.map((info, index) => (
                       <div key={index} className="flex gap-3 text-base md:text-lg">
@@ -219,31 +227,59 @@ function ArticleDetail({ type }) {
                         <span className="text-gray-600 dark:text-gray-400">{info.value}</span>
                       </div>
                     ))}
+
+                    {/* 新增：有售卖信息时显示查看价格按钮 */}
+                    {article.sale_info?.is_active && (
+                      <button
+                        onClick={() => setShowPriceModal(true)}
+                        className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-full transition-colors shadow-sm"
+                      >
+                        购书咨询
+                      </button>
+                    )}
+
                   </div>
                 </div>
-              </div>
-            )}
 
-            {richSections.map(section => {
-              const IconComponent = section.icon
-              return (
-                <div key={section.key} className="mb-10">
-                  <div className="flex items-center gap-3 mb-3">
+                {showPriceModal && (
+                  <PriceModal
+                    saleInfo={article.sale_info}
+                    articletitle={article.标题}
+
+                    onClose={() => setShowPriceModal(false)}
+                  />
+                )}
+              </div>
+            )
+            }
+
+
+            {richSections.map((section) => (
+              <section key={section.key} className="mb-10">
+                {/* 核心修改：只有当 title 存在时才渲染标题头 */}
+                {section.title && (
+                  <div className="flex items-center gap-3 mb-3 ">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 flex items-center justify-center shadow-sm">
-                      <IconComponent className="w-6 h-6 text-green-600 dark:text-green-400" aria-hidden="true" />
+                      <section.icon className="w-6 h-6 text-green-600 dark:text-green-400" aria-hidden="true" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{section.title}</h3>
                   </div>
+                )}
+
+
                 <div
-                  className="prose prose-lg prose-gray dark:prose-invert max-w-none text-justify leading-relaxed [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-6 [&_img]:mx-auto [&_img]:block [&_img]:shadow-md [&_p]:mb-4 [&_p]:text-gray-700 [&_p]:dark:text-gray-300"
+                  className="prose prose-lg prose-gray dark:prose-invert max-w-none text-justify leading-relaxed [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-6 [&_img]:mx-auto [&_img]:block [&_img]:shadow-md [&_p]:mb-0 [&_p]:text-gray-700 [&_p]:dark:text-gray-300"
                   dangerouslySetInnerHTML={{ __html: section.value }}
                 />
-                </div>
-              )
-            })}
+
+              </section>
+            ))}
+
+
+
 
             {!richSections.length && article.内容 && (
-              <div className="prose prose-lg prose-gray dark:prose-invert max-w-none text-justify leading-relaxed [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-6 [&_img]:mx-auto [&_img]:block [&_img]:shadow-md [&_p]:mb-4 [&_p]:text-gray-700 [&_p]:dark:text-gray-300">
+              <div className="prose prose-lg prose-gray dark:prose-invert max-w-none text-justify leading-relaxed [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-6 [&_img]:mx-auto [&_img]:block [&_img]:shadow-md [&_p]:mb-0 [&_p]:text-gray-700 [&_p]:dark:text-gray-300">
                 <div dangerouslySetInnerHTML={{ __html: article.内容 }} />
               </div>
             )}

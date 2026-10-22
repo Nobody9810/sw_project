@@ -114,6 +114,7 @@ INSTALLED_APPS = [
     'sorl.thumbnail',           # 图片处理
     # # 'mptt',                     # 树形结构
     'rest_framework',           # REST API
+
 ]
 
 # =========================================
@@ -133,6 +134,7 @@ MIDDLEWARE = [
 if IS_PRODUCTION:
     # 安全相关设置
     SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True

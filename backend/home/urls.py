@@ -4,6 +4,9 @@ from django.views.generic import TemplateView
 from django.contrib import admin
 
 urlpatterns = [
+
+
+
     path('版权声明/', views.copyright, name='T-P'),
     path('关于我们/', views.about_us, name='about_us'),
     path('搜索/',views.SearchAll,name='searchAll'),

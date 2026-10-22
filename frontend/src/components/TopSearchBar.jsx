@@ -4,7 +4,7 @@ import { Search, Instagram, Facebook, Mail, UserCircle, Moon, Sun, MessageSquare
 import ClockComponent from './Clock'
 import apiClient from '../utils/apiClient'
 import { formatDateToChinese } from '../utils/dateFormatter'
-import { useTheme } from '../hooks/useTheme'
+// import { useTheme } from '../hooks/useTheme'
 
 function TopSearchBar() {
   const [keyword, setKeyword] = useState('')
@@ -18,7 +18,7 @@ function TopSearchBar() {
   const [feedbackData, setFeedbackData] = useState({ name: '', email: '', message: '' })
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
   const [feedbackSuccess, setFeedbackSuccess] = useState(false)
-  const { isDark: isDarkTheme, toggleTheme } = useTheme()
+  // const { isDark: isDarkTheme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const searchInputRef = useRef(null)
@@ -660,13 +660,13 @@ function TopSearchBar() {
               >
                 <UserCircle size={20} />
               </a>
-              <button
+              {/* <button
                 className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-800 to-orange-500 text-white flex items-center justify-center transition-all duration-300 shadow-md hover:from-orange-500 hover:to-orange-600 hover:-translate-y-0.5 hover:shadow-lg border-none focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
                 title={isDarkTheme ? "切换到浅色主题" : "切换到深色主题"}
                 onClick={toggleTheme}
               >
                 {isDarkTheme ? <Sun size={20} id="theme-icon" /> : <Moon size={20} id="theme-icon" />}
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

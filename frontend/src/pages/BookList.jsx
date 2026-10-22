@@ -30,13 +30,13 @@ function BookList({ type }) {
     const fetchItems = async () => {
       console.log(`Fetching ${type} books - page ${page}`)
       setLoading(true)
-      
+
       try {
         const response = await apiClient.get(`/${type}/`, {
           params: { page, page_size: pageSize },
           signal: controller.signal
         })
-        
+
         if (isMounted) {
           const data = response.data || {}
           const list = data.results ?? (Array.isArray(data) ? data : [])
@@ -45,9 +45,9 @@ function BookList({ type }) {
             : Array.isArray(data)
               ? data.length
               : list.length
-          
+
           console.log(`Loaded ${list.length} books for ${type}`)
-          
+
           setItems(list)
           setPagination({
             count: countValue,
@@ -60,7 +60,7 @@ function BookList({ type }) {
           console.log(`Request cancelled for ${type}`)
           return
         }
-        
+
         if (isMounted) {
           console.error(`Error fetching ${type}:`, error)
           setItems([])
@@ -100,7 +100,7 @@ function BookList({ type }) {
           <div className="lg:col-span-9">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[...Array(8)].map((_, index) => (
-                <div 
+                <div
                   key={index}
                   className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 animate-pulse"
                 >
@@ -132,51 +132,68 @@ function BookList({ type }) {
               </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+              
+
+
+
+
               {items.map(item => (
-                <div 
-                  key={item.id}
-                  className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer h-full flex flex-col"
-                >
-                  <Link to={`/${type}/${item.id}`} className="block relative overflow-hidden bg-gray-100 dark:bg-gray-700">
-                    <div className="relative h-56 overflow-hidden border-b border-gray-200 dark:border-gray-700">
-                      <img 
-                        src={item.图片 || '/assets/images/default-placeholder.png'} 
-                        alt={item.标题}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.target.onerror = null
-                          e.target.src = '/assets/images/default-placeholder.png'
-                        }}
-                      />
-                    </div>
-                  </Link>
+  <div 
+    key={item.id}
+    className={`group bg-transparent sm:bg-white sm:dark:bg-gray-800 rounded-none sm:rounded-lg overflow-hidden shadow-none sm:shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer h-full flex flex-col ${
+      item.is_for_sale
+        ? 'sm:border-2 sm:border-red-400 dark:sm:border-red-500 ring-1 ring-red-200 dark:ring-red-900/50'
+        : 'sm:border sm:border-gray-200 sm:dark:border-gray-700'
+    }`}
+  >
+    <Link to={`/${type}/${item.id}`} className="block relative overflow-hidden bg-gray-100 dark:bg-gray-700">
+      <div className="relative h-56 overflow-hidden border-b border-gray-200 dark:border-gray-700">
+        <img 
+          src={item.图片 || '/assets/images/default-placeholder.png'} 
+          alt={item.标题}
+          loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            e.target.onerror = null
+            e.target.src = '/assets/images/default-placeholder.png'
+          }}
+        />
+        {/* 醒目横幅角标 */}
+        {item.is_for_sale && (
+          <div className="absolute top-0 left-0 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-br-lg shadow-md flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+            现货出售
+          </div>
+        )}
+      </div>
+    </Link>
 
-                  <div className="p-3 flex-1 flex flex-col">
-                    <h6 className="text-sm font-semibold leading-tight mb-1.5 line-clamp-1">
-                      <Link 
-                        to={`/${type}/${item.id}`} 
-                        className="text-gray-900 dark:text-gray-100 hover:text-green-600 dark:hover:text-green-400 transition-colors no-underline"
-                      >
-                        {item.标题}
-                      </Link>
-                    </h6>
+    <div className="p-3 flex-1 flex flex-col">
+      <h6 className="text-sm font-semibold leading-tight mb-1.5 line-clamp-1">
+        <Link 
+          to={`/${type}/${item.id}`} 
+          className="text-gray-900 dark:text-gray-100 hover:text-green-600 dark:hover:text-green-400 transition-colors no-underline"
+        >
+          {item.标题}
+        </Link>
+      </h6>
 
-                    {item.作者 && (
-                      <div className="text-xs text-gray-600 dark:text-gray-400 truncate flex items-center gap-1">
-                        <User className="w-3 h-3 text-gray-400" />
-                        <span>{item.作者}</span>
-                      </div>
-                    )}
+      {item.作者 && (
+        <div className="text-xs text-gray-600 dark:text-gray-400 truncate flex items-center gap-1">
+          <User className="w-3 h-3 text-gray-400" />
+          <span>{item.作者}</span>
+        </div>
+      )}
 
-                    {item.评分 && (
-                      <div className="text-xs mt-auto pt-1.5 text-amber-500 tracking-wider">
-                        {'★'.repeat(Math.round(item.评分 / 2))}{'☆'.repeat(5 - Math.round(item.评分 / 2))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+      {item.评分 && (
+        <div className="text-xs mt-auto pt-1.5 text-amber-500 tracking-wider">
+          {'★'.repeat(Math.round(item.评分 / 2))}{'☆'.repeat(5 - Math.round(item.评分 / 2))}
+        </div>
+      )}
+    </div>
+  </div>
+))}
             </div>
           </div>
 
