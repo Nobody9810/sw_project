@@ -2,6 +2,7 @@ from django.contrib import admin
 from unfold.admin import TabularInline
 from shuwei.admin_base import LibraryModelAdmin
 from shuwei.admin_formatting import admin_text_preview
+from notifications.admin_cascade import ReviewCascadeDeleteMixin
 from .models import Question, Answer
 from django.forms.models import BaseInlineFormSet
 from django.core.exceptions import ValidationError
@@ -24,7 +25,7 @@ class AnswerInline(TabularInline):
     readonly_fields = ('author',)
 
 @admin.register(Question)
-class QuestionAdmin(LibraryModelAdmin):
+class QuestionAdmin(ReviewCascadeDeleteMixin, LibraryModelAdmin):
     list_display = ('question_preview', 'author', 'guest_name', 'status', 'created_at')
     list_filter = ('status', 'created_at')
     search_fields = ('content',)
