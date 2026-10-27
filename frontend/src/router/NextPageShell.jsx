@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import ErrorPage from 'next/error'
-import { articleTypes, classifyRoute } from '@/lib/routes'
+import { articleTypes, classifyRoute, sameRouteParts } from '@/lib/routes'
 import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
 import PageSkeleton from '@/components/common/PageSkeleton'
@@ -44,13 +44,16 @@ function CurrentPage({ routeParts, initialArticle, initialError }) {
   const router = useRouter()
   if (!routeParts && !router.isReady) return <LoadingFallback />
 
-  const parts = routeParts || (Array.isArray(router.query.path) ? router.query.path : [])
+  const currentParts = Array.isArray(router.query.path) ? router.query.path : []
+  // Shallow client navigation keeps the first page's server props.
+  const serverPage = routeParts && (!router.isReady || sameRouteParts(routeParts, currentParts))
+  const parts = serverPage ? routeParts : currentParts
   if (classifyRoute(parts) === 'notFound') return <ResolvedErrorPage />
   const [section, subSection, id] = parts
 
   if (!section) return <HomePage />
   if (section === '书评' && subSection === '分类' && id) return <BookReviewCategoryList key={id} />
-  if (articleTypes.has(section) && subSection) return <ArticleDetail key={`${section}/${subSection}`} type={section} initialArticle={initialArticle} initialError={initialError} />
+  if (articleTypes.has(section) && subSection) return <ArticleDetail key={`${section}/${subSection}`} type={section} initialArticle={serverPage ? initialArticle : null} initialError={serverPage ? initialError : ''} />
   if (section === '登录') return <LoginPage />
   if (section === '更新说明') return <UpdatesPage />
   if (section === '问答') return <QAPage />

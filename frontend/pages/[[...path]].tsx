@@ -1,7 +1,8 @@
 import type { GetServerSideProps } from 'next'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import NextPageShell from '@/router/NextPageShell'
-import { classifyRoute } from '@/lib/routes'
+import { classifyRoute, sameRouteParts } from '@/lib/routes'
 import { articlePath, articleSlug } from '@/lib/articleUrl'
 import type { ArticleData } from '@/types/content'
 import { articleShareData, articleShareImage } from '@/lib/articleShare'
@@ -14,7 +15,16 @@ type Props = {
   shareImage?: string
 }
 
-export default function CatchAllPage(props: Props) {
+export default function CatchAllPage(serverProps: Props) {
+  const router = useRouter()
+  const currentParts = Array.isArray(router.query.path) ? router.query.path : []
+  // Client navigation is shallow, so server props may describe an earlier page.
+  const props: Props = sameRouteParts(serverProps.routeParts, currentParts) ? serverProps : {
+    routeParts: currentParts,
+    initialArticle: null,
+    initialError: '',
+    canonicalUrl: new URL(router.asPath.split(/[?#]/)[0], serverProps.canonicalUrl).href,
+  }
   const article = props.initialArticle
   const share = articleShareData(article, props.routeParts[0])
   const title = article ? `${share.title} — 書味` : '書味'
