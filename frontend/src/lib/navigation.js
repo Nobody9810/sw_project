@@ -1,12 +1,20 @@
-import Link from 'next/link'
-import { useMemo } from 'react'
+import NextLink from 'next/link'
+import { createElement, useMemo } from 'react'
 import { useRouter } from 'next/router'
+import { isShallowNavigation } from './routes'
 
-export { Link }
+/** @param {import('react').ComponentProps<typeof NextLink>} props */
+export function Link({ shallow, ...props }) {
+  const { asPath } = useRouter()
+  return createElement(NextLink, { ...props, shallow: shallow ?? isShallowNavigation(props.href, asPath) })
+}
 
 export function useNavigate() {
   const router = useRouter()
-  return (url, as, options) => router.push(url, as, options)
+  return (url, as, options) => router.push(url, as, {
+    ...options,
+    shallow: options?.shallow ?? (!as && isShallowNavigation(url, router.asPath)),
+  })
 }
 
 export function useLocation() {

@@ -7,14 +7,25 @@ function identity(value) {
   }
 }
 
+function pathname(value) {
+  try {
+    return new URL(value, 'https://site.local').pathname.split('/').filter(Boolean).map(decodeURIComponent).join('/')
+  } catch {
+    return value
+  }
+}
+
+const samePath = (a, b) => b !== undefined && pathname(a) === pathname(b)
+
 // A route completing only means its code/props arrived, not that its data did.
 export function createPageTransition(onChange) {
   let current = null
   const matches = url => current && identity(current.url) === identity(url)
   const finish = () => { current = null; onChange(null) }
   return {
-    start(url, options) {
-      if (options?.shallow) return
+    start(url, options, fromUrl) {
+      // In-page shallow updates (e.g. clearing 经训 filters) keep their content.
+      if (options?.shallow && samePath(url, fromUrl)) return
       current = { url, routeComplete: false, contentReady: false }
       onChange(current)
     },

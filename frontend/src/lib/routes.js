@@ -10,3 +10,26 @@ export function classifyRoute(parts = []) {
   if ((parts.length === 2 || (parts.length === 3 && Boolean(id))) && articleTypes.has(section) && positiveId(subSection)) return 'article'
   return 'notFound'
 }
+
+function pathParts(pathname) {
+  return pathname.split('/').filter(Boolean).map(decodeURIComponent)
+}
+
+export function sameRouteParts(a = [], b = []) {
+  return a.length === b.length && a.every((part, index) => part === b[index])
+}
+
+// Every site page is served by the catch-all page, whose server props only
+// matter for the first HTML response. Client navigation to another section
+// can skip the /_next/data round trip; the page fetches its own data.
+export function isShallowNavigation(href, currentPath) {
+  if (typeof href !== 'string' || !href.startsWith('/') || href.startsWith('//')) return false
+  try {
+    const target = new URL(href, 'https://site.local')
+    const current = new URL(currentPath || '/', 'https://site.local')
+    const parts = pathParts(target.pathname)
+    return classifyRoute(parts) !== 'notFound' && !sameRouteParts(parts, pathParts(current.pathname))
+  } catch {
+    return false
+  }
+}
