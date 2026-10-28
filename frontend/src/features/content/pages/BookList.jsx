@@ -38,7 +38,7 @@ function BookList({ type }) {
     <Link href={articlePath(type, item)} className="block relative overflow-hidden bg-gray-100 dark:bg-night-700">
       <div className={BOOK_COVER}>
         <CoverImage src={item.图片} alt={item.标题} kind="book" label={type} loading="lazy"
-          className="w-full h-full object-contain sm:object-cover sm:group-hover:scale-105 transition-transform duration-300 motion-reduce:transition-none"
+          className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-300 motion-reduce:transition-none"
           placeholderClassName="h-full w-full" />
         {/* 醒目横幅角标 */}
         {item.is_for_sale && (

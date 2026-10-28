@@ -12,6 +12,7 @@ djangorestframework-simplejwt==5.5.1
 sorl-thumbnail==12.11.0
 pillow==12.0.0
 PyMuPDF==1.28.0
+pikepdf==10.13.0.post1
 requests==2.32.5
 nh3==0.3.7
 redis==6.4.0

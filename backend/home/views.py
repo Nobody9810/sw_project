@@ -1,6 +1,6 @@
 from shuwei.submissions import text_field, allow_submission, rate_limit_response
 from .serializers import DETAIL_SERIALIZER_MAP, LIST_SERIALIZER_MAP
-from .html import first_content_image
+from .images import card_image
 from .querysets import adjacent_articles, content_queryset, parse_pagination
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
@@ -246,7 +246,7 @@ def api_search_all(request):
                 '标题': item.标题,
                 '摘要': summary,
                 '更新时间': item.更新时间.isoformat() if hasattr(item, '更新时间') and item.更新时间 else None,
-                '图片': item.图片.url if getattr(item, '图片', None) else first_content_image(getattr(item, '内容', None)),
+                '图片': card_image(item),
             })
 
     return JsonResponse({
@@ -384,7 +384,7 @@ def api_book_reviews_by_category(request, category_id):
                 '作者': author_value,
                 '内容': content_value,
                 '更新时间': item.更新时间.isoformat() if hasattr(item, '更新时间') and item.更新时间 else '',
-                '图片': item.图片.url if getattr(item, '图片', None) else first_content_image(getattr(item, '内容', None)),
+                '图片': card_image(item),
                 '出处': getattr(item, '出处', None) or '',
                 '书籍出版日期': item.书籍出版日期.isoformat() if hasattr(item, '书籍出版日期') and item.书籍出版日期 else None,
                 '分类名称': category.名称,

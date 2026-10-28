@@ -215,6 +215,11 @@ STORAGES = {
     'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
 }
 
+# 列表卡片缩略图（home.images）。缩略图已是成品，不再经过上传转换存储。
+THUMBNAIL_STORAGE = 'django.core.files.storage.FileSystemStorage'
+THUMBNAIL_FORMAT = 'WEBP'
+THUMBNAIL_UPSCALE = False
+
 # Configure these only for proxies that append a verified client address.
 SUBMISSION_TRUSTED_PROXIES = [
     value.strip() for value in os.getenv('SUBMISSION_TRUSTED_PROXIES', '').split(',') if value.strip()

@@ -1,13 +1,11 @@
 """
 文件压缩工具模块
-支持图片和PDF的自动压缩
+PDF 压缩工具（图片规则见 images.py）
 """
 import os
 import io
 import time
 import sys
-from PIL import Image
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.base import ContentFile
 
 # 确保 print 输出立即刷新（避免缓冲）
@@ -17,43 +15,6 @@ def print_flush(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
     sys.stderr.flush()
-
-
-def compress_image(image_file, quality=85, max_width=1920, max_height=1920):
-    """Preserve file format, alpha and animated originals during optimization."""
-    import logging
-    logger = logging.getLogger(__name__)
-    image_file.seek(0)
-    original = image_file.read()
-    image_file.seek(0)
-    try:
-        with Image.open(io.BytesIO(original)) as image:
-            if getattr(image, 'is_animated', False):
-                return image_file
-            extension = os.path.splitext(image_file.name)[1].lower()
-            image_format = {'.jpg': 'JPEG', '.jpeg': 'JPEG', '.png': 'PNG',
-                            '.webp': 'WEBP', '.gif': 'GIF', '.bmp': 'BMP'}.get(extension)
-            if image_format is None or image.format != image_format:
-                return image_file
-            image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
-            if image_format == 'JPEG' and image.mode not in ('RGB', 'L'):
-                image = image.convert('RGB')
-            output = io.BytesIO()
-            options = {'quality': quality} if image_format in ('JPEG', 'WEBP') else {}
-            if image_format in ('JPEG', 'PNG'):
-                options['optimize'] = True
-            image.save(output, format=image_format, **options)
-            if output.tell() >= len(original):
-                return image_file
-            output.seek(0)
-            result = InMemoryUploadedFile(output, 'ImageField', image_file.name,
-                                          Image.MIME[image_format], len(output.getvalue()), None)
-            result._compressed = True
-            return result
-    except Exception:
-        logger.exception('图片优化失败，保留原文件: %s', image_file.name)
-        image_file.seek(0)
-        return image_file
 
 
 def compress_pdf_with_ghostscript(pdf_file):
@@ -334,17 +295,3 @@ def compress_pdf(pdf_file, _tried_ghostscript=False):
         return pdf_file
 
 
-def should_compress_file(file, file_type=None):
-    """Only optimize images over 100 KB in upload requests."""
-    extension = os.path.splitext(getattr(file, 'name', None) or '')[1].lower()
-    if file_type == 'pdf' or extension == '.pdf':
-        return False
-    if extension not in ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'):
-        return False
-    try:
-        file.seek(0, os.SEEK_END)
-        size = file.tell()
-        file.seek(0)
-        return size > 100 * 1024
-    except (OSError, ValueError):
-        return False
