@@ -181,10 +181,10 @@ DETAIL_SERIALIZER_MAP = {
 # ========== 列表页序列化器（内容截断，字段更轻量） ==========
 
 def list_cover(data, instance):
-    """List cards: the uploaded cover, else the article's first content image; None shows the default."""
-    if '图片' in data and not data['图片']:
-        from .html import first_content_image
-        data['图片'] = first_content_image(getattr(instance, '内容', None))
+    """List cards: a thumbnail of the cover, else of the first content image; None shows the default."""
+    if '图片' in data:
+        from .images import card_image
+        data['图片'] = card_image(instance)
     return data
 
 

@@ -4,6 +4,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django_ckeditor_5.permissions import check_upload_permission
 from django_ckeditor_5.forms import UploadFileForm
@@ -28,7 +29,8 @@ def upload_file(request):
     try:
         validate_upload(uploaded)
         storage = CompressedFileSystemStorage()
-        filename = storage.save(uploaded.name, uploaded)
+        # Staged until the article is saved; home.media_organize then moves it to <section>/<id>/.
+        filename = storage.save(f'uploads/{timezone.now():%Y/%m}/{Path(uploaded.name).name}', uploaded)
         return JsonResponse({'url': storage.url(filename)})
     except ValidationError:
         return JsonResponse({'error': {'message': '文件格式无效或大小超限'}}, status=400)
